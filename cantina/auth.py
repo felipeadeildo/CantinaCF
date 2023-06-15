@@ -55,6 +55,9 @@ def check_permission():
         if not role_has_permission(user["role"]):
             abort(403) # user does not have permission
     
+    if "cart" not in session:
+        session["cart"] = []
+    
 
 
 def set_guest_user():

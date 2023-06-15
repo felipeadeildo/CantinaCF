@@ -4,6 +4,7 @@ CREATE TABLE user (
   name TEXT NOT NULL,
   username TEXT NOT NULL,
   password TEXT NOT NULL,
+  saldo REAL DEFAULT 0,
   role TEXT NOT NULL
 );
 
@@ -15,12 +16,13 @@ CREATE TABLE aluno (
   turma TEXT, -- A, B, C
   telefone TEXT,
   email TEXT,
-  cpf TEXT
+  cpf TEXT,
+  saldo REAL DEFAULT 0
 );
 
 -- Create the "produto" table
 CREATE TABLE produto (
-  id INTEGER PRIMARY KEY,
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
   nome TEXT NOT NULL, -- pipoca bokus
   descricao TEXT, -- pode ser observações
   valor REAL NOT NULL,

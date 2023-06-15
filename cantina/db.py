@@ -33,6 +33,7 @@ def get_conn(ignore_errors=False):
             g.db = conn
     return g.db
 
+
 def close_db():
     """
     Closes the database connection.
@@ -63,6 +64,7 @@ def get_user(identification: int, by: str = "id"):
     elif by == "username":
         return conn.execute("SELECT * FROM user WHERE username = ?", (identification,)).fetchone()
     raise Exception("Invalid by parameter")
+
 
 def insert_user(username: str, hashed_password: str, role: str, **kwargs):
     """
@@ -109,6 +111,7 @@ def get_products():
     conn = get_conn()
     return conn.execute("SELECT * FROM produto").fetchall()
 
+
 def get_product(by: str = "id", **kwargs):
     """
     Retrieves a product from the database.
@@ -128,7 +131,7 @@ def init_db():
     """
     print("Initializing database...")
     db = get_conn(ignore_errors=True)
-    with app.open_resource(os.path.join(os.getcwd(), "schema.sql"), mode="r") as f:
+    with open(os.path.join(os.getcwd(), "schema.sql"), "r", encoding="utf8") as f:
         db.cursor().executescript(f.read())
     db.commit()
     print("Database initialized.")
