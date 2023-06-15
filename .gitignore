@@ -1,0 +1,5 @@
+*.sqlite
+flask_session/
+venv/
+__pycache__/
+*/__pycache__

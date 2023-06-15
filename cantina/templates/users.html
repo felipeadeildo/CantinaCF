@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Usuários{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col s12 m8 {% if session.user.role == 'admin' %}l8{% else %}l12{% endif %}">
+        <div class="card">
+            <div class="card-content">
+                <span class="card-title">Gerenciamento de Usuários</span>
+                <table class="responsive-table stripped">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Usuário</th>
+                            <th>Cargo</th>
+                            <th>Editar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td>{{ user.name }}</td>
+                            <td>{{ user.username }}</td>
+                            <td>{{ user.role }}</td>
+                            <td>
+                                <a href="{{ url_for('edit_password', user_id=user.id) }}" class="btn waves-effect waves-light">
+                                    <i class="material-icons">edit</i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% if session.user.role == 'admin' %}
+    <div class="col s12 m4 l4">
+        <div class="card">
+            <div class="card-content">
+                <span class="card-title">Adicionar Usuário</span>
+                <form method="post" action="{{ url_for('users') }}">
+                    <div class="input-field">
+                        <input id="username" type="text" name="username" required>
+                        <label for="username">Usuário</label>
+                    </div>
+                    <div class="input-field">
+                        <input id="password" type="password" name="password" required>
+                        <label id="password_label" for="password">Senha</label>
+                        <button class="btn waves-effect waves-light" type="button" onclick="generateRandomPassword()">Senha Aleatória</button>
+                        <button class="btn waves-effect waves-light" type="button" onclick="viewPassword()"><i class="material-icons">remove_red_eye</i></button>
+                    </div>
+                    <div class="input-field">
+                        <input id="name" type="text" name="name">
+                        <label for="name">Nome</label>
+                    </div>
+                    <div class="input-field">
+                        <select id="role" name="role" required>
+                            <option value="" disabled selected>Selecione Cargo</option>
+                            {% for role in roles %}
+                            <option value="{{ role }}">{{ role }}</option>
+                            {% endfor %}
+                        </select>
+                        <label for="role">Role</label>
+                    </div>
+                    <button class="btn waves-effect waves-light" type="submit" name="action">Adicionar Usuário
+                        <i class="material-icons right">person_add</i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function generateRandomPassword() {
+        let randomPassword = Math.random().toString(36).slice(-12);
+        document.getElementById("password").value = randomPassword;
+        document.getElementById("password_label").classList.add("active");
+    }
+    function viewPassword() {
+        let password_tag = document.getElementById("password");
+        password_tag.type === 'password' ? password_tag.type = 'text' : password_tag.type = 'password';
+    }
+</script>
+{% endblock %}

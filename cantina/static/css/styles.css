@@ -1,0 +1,115 @@
+.small-title {
+    font-size: 15px !important;
+}
+
+.no-bottom-pad {
+    padding-bottom: 0px !important;
+}
+
+.no-top-pad {
+    padding-top: 0px !important;
+}
+
+.reduced-pad {
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+}
+
+.reduced-pad>.card-title {
+    margin-bottom: 0px !important;
+}
+
+.btn-wide {
+    width: 100% !important;
+}
+
+.btn-narrow {
+    width: 30px;
+    padding-right: 5px;
+}
+
+.top-right {
+    margin: -5px -5px 0px 0px;
+}
+
+.brand-logo {
+    margin-left: 20px;
+}
+
+.hidden {
+    display: none;
+}
+
+.card .card-content {
+    padding: 18px !important;
+}
+
+.clear {
+    margin-left: -100px;
+    margin-top: 2px;
+}
+
+.tight-top {
+    margin-top: 0px;
+    padding-top: 0px;
+}
+
+.tight-bottom {
+    margin-bottom: 0px;
+    padding-bottom: 0px;
+}
+
+.patient-body {
+    padding: 0px;
+    height: 400px;
+    overflow-y: scroll;
+    overflow-x: clip;
+}
+
+.patient-header {
+    font-size: 23px;
+}
+
+.highlight {
+    display: inline;
+    background-color: rgb(255, 172, 47);
+}
+
+.collapsible-header {
+    display: block !important;
+}
+
+.labels-menu {
+    width: 250px;
+    height: 80%;
+    overflow-y: auto;
+    overflow-x: clip;
+}
+
+.labels-text-icon {
+    font-size: 20px;
+    margin-left: 5px;
+    margin-right: 4px;
+    margin-top: -3px;
+}
+
+.cursor {
+    cursor: pointer;
+}
+
+#toast-container {
+    top: auto !important;
+    right: auto !important;
+    bottom: 10%;
+    left: 7%;
+}
+
+body {
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+}
+
+main {
+    flex: 1 0 auto;
+}

@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block title %}Venda de Produtos{% endblock %}
+
+{% block content %}
+<div class="toast-container">
+    <!-- Toasts serão adicionados aqui -->
+</div>
+<div class="">
+  <h5 class="center">Venda de Produtos</h5>
+  <div class="input-field">
+    <i class="material-icons prefix">search</i>
+    <input id="search" type="text" placeholder="Pesquisar por nome" oninput="searchProducts()">
+    <label for="search">Pesquisar</label>
+  </div>
+  <div class="scrollable-table">
+    <table id="products-table">
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Valor</th>
+          <th>Tipo</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for product in products %}
+        <tr>
+          <td>{{ product.nome }}</td>
+          <td>R$ {{ product.valor }}</td>
+          <td>{{ product.tipo }}</td>
+          <td>
+            <button class="btn-floating btn-small waves-effect waves-light minus-btn " onclick="changeProductQuantity({{ product.id }}, -1)">
+              <i class="material-icons">remove</i>
+            </button>
+            <span class="product-quantity" id="product-quantity-{{ product.id }}">{{ product.quantidade }}</span>
+            <button class="btn-floating btn-small waves-effect waves-light plus-btn" onclick="changeProductQuantity({{ product.id }}, 1)">
+              <i class="material-icons">add</i>
+            </button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Função para alterar a quantidade de um produto
+    function changeProductQuantity(productId, quantity) {
+        let urlChangeProductQuantity = "{{ url_for('change_product_quantity') }}?id=" + productId + "&quantity=";
+
+        let newQuantity = parseInt(document.getElementById("product-quantity-" + productId).innerHTML) + quantity;
+        
+        if (newQuantity >= 0) {
+        fetch(urlChangeProductQuantity + newQuantity)
+            .then(response => {
+            if (response.ok) {
+                document.getElementById("product-quantity-" + productId).innerHTML = newQuantity;
+                M.toast({html: 'Quantidade do produto atualizada com sucesso!', classes: 'green lighten-1'});
+            } else {
+                M.toast({html: 'Erro ao atualizar a quantidade do produto.', classes: 'red lighten-1'});
+            }
+            })
+            .catch(error => {
+            console.error(error);
+            M.toast({html: 'Erro ao atualizar a quantidade do produto.', classes: 'red lighten-1'});
+            });
+        }
+    }
+
+    // Função para pesquisar produtos com base no nome
+    let old_input = "";
+    function searchProducts() {
+        let urlSearchProducts = "{{ url_for('search_products') }}?search=";
+        let searchInput = document.getElementById("search").value;
+        if (searchInput != old_input) {
+            old_input = searchInput;
+        }
+        else {
+            return;
+        }
+        fetch(urlSearchProducts + searchInput)
+            .then(response => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                M.toast({html: 'Erro ao buscar produtos.', classes: 'red lighten-1'});
+            }
+            })
+            .then(products => {
+                let productsTable = document.getElementById("products-table");
+                productsTable.innerHTML = "";
+                for (let product of products) {
+                    productsTable.innerHTML += `
+                    <tr>
+                        <td>${product.nome}</td>
+                        <td>R$ ${product.valor}</td>
+                        <td>${product.tipo}</td>
+                        <td>
+                            <button class="btn-floating btn-small waves-effect waves-light minus-btn" onclick="changeProductQuantity(${product.id}, -1)">
+                                <i class="material-icons">remove</i>
+                            </button>
+                            <span class="product-quantity" id="product-quantity-${product.id}">${product.quantidade}</span>
+                            <button class="btn-floating btn-small waves-effect waves-light plus-btn" onclick="changeProductQuantity(${product.id}, 1)">
+                                <i class="material-icons">add</i>
+                            </button>
+                        </td>
+                    </tr>
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error(error);
+                M.toast({html: 'Erro ao buscar produtos.', classes: 'red lighten-1'});
+            });
+    }
+</script>
+{% endblock %}
