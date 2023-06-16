@@ -1,10 +1,11 @@
+from werkzeug.security import generate_password_hash
+from .settings import DB_PATH
+from datetime import datetime
+from getpass import getpass
+from flask import g, abort
+from . import app
 import sqlite3
 import os
-from .settings import DB_PATH
-from flask import g, abort
-from getpass import getpass
-from werkzeug.security import generate_password_hash
-from . import app
 
 def get_conn(ignore_errors=False):
     """
@@ -93,6 +94,31 @@ def update_user_password(identification: int, new_password: str):
     conn.execute("UPDATE user SET password = ? WHERE id = ?", (generate_password_hash(new_password), identification))
     conn.commit()
 
+
+def update_user_saldo(identification: int, new_saldo: float):
+    """
+    Updates a user's saldo.
+    """
+    conn = get_conn()
+    conn.execute("UPDATE user SET saldo = ? WHERE id = ?", (new_saldo, identification))
+    conn.commit()
+
+
+def insert_product_sales(sold_by: int, sold_to: int, products: list):
+    """
+    Inserts a product sale into the database.
+    """
+    current_datetime = datetime.now()
+    current_datetime_str = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
+    turno = "Manhã" if current_datetime.hour < 12 else "Tarde"
+    
+    query_values = [
+        (current_datetime_str, product['id'], sold_by, sold_to, turno) for product in products
+    ]
+
+    conn = get_conn()
+    conn.executemany("INSERT INTO venda_produto (data_hora, produto_id, vendido_por, vendido_para, turno) VALUES (?, ?, ?, ?, ?)", query_values)
+    conn.commit()
 
 def get_users():
     """

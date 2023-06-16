@@ -5,10 +5,26 @@
 {% endblock title %}
 
 {% block content %}
+    <style>
+        .product-list {
+            max-height: 64vh;
+            overflow-y: auto;
+        }
+        .custom-toast {
+            top: 10px;
+            bottom: auto;
+            left: 50%;
+            right: auto;
+            border-radius: 10px;
+        }
+    </style>
+
     <div class="toast-container"></div>
 
-    <div class="search-bar">
-        <input type="text" id="product-search" oninput="searchProducts()" placeholder="Pesquisar produtos..." />
+    <div class="input-field">
+        <i class="material-icons prefix">search</i>
+        <input type="text" id="product-search" oninput="searchProducts()"/>
+        <label for="product-search">Pesquisar produtos...</label>
     </div>
 
     <div class="product-list">
@@ -41,14 +57,14 @@
             </tbody>
         </table>
     </div>
-    <div class="">
+    <div class="cart-container">
         <div class="row">
             <ul id="cart-list" class="collection with-header">
-                <li class="collection-header" id="carrinho-title"><h4>Carrinho - R$ <span id="cart-total">0.00</span></h4></li>
+                <li class="collection-header"><h4>Carrinho - R$ <span id="cart-total">0.00</span></h4></li>
             </ul>
         </div>
 
-        <a href="{{ url_for('confirm_purchase', comprar=true) }}" class="btn">Confirmar Compra</a>
+        <a href="{{ url_for('confirm_purchase') }}" class="btn">Confirmar Compra</a>
     </div>
 {% endblock content %}
 
@@ -111,7 +127,7 @@
             .then(response => response.json())
             .then(data => {
                 if (data.ok) {
-                    M.toast({html: `${data.message}`});
+                    M.toast({html: `${data.message}`, classes: 'custom-toast'});
                     var cartList = document.getElementById('cart-list');
                     var divItem = document.createElement('div');
                     divItem.className = "col s3";
@@ -126,7 +142,7 @@
                     quantidadeTag.innerText = data.product.quantidade;
 
                 } else {
-                    M.toast({html: 'Algo deu errado.'});
+                    M.toast({html: 'Algo deu errado.', classes: 'custom-toast'});
                 }
             })
             .catch((error) => {
