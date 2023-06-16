@@ -37,7 +37,7 @@ def process_purchase(form):
     # TODO: verificar o saldo do usuário antes de realizar a compra
     total_compra = sum(product["valor"] for product in session["cart"])
     if user["saldo"] < total_compra:
-        flash(f"O usuário {user['nome']} não tem saldo suficiente para realizar a compra...", "error")
+        flash(f"O usuário {user['name']} não tem saldo suficiente para realizar a compra...", "error")
         return
     
     change_saldo = user["saldo"] - total_compra
