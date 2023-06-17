@@ -1,56 +1,56 @@
 {% extends "base.html" %}
 
 {% block title %}
-    Confirmar Compra
+Confirmar Compra
 {% endblock title %}
 
 {% block content %}
-    <div class="container">
-        <h4 class="center-align">Confirmação de Compra</h4>
+<div class="container">
+    <h4 class="center-align">Confirmação de Compra</h4>
 
-        <div class="row">
-            <div class="col s12">
-                <div class="card-panel">
-                    <div style="max-height: 50vh; overflow-y: auto;">
-                        <table class="striped">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Nome</th>
-                                    <th>Valor</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for product in session.cart %}
-                                    <tr>
-                                        <td>{{ product.id }}</td>
-                                        <td>{{ product.nome }}</td>
-                                        <td>R$ {{ product.valor }}</td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    <h5>Total: R$ {{ (session.cart|sum(attribute='valor'))|round(2, 'floor') }}</h5>
+    <div class="row">
+        <div class="col s12">
+            <div class="card-panel">
+                <div style="max-height: 50vh; overflow-y: auto;">
+                    <table class="striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nome</th>
+                                <th>Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product in session.cart %}
+                            <tr>
+                                <td>{{ product.id }}</td>
+                                <td>{{ product.nome }}</td>
+                                <td>R$ {{ product.valor }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
+                <h5>Total: R$ {{ (session.cart|sum(attribute='valor'))|round(2, 'floor') }}</h5>
             </div>
         </div>
-
-        <div class="row">
-            <form class="col s12" method="POST" action="{{ url_for('confirm_purchase') }}">
-                <div class="row">
-                    <div class="input-field col s6">
-                        <input id="matricula" type="text" class="validate" name="matricula" required>
-                        <label for="matricula">Número de Matrícula</label>
-                    </div>
-                    <div class="input-field col s6">
-                        <input id="password" type="password" class="validate" name="password" required>
-                        <label for="password">Senha</label>
-                    </div>
-                </div>
-                <button class="btn waves-effect waves-light" type="submit" name="action">Confirmar Compra</button>
-                <a class="btn waves-effect waves-light" href="{{ url_for('index') }}">Voltar para Cantina</a>
-            </form>
-        </div>
     </div>
+
+    <div class="row">
+        <form class="col s12" method="POST" action="{{ url_for('confirm_purchase') }}">
+            <div class="row">
+                <div class="input-field col s6">
+                    <input id="matricula" type="text" class="validate" name="matricula" required>
+                    <label for="matricula">Número de Matrícula</label>
+                </div>
+                <div class="input-field col s6">
+                    <input id="password" type="password" class="validate" name="password" required>
+                    <label for="password">Senha</label>
+                </div>
+            </div>
+            <button class="btn waves-effect waves-light" type="submit" name="action">Confirmar Compra</button>
+            <a class="btn waves-effect waves-light" href="{{ url_for('index') }}">Voltar para Cantina</a>
+        </form>
+    </div>
+</div>
 {% endblock content %}

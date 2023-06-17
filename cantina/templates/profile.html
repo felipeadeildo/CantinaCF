@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}
+Meu Perfil - {{ user.name }}
+{% endblock %}
+
+{% block content %}
+<div class="">
+  <div class="card">
+    <div class="card-content">
+      <div class="row">
+        <div class="col s9">
+          <span class="card-title">{{ user.name }}</span>
+          {% if user.id %}
+          <p>Matrícula: {{ user.id }}</p>
+          {% endif %}
+          {% if user.username %}
+          <p>Nome de usuário: {{ user.username }}</p>
+          {% endif %}
+          {% if user.saldo %}
+          <p>Saldo: R$ {{ user.saldo }}</p>
+          {% endif %}
+          {% if user.role %}
+          <p>Cargo: {{ user.role }}</p>
+          {% endif %}
+          {% if user.serie %}
+          <p>Série: {{ user.serie }}</p>
+          {% endif %}
+          {% if user.turma %}
+          <p>Turma: {{ user.turma }}</p>
+          {% endif %}
+          {% if user.telefone %}
+          <p>Telefone: {{ user.telefone }}</p>
+          {% endif %}
+          {% if user.email %}
+          <p>Email: {{ user.email }}</p>
+          {% endif %}
+          {% if user.cpf %}
+          <p>CPF: {{ user.cpf }}</p>
+          {% endif %}
+        </div>
+        <div class="col s3 right-align">
+          <a class="btn-floating waves-effect waves-light tooltipped" data-position="bottom"
+            data-tooltip="Editar Perfil" href="{{ url_for('edit_profile') }}">
+            <i class="material-icons">edit</i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="transactions" style="max-height:400px; overflow-y:auto;">
+    {% for transaction in transactions %}
+    {% if transaction.tipo == 'recarga' %}
+    <div class="card green lighten-4">
+      <div class="card-content">
+        <span class="card-title">{{ transaction.data_hora }} - Recarga</span>
+        <p>Tipo de pagamento: {{ transaction.tipo_pagamento }}</p>
+        <p>Valor: {{ transaction.valor }}</p>
+        <p>Liberado por: {{ transaction.liberado_por.name }}</p>
+        <p>Turno: {{ transaction.turno }}</p>
+      </div>
+    </div>
+    {% else %}
+    <div class="card red lighten-4">
+      <div class="card-content">
+        <span class="card-title">{{ transaction.data_hora }} - Venda</span>
+        <p>Produto: {{ transaction.product.nome }}</p>
+        <p>Valor: R$ {{ transaction.product.valor }}</p>
+        <p>Tipo: {{ transaction.product.tipo }}</p>
+        <p>Vendido por: {{ transaction.vendido_por.name }}</p>
+        <p>Turno: {{ transaction.turno }}</p>
+      </div>
+    </div>
+    {% endif %}
+    {% endfor %}
+  </div>
+</div>
+{% endblock content %}

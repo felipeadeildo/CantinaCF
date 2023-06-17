@@ -34,11 +34,12 @@ def process_purchase(form):
         flash(f"Matrícula e/ou Senha incorretos...", "error")
         return
     
-    # TODO: verificar o saldo do usuário antes de realizar a compra
     total_compra = sum(product["valor"] for product in session["cart"])
     if user["saldo"] < total_compra:
         flash(f"O usuário {user['name']} não tem saldo suficiente para realizar a compra...", "error")
         return
+    
+    # TODO: adicionar sugestão de pagamento em espécie
     
     change_saldo = user["saldo"] - total_compra
     update_user_saldo(user["id"], change_saldo)

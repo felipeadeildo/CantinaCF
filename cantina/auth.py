@@ -1,6 +1,6 @@
 from flask import flash, redirect, render_template, request, session, url_for, abort
 from werkzeug.security import check_password_hash, generate_password_hash
-from .db import get_user, get_users, insert_user, update_user_password
+from .db import get_user, get_users, insert_user, update_user_password, get_transactions
 from .settings import PERMISSIONS
 from . import app
 
@@ -125,3 +125,15 @@ def edit_password():
         security_edit_password(to_change_user, changer_user, old_password, new_password)    
 
     return render_template("edit-password.html", user=to_change_user)
+
+@app.route("/profile")
+def profile():
+    context = {
+        "user": session.get("user"),
+        "transactions": get_transactions(session["user"]["id"])
+    }
+    return render_template("profile.html", **context)
+
+@app.route("/edit-profile")
+def edit_profile():
+    return render_template("edit-profile.html")

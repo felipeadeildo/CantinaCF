@@ -160,6 +160,36 @@ def update_product_quantity(by: str = "id", **kwargs):
         conn.execute("UPDATE produto SET quantidade = ? WHERE name = ?", (kwargs.get("quantity"), kwargs.get("name")))
     conn.commit()
 
+def get_transactions(user_id: int, type: str = "all"):
+    """
+    Retrieves all transactions from the database.
+
+    :param user_id: An integer representing the user's ID.
+    :param type: A string representing the type of transaction to retrieve. Possible values are "all", "entrada", and "saida".
+    """
+    conn = get_conn()
+    transactions = []
+    if type == "all":
+        transactions.extend(get_transactions(user_id, "entrada"))
+        transactions.extend(get_transactions(user_id, "saida"))
+    elif type == "entrada":
+        result = conn.execute("SELECT * FROM controle_pagamento WHERE aluno_id = ?", (user_id,)).fetchall()
+        for transaction in result:
+            transaction = dict(transaction)
+            transaction["liberado_por"] = get_user(transaction["liberado_por"])
+            transactions.append(transaction)
+    elif type == "saida":
+        result = conn.execute("SELECT * FROM venda_produto WHERE vendido_para = ?", (user_id,)).fetchall()
+        for transaction in result:
+            transaction = dict(transaction)
+            transaction["product"] = get_product("id", id=transaction["produto_id"])
+            transaction["vendido_por"] = get_user(transaction["vendido_por"])
+            transactions.append(transaction)
+    transactions.sort(key=lambda x: x["data_hora"])
+    return transactions
+
+        
+
 
 @app.cli.command("initdb")
 def init_db():
