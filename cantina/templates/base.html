@@ -30,6 +30,7 @@
                 {% if session["user"]["role"] == 'admin' %}
                     <li><a href="{{ url_for('index') }}">Cantina</a></li>
                     <li><a href="{{ url_for('users') }}">Usuários</a></li>
+                    <li><a href="{{ url_for('recharge') }}">Recarga</a></li>
                 {% endif %}
 
                 <li><a href="{{ url_for('logout') }}">Sair</a></li>
@@ -76,10 +77,10 @@
         </div>
         {% endif %}
         {% endwith %}
-
         <div class="container">
             <div class="row">
                 <div class="col s12">
+                    <div class="toast-container"></div>
                     {% block content %}{% endblock %}
                 </div>
             </div>

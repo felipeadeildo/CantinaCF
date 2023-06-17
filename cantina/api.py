@@ -1,9 +1,9 @@
-from .db import get_conn, get_product, update_product_quantity
+from .db import get_conn, get_product, update_product_quantity, get_user as get_userdb
 from flask import request, jsonify, session
 from . import app
 
 
-@app.route("/search-product", methods=["GET", "POST"])
+@app.route("/api/search-product", methods=["GET", "POST"])
 def search_products():
     data = request.get_json()
     query = data.get("query")
@@ -13,7 +13,7 @@ def search_products():
     return jsonify(products)
 
 
-@app.route("/add-to-cart", methods=["GET", "POST"])
+@app.route("/api/add-to-cart", methods=["GET", "POST"])
 def add_to_cart():
     data = request.get_json()
     product_id = data.get("id")
@@ -39,7 +39,7 @@ def add_to_cart():
         return jsonify(context)
 
 
-@app.route("/remove-from-cart", methods=["POST"])
+@app.route("/api/remove-from-cart", methods=["POST"])
 def remove_from_cart():
     data = request.get_json()
     product_id = data.get("id")
@@ -54,3 +54,21 @@ def remove_from_cart():
         "message": f"Produto {product['nome']} removido com sucesso!",
         "product": product,
     })
+
+
+@app.route("/api/get-user", methods=["POST"])
+def get_user():
+    data = request.get_json()
+    user_id = data.get("id")
+    user = get_userdb(user_id)
+    if user is None:
+        context = {
+            "message": f"Usuário de ID {user_id} não encontrado!",
+            "user": False
+        }
+    else:
+        context = {
+            "message": f"Comprimente bem o usuário {user['name']}! :D",
+            "user": dict(user)
+        }
+    return jsonify(context)

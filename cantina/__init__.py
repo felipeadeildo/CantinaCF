@@ -1,4 +1,4 @@
-from .settings import SECRET_KEY, DEBUG
+from .settings import SECRET_KEY, DEBUG, UPLOAD_FOLDER
 from flask_session import Session
 from datetime import timedelta
 from flask import Flask
@@ -15,6 +15,7 @@ tmp_dir = tempfile.mkdtemp(prefix='cantina_')
 app = Flask(__name__, template_folder='templates', static_folder='static')
 app.config['DEBUG'] = DEBUG 
 app.config["SESSION_TYPE"] = SESSION_TYPE
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.secret_key = SECRET_KEY
 Session(app)
 

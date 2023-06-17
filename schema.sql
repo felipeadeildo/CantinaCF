@@ -58,10 +58,7 @@ CREATE TABLE controle_pagamento(
   liberado_por INTEGER,
   turno TEXT,
   aluno_id INTEGER,
-  bandeira_cartao TEXT, -- se for no cartão
-  pix TEXT, -- se for no pix, pode ser a chave pix
-  banco TEXT, -- se for no pix, pode ser o banco
-  pagamento_realizado BOOLEAN,
+  comprovante TEXT,
   FOREIGN KEY(aluno_id) REFERENCES user(id),
   FOREIGN KEY(liberado_por) REFERENCES user(id)
 );

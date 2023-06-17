@@ -119,3 +119,12 @@ main {
         display: inherit !important;
     }
 }
+
+#toast-container {
+    top: 0;
+    bottom: auto;
+    left: 50%;
+    transform: translateX(-50%);
+    right: auto;
+    border-radius: 15px !important;
+}

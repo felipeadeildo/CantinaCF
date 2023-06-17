@@ -1,5 +1,5 @@
 from werkzeug.security import generate_password_hash
-from .settings import DB_PATH
+from .settings import DB_PATH, PAYMENT_TYPES
 from datetime import datetime
 from getpass import getpass
 from flask import g, abort
@@ -95,12 +95,12 @@ def update_user_password(identification: int, new_password: str):
     conn.commit()
 
 
-def update_user_saldo(identification: int, new_saldo: float):
+def update_user_saldo(user_id: int, new_saldo: float):
     """
     Updates a user's saldo.
     """
     conn = get_conn()
-    conn.execute("UPDATE user SET saldo = ? WHERE id = ?", (new_saldo, identification))
+    conn.execute("UPDATE user SET saldo = ? WHERE id = ?", (new_saldo, user_id))
     conn.commit()
 
 
@@ -190,8 +190,25 @@ def get_transactions(user_id: int, type: str = "all"):
     transactions.sort(key=lambda x: x["data_hora"])
     return transactions
 
-        
 
+def insert_recharge(user_id: int, allowed_by: int, value: float, payment_type: str, **kwargs):
+    """
+    Inserts a recharge into the database.
+    """
+    current_datetime = datetime.now()
+    current_datetime_str = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
+    turno = "Manhã" if current_datetime.hour < 12 else "Tarde"
+    conn = get_conn()
+    if kwargs.get("observation") is not None:
+        observation = kwargs.get("observation")
+    else:
+        observation = None
+    if kwargs.get("filename") is not None:
+        filename = kwargs.get("filename")
+    else:
+        filename = None
+    conn.execute("INSERT INTO controle_pagamento (tipo_pagamento, descricao, aluno_id, liberado_por, data_hora, turno, comprovante, valor) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", (payment_type, observation, user_id, allowed_by, current_datetime_str, turno, filename, value))
+    conn.commit()
 
 @app.cli.command("initdb")
 def init_db():

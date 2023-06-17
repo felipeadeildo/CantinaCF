@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Recarga de Crédito
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h4 class="center">Recarga de Crédito</h4>
+    <form action="{{ url_for('recharge') }}" method="post" enctype="multipart/form-data">
+        <div class="input-field">
+            <input type="text" class="validate" id="matricula" name="matricula" required>
+            <label for="matricula">Número de Matrícula</label>
+        </div>
+
+        <div class="input-field">
+            <select name="payment-method" id="payment-method" class="validade" name="payment-method" required>
+                <option value="" disabled selected>Escolha forma de Pagamento</option>
+                <option value="pix">PIX</option>
+                <option value="debit_card">Cartão de Débito</option>
+                <option value="credit_card">Cartão de Crédito</option>
+                <option value="cash">Espécie</option>
+            </select>
+            <label for="payment-method">Forma de Pagamento</label>
+        </div>
+
+        <div class="input-field">
+            <input type="number" class="validate" id="reload-value" name="reload-value" min="0" step="0.01" required>
+            <label for="reload-value">Valor da Recarga</label>
+        </div>
+
+        <div class="input-field">
+            <input type="text" class="validate" id="observations" name="observations">
+            <label for="observations">Observações</label>
+        </div>
+
+        <div class="file-field input-field" id="proof-container" style="display:none;">
+            <div class="btn tiny">
+                <span>Submeter Comprovante</span>
+                <input type="file" name="proof" id="proof">
+            </div>
+
+            <div class="file-path-wrapper">
+                <input type="text" class="file-path validate" placeholder="Submeter Comprovante">
+            </div>
+        </div>
+
+        <button id="submit-btn" class="btn waves-effect waves-light" type="submit" name="action">
+            Recarregar
+            <i class="material-icons right">send</i>
+        </button>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    let matriculaTag = document.getElementById('matricula');
+    let paymentMethodTag = document.getElementById('payment-method');
+    let proofContainerTag = document.getElementById('proof-container');
+    let submitBtnTag = document.getElementById('submit-btn');
+
+    matriculaTag.addEventListener('blur', function() {
+        let matricula = matriculaTag.value;
+        fetch('{{ url_for("get_user") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ id: matricula })
+        })
+        .then(response => response.json())
+        .then(data => {
+            M.Toast.dismissAll();
+            color = data.user ? 'green' : 'red';
+            matriculaTag.className = data.user ? 'validate valid' : 'validate invalid';
+            M.toast({ html: data.message, classes: `custom-toast ${color}` });
+        })
+        .catch((error) => {
+            console.error('Error:', error)
+        });
+    });
+
+    verify_proof_visualization = function() {
+        if (paymentMethodTag.value === 'cash') {
+            proofContainerTag.style.display = 'none';
+        } else {
+            proofContainerTag.style.display = 'block';
+        }
+    }
+    verify_proof_visualization();
+
+    paymentMethodTag.addEventListener('change', verify_proof_visualization);
+});
+</script>
+{% endblock %}

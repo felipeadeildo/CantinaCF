@@ -1,12 +1,15 @@
-from .db import get_user, get_users, insert_user, update_user_password, get_transactions
+from .db import get_user, get_users, insert_user, update_user_password, get_transactions, update_user_saldo, insert_recharge
+from .settings import PERMISSIONS, UPLOAD_FOLDER, ALLOWED_EXTENSIONS
 from flask import abort, request, session, render_template, flash
 from werkzeug.security import generate_password_hash
-from .settings import PERMISSIONS
+from werkzeug.utils import secure_filename
 from .auth import verify_password
+from datetime import datetime
 from . import app
+import os
 
 
-@app.route("/users", methods=("POST", "GET"))
+@app.route("/usuarios", methods=("POST", "GET"))
 def users():
     if request.method == "POST":
         if session["user"]["role"] != "admin":
@@ -45,7 +48,7 @@ def security_edit_password(to_change_user, changer_user, old_password, new_passw
     flash("Senha alterada com sucesso!", category="success")
 
     
-@app.route("/edit-password", methods=("POST", "GET"))
+@app.route("/editar-senha", methods=("POST", "GET"))
 def edit_password():
     to_change_user_id = request.args.get("user_id") or session.get("user")["id"]
     to_change_user = get_user(to_change_user_id, by="id")
@@ -60,7 +63,7 @@ def edit_password():
 
     return render_template("edit-password.html", user=to_change_user)
 
-@app.route("/profile")
+@app.route("/perfil")
 def profile():
     context = {
         "user": session.get("user"),
@@ -68,6 +71,54 @@ def profile():
     }
     return render_template("profile.html", **context)
 
-@app.route("/edit-profile")
+@app.route("/editar-perfil")
 def edit_profile():
     return render_template("edit-profile.html")
+
+
+def allowed_file(filename):
+    return "." in filename and \
+           filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+def security_recharge():
+    user_id = request.form.get("matricula")
+    if user_id is None:
+        flash("Por favor, insira a matricula do usuário!", category="error")
+        return
+    user = get_user(user_id)
+    if user is None:
+        flash("Usuário de ID {} não encontrado!".format(user_id), category="error")
+        return
+    payment_method = request.form.get("payment-method")
+    if payment_method is None:
+        flash("Por favor, insira o método de pagamento!", category="error")
+        return
+    value = request.form.get("reload-value")
+    if value is None:
+        flash("Por favor, insira o valor!", category="error")
+        return
+    value = float(value)
+    new_value = user["saldo"] + value
+    observations = request.form.get("observations")
+    if payment_method != 'cash':
+        file = request.files.get("proof")
+        if file is None:
+            flash("Por favor, insira o documento de pagamento!", category="error")
+            return
+        current_datetime_str = datetime.now().strftime("%Y-%m-%d %H-%M-%S")
+        filename = secure_filename(f"{user_id}.{payment_method}.{current_datetime_str}.{file.filename}")
+        file.save(os.path.join(UPLOAD_FOLDER, filename))
+        insert_recharge(user_id, session["user"]["id"], value, payment_method, filename=filename, observations=observations)
+    else:
+        insert_recharge(user_id, session["user"]["id"], value, payment_method, observations=observations)
+    update_user_saldo(user_id, new_value)
+    flash(f"Saldo de {user['name']} atualizado com sucesso!", category="success")
+    
+
+
+@app.route('/recarregar', methods=["POST", "GET"])
+def recharge():
+    if request.method == "POST":
+        security_recharge()
+    return render_template('recharge.html')
