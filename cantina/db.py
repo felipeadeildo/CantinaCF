@@ -149,6 +149,17 @@ def get_product(by: str = "id", **kwargs):
         return conn.execute("SELECT * FROM produto WHERE name = ?", (kwargs.get("name"),)).fetchone()
 
 
+def update_product_quantity(by: str = "id", **kwargs):
+    """
+    Updates the quantity of a product in the database.
+    """
+    conn = get_conn()
+    if by == "id":
+        conn.execute("UPDATE produto SET quantidade = ? WHERE id = ?", (kwargs.get("quantity"), kwargs.get("id")))
+    elif by == "name":
+        conn.execute("UPDATE produto SET quantidade = ? WHERE name = ?", (kwargs.get("quantity"), kwargs.get("name")))
+    conn.commit()
+
 
 @app.cli.command("initdb")
 def init_db():

@@ -1,6 +1,6 @@
 from . import app
 from flask import abort, request, jsonify, session
-from .db import get_conn
+from .db import get_conn, get_product, update_product_quantity
 from datetime import datetime
 
 
@@ -13,14 +13,14 @@ def search_products():
     products = [dict(products) for products in products]
     return jsonify(products)
 
-@app.route("/add2cart", methods=["GET", "POST"])
+@app.route("/add-to-cart", methods=["GET", "POST"])
 def add_to_cart():
     data = request.get_json()
     product_id = data.get("id")
     conn = get_conn()
     try:
-        product = conn.execute("SELECT * FROM produto WHERE id = ?", (product_id, )).fetchone()
-        conn.execute("UPDATE produto SET quantidade = ? WHERE id = ?", (product["quantidade"] - 1, product_id))
+        product = get_product(id=product_id)
+        update_product_quantity(id=product_id, quantity=product["quantidade"] - 1)
         conn.commit()
     except Exception as e:
         context = {
@@ -37,3 +37,19 @@ def add_to_cart():
         context["product"]["quantidade"] -= 1
         session["cart"].append(context["product"])
         return jsonify(context)
+
+@app.route("/remove-from-cart", methods=["POST"])
+def remove_from_cart():
+    data = request.get_json()
+    product_id = data.get("id")
+    for product in session["cart"]:
+        if product["id"] == product_id:
+            session["cart"].remove(product)
+            break
+    product = dict(get_product(id=product_id))
+    product["quantidade"] += 1
+    update_product_quantity(id=product_id, quantity=product["quantidade"])
+    return jsonify({
+        "message": f"Produto {product['nome']} removido com sucesso!",
+        "product": product,
+    })

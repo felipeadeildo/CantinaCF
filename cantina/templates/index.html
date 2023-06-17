@@ -129,9 +129,18 @@
                 if (data.ok) {
                     M.toast({html: `${data.message}`, classes: 'custom-toast'});
                     var cartList = document.getElementById('cart-list');
+                    var count = cartList.childElementCount;
                     var divItem = document.createElement('div');
-                    divItem.className = "col s3";
-                    divItem.innerHTML = `<li class="collection-item">${data.product.nome}</li>`;
+                    divItem.className = "col s4";
+                    divItem.id = `cart-${data.product.id}-${count}`;
+                    divItem.innerHTML = `
+                    <li class="collection-item">
+                        <button class="btn tiny btn-floating waves-effect waves-light tooltipped" data-position="bottom" data-tooltip="Remover ${data.product.nome} do carrinho" onclick="removeFromCart(${data.product.id}, 'cart-${data.product.id}-${count}')">
+                            <i class="material-icons red">remove</i>
+                        </button>
+                        <span style="margin-left: 5px;">${data.product.nome}</span>
+                    </li>
+                    `;
                     cartList.appendChild(divItem);
                     
                     var totalSpan = document.getElementById('cart-total');
@@ -144,6 +153,35 @@
                 } else {
                     M.toast({html: 'Algo deu errado.', classes: 'custom-toast'});
                 }
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+        }
+
+        function removeFromCart(id, cartId) {
+            var urlRemoveFromCart = "{{ url_for('remove_from_cart') }}";
+
+            fetch(urlRemoveFromCart, {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    id: id,
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                M.toast({html: `${data.message}`, classes: 'custom-toast'});
+                document.getElementById(cartId).remove();
+
+                var totalSpan = document.getElementById('cart-total');
+                var total = parseFloat(totalSpan.innerText) - data.product.valor;
+                totalSpan.innerText = total.toFixed(2);
+
+                var quantidadeTag = document.getElementById(`product-quantity-${data.product.id}`);
+                quantidadeTag.innerText = data.product.quantidade;
             })
             .catch((error) => {
                 console.error(error);
