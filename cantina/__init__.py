@@ -1,8 +1,8 @@
-from flask import Flask
+from .settings import SECRET_KEY, DEBUG
 from flask_session import Session
 from datetime import timedelta
+from flask import Flask
 import tempfile
-from .settings import SECRET_KEY, DEBUG
 
 
 SESSION_TYPE = 'filesystem'
@@ -19,7 +19,8 @@ app.secret_key = SECRET_KEY
 Session(app)
 
 
-from . import db
-from . import auth
+from . import functionalities
 from . import cantina
+from . import auth
 from . import api
+from . import db

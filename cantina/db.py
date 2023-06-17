@@ -176,14 +176,16 @@ def get_transactions(user_id: int, type: str = "all"):
         result = conn.execute("SELECT * FROM controle_pagamento WHERE aluno_id = ?", (user_id,)).fetchall()
         for transaction in result:
             transaction = dict(transaction)
-            transaction["liberado_por"] = get_user(transaction["liberado_por"])
+            transaction["liberado_por"] = dict(get_user(transaction["liberado_por"]))
+            transaction["tipo"] = "entrada"
             transactions.append(transaction)
     elif type == "saida":
         result = conn.execute("SELECT * FROM venda_produto WHERE vendido_para = ?", (user_id,)).fetchall()
         for transaction in result:
             transaction = dict(transaction)
-            transaction["product"] = get_product("id", id=transaction["produto_id"])
-            transaction["vendido_por"] = get_user(transaction["vendido_por"])
+            transaction["product"] = dict(get_product("id", id=transaction["produto_id"]))
+            transaction["vendido_por"] = dict(get_user(transaction["vendido_por"]))
+            transaction["tipo"] = "saida"
             transactions.append(transaction)
     transactions.sort(key=lambda x: x["data_hora"])
     return transactions

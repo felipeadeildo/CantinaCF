@@ -6,37 +6,38 @@ Meu Perfil - {{ user.name }}
 
 {% block content %}
 <div class="">
+  <h4 class="center">Meu Perfil</h4>
   <div class="card">
     <div class="card-content">
       <div class="row">
         <div class="col s9">
           <span class="card-title">{{ user.name }}</span>
           {% if user.id %}
-          <p>Matrícula: {{ user.id }}</p>
+          <p><strong>Matrícula:</strong> <span class="blue-text">{{ user.id }}</span></p>
           {% endif %}
           {% if user.username %}
-          <p>Nome de usuário: {{ user.username }}</p>
+          <p><strong>Nome de usuário:</strong> <span class="blue-text">{{ user.username }}</span></p>
           {% endif %}
           {% if user.saldo %}
-          <p>Saldo: R$ {{ user.saldo }}</p>
+          <p><strong>Saldo:</strong> <span class="blue-text">R$ {{ user.saldo }}</span></p>
           {% endif %}
           {% if user.role %}
-          <p>Cargo: {{ user.role }}</p>
+          <p><strong>Cargo:</strong> <span class="blue-text">{{ user.role }}</span></p>
           {% endif %}
           {% if user.serie %}
-          <p>Série: {{ user.serie }}</p>
+          <p><strong>Série:</strong> <span class="blue-text">{{ user.serie }}</span></p>
           {% endif %}
           {% if user.turma %}
-          <p>Turma: {{ user.turma }}</p>
+          <p><strong>Turma:</strong> <span class="blue-text">{{ user.turma }}</span></p>
           {% endif %}
           {% if user.telefone %}
-          <p>Telefone: {{ user.telefone }}</p>
+          <p><strong>Telefone:</strong> <span class="blue-text">{{ user.telefone }}</span></p>
           {% endif %}
           {% if user.email %}
-          <p>Email: {{ user.email }}</p>
+          <p><strong>Email:</strong> <span class="blue-text">{{ user.email }}</span></p>
           {% endif %}
           {% if user.cpf %}
-          <p>CPF: {{ user.cpf }}</p>
+          <p><strong>CPF:</strong> <span class="blue-text">{{ user.cpf }}</span></p>
           {% endif %}
         </div>
         <div class="col s3 right-align">
@@ -49,21 +50,21 @@ Meu Perfil - {{ user.name }}
     </div>
   </div>
 
-
-  <div class="transactions" style="max-height:400px; overflow-y:auto;">
+  <h4 class="center">Transações</h4>
+  <div class="transactions row" style="max-height:400px; overflow-y:auto;">
     {% for transaction in transactions %}
-    {% if transaction.tipo == 'recarga' %}
-    <div class="card green lighten-4">
+    {% if transaction.tipo == 'entrada' %}
+    <div class="card green lighten-4 col s4">
       <div class="card-content">
         <span class="card-title">{{ transaction.data_hora }} - Recarga</span>
         <p>Tipo de pagamento: {{ transaction.tipo_pagamento }}</p>
-        <p>Valor: {{ transaction.valor }}</p>
+        <p>Valor: R$ {{ transaction.valor }}</p>
         <p>Liberado por: {{ transaction.liberado_por.name }}</p>
         <p>Turno: {{ transaction.turno }}</p>
       </div>
     </div>
     {% else %}
-    <div class="card red lighten-4">
+    <div class="card red lighten-4 col s4">
       <div class="card-content">
         <span class="card-title">{{ transaction.data_hora }} - Venda</span>
         <p>Produto: {{ transaction.product.nome }}</p>

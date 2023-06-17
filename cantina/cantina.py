@@ -1,7 +1,8 @@
-from flask import render_template, request, flash, session
-from . import app
 from .db import get_products, get_user, update_user_saldo, insert_product_sales
+from flask import render_template, request, flash, session
 from .auth import verify_password
+from . import app
+
 
 @app.route("/")
 @app.route("/venda-produtos")
@@ -10,6 +11,7 @@ def index():
         "products": get_products()
     }
     return render_template("index.html", **context)
+
 
 @app.route("/venda-produtos/confirmar-compra", methods=["POST", "GET"])
 def confirm_purchase():
@@ -45,7 +47,7 @@ def process_purchase(form):
     update_user_saldo(user["id"], change_saldo)
 
 
-    insert_product_sales(sold_by=user["id"], sold_to=user["id"], products=session["cart"])
+    insert_product_sales(sold_by=session["user"]["id"], sold_to=user["id"], products=session["cart"])
 
     session["cart"] = []
     flash("Compra realizada com sucesso!", "success")

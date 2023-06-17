@@ -1,7 +1,6 @@
-from . import app
-from flask import abort, request, jsonify, session
 from .db import get_conn, get_product, update_product_quantity
-from datetime import datetime
+from flask import request, jsonify, session
+from . import app
 
 
 @app.route("/search-product", methods=["GET", "POST"])
@@ -12,6 +11,7 @@ def search_products():
     products = conn.execute("SELECT * FROM produto WHERE nome LIKE ? OR id = ?", ("%{}%".format(query), query)).fetchall()
     products = [dict(products) for products in products]
     return jsonify(products)
+
 
 @app.route("/add-to-cart", methods=["GET", "POST"])
 def add_to_cart():
@@ -37,6 +37,7 @@ def add_to_cart():
         context["product"]["quantidade"] -= 1
         session["cart"].append(context["product"])
         return jsonify(context)
+
 
 @app.route("/remove-from-cart", methods=["POST"])
 def remove_from_cart():
