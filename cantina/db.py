@@ -1,5 +1,5 @@
 from werkzeug.security import generate_password_hash
-from .settings import DB_PATH, PAYMENT_TYPES
+from .settings import DB_PATH, SERIES
 from datetime import datetime
 from getpass import getpass
 from flask import g, abort
@@ -80,9 +80,16 @@ def insert_user(username: str, hashed_password: str, role: str, **kwargs):
         name = kwargs.get("name")
     else:
         name = username.capitalize()
+    
+    serie = kwargs.get("serie")
+    if serie is not None:
+        serie = SERIES[int(serie)]
+    turma = kwargs.get("turma")
+    if turma is not None:
+        turma = turma.lower()
 
     conn = get_conn()
-    conn.execute("INSERT INTO user (username, password, role, name) VALUES (?, ?, ?, ?)", (username, hashed_password, role, name))
+    conn.execute("INSERT INTO user (username, password, role, name, serie, turma) VALUES (?, ?, ?, ?, ?, ?)", (username, hashed_password, role, name, serie, turma))
     conn.commit()
 
 

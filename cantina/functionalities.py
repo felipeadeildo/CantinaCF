@@ -1,5 +1,5 @@
 from .db import get_user, get_users, insert_user, update_user_password, get_transactions, update_user_saldo, insert_recharge
-from .settings import PERMISSIONS, UPLOAD_FOLDER, ALLOWED_EXTENSIONS
+from .settings import PERMISSIONS, UPLOAD_FOLDER, ALLOWED_EXTENSIONS, SERIES
 from flask import abort, request, session, render_template, flash
 from werkzeug.security import generate_password_hash
 from werkzeug.utils import secure_filename
@@ -18,8 +18,10 @@ def users():
         password = request.form.get("password")
         name = request.form.get("name")
         role = request.form.get("role")
+        serie = request.form.get("serie")
+        turma = request.form.get("turma")
         if get_user(username, by="username") is None:
-            insert_user(username, generate_password_hash(password), role, name=name)
+            insert_user(username, generate_password_hash(password), role, name=name, serie=serie, turma=turma)
             flash(f"Usuário {username} foi registrado com sucesso!", category="success")
         else:
             flash(f"Usuário {username} já existe!", category="warning")
@@ -27,6 +29,7 @@ def users():
     context = {
         "users": get_users(),
         "roles": list(PERMISSIONS.keys()),
+        "series": SERIES
     }
 
     return render_template("users.html", **context)

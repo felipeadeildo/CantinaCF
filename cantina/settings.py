@@ -13,10 +13,45 @@ DB_PATH = os.path.join(os.getcwd(), "database.sqlite")
 """Database Sqlite3 PATH"""
 
 PERMISSIONS = {
-    "admin": ["static", "login", "/", "edit_password", "logout", "users", "index", "search_products", "add_to_cart", "confirm_purchase", "remove_from_cart", "profile", 'recharge', "get_user"],
-    "user": ["static", "login", "/", "edit_password", "users", "logout", "index", "add_to_cart", "search_products", "profile"],
-    "aluno": ["login", "static", "users", "edit_password", "logout"],
-    "guest": ["static", "login"]
+    "admin": [
+        "static", 
+        "login", 
+        "logout", 
+        "users", 
+        "edit_password", 
+        "index", 
+        "search_products", 
+        "add_to_cart", 
+        "confirm_purchase", 
+        "remove_from_cart", 
+        "profile", 
+        "recharge", 
+        "get_user",
+        "generate_random_username"
+    ],
+    "user": [
+        "static", 
+        "login", 
+        "logout", 
+        "edit_password", 
+        "users", 
+        "index", 
+        "add_to_cart", 
+        "search_products", 
+        "profile",
+        "generate_random_username"
+    ],
+    "aluno": [
+        "static",
+        "login", 
+        "logout",
+        "profile",
+        "generate_random_username"
+    ],
+    "guest": [
+        "static", 
+        "login"
+    ]
 }
 """Mapping of permissions to routes that can be accessed by roles"""
 
@@ -36,3 +71,11 @@ PAYMENT_TYPES = {
     'credit_card': 'Cartão de Crédito',
     'pix': 'PIX',
 }
+
+SERIES = [
+    '3º EM', '2º EM', '1º EM',
+    '1º EF', '2º EF', '3º EF',
+    '4º EF', '5º EF', '6º EF',
+    '7º EF', '8º EF', '9º EF',
+]
+"""Series of School"""
