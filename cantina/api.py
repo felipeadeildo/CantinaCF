@@ -72,3 +72,17 @@ def get_user():
             "user": dict(user)
         }
     return jsonify(context)
+
+@app.route("/api/generate-random-username", methods=["POST"])
+def generate_random_username():
+    data = request.get_json()
+    name = data.get("name", "aluno usuario").lower().split()
+    username = f"{name[0]}.{name[1]}"
+    conn = get_conn()
+    # get usersnames that startswith the username
+    usernames = conn.execute("SELECT username FROM user WHERE username LIKE ?", ("%{}%".format(username),)).fetchall()
+    if len(usernames) > 0:
+        username = f"{username}{len(usernames)}"
+    return jsonify({
+        "username": username
+    })
