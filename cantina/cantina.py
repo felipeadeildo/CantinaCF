@@ -38,7 +38,7 @@ def process_purchase(form):
     
     total_compra = sum(product["valor"] for product in session["cart"])
     if user["saldo"] < total_compra:
-        flash(f"O usuário {user['name']} não tem saldo suficiente para realizar a compra...", "error")
+        flash(f"O usuário {user['name']} não tem saldo suficiente para realizar a compra... Seu saldo atual é de R$ {user['saldo']}", "error")
         return
     
     # TODO: adicionar sugestão de pagamento em espécie
