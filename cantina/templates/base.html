@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <!--Import Google Icon Font-->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -23,17 +24,17 @@
         </nav>
         <ul id="slide-out" class="sidenav">
             {% if session['user_id'] == 'guest' %}
-                <li><a href="{{ url_for('login') }}">Login</a></li>
+            <li><a href="{{ url_for('login') }}">Login</a></li>
             {% else %}
-                <li><a href="{{ url_for('profile') }}">Meu Perfil</a></li>
-                
-                {% if session["user"]["role"] == 'admin' %}
-                    <li><a href="{{ url_for('index') }}">Cantina</a></li>
-                    <li><a href="{{ url_for('users') }}">Usuários</a></li>
-                    <li><a href="{{ url_for('recharge') }}">Recarga</a></li>
-                {% endif %}
+            <li><a href="{{ url_for('profile') }}">Meu Perfil</a></li>
 
-                <li><a href="{{ url_for('logout') }}">Sair</a></li>
+            {% if session["user"]["role"] == 'admin' %}
+            <li><a href="{{ url_for('index') }}">Cantina</a></li>
+            <li><a href="{{ url_for('users') }}">Usuários</a></li>
+            <li><a href="{{ url_for('recharge') }}">Recarga</a></li>
+            {% endif %}
+
+            <li><a href="{{ url_for('logout') }}">Sair</a></li>
             {% endif %}
         </ul>
     </header>
@@ -45,7 +46,7 @@
             <div class="card-content">
                 <span class="card-title orange-text">Aviso</span>
                 {% for message in warning_messages %}
-                    <p class="orange-text">{{ message }}</p>
+                <p class="orange-text">{{ message }}</p>
                 {% endfor %}
             </div>
         </div>
@@ -58,7 +59,7 @@
             <div class="card-content">
                 <span class="card-title green-text">Sucesso</span>
                 {% for message in success_messages %}
-                    <p class="green-text">{{ message }}</p>
+                <p class="green-text">{{ message }}</p>
                 {% endfor %}
             </div>
         </div>
@@ -71,7 +72,7 @@
             <div class="card-content">
                 <span class="card-title red-text">Erro</span>
                 {% for message in error_messages %}
-                    <p class="red-text">{{ message }}</p>
+                <p class="red-text">{{ message }}</p>
                 {% endfor %}
             </div>
         </div>
@@ -94,4 +95,5 @@
     <script type="text/javascript" src="{{url_for('static', filename='js/scripts.js')}}"></script>
     {% block scripts %}{% endblock %}
 </body>
+
 </html>

@@ -40,12 +40,14 @@ Meu Perfil - {{ user.name }}
           <p><strong>CPF:</strong> <span class="blue-text">{{ user.cpf }}</span></p>
           {% endif %}
         </div>
+        {% if session.user.role == 'admin' %}
         <div class="col s3 right-align">
           <a class="btn-floating waves-effect waves-light tooltipped" data-position="bottom"
-            data-tooltip="Editar Perfil" href="{{ url_for('edit_profile') }}">
+            data-tooltip="Editar Perfil" href="{{ url_for('edit_profile', user_id=user.id) }}">
             <i class="material-icons">edit</i>
           </a>
         </div>
+        {% endif %}
       </div>
     </div>
   </div>

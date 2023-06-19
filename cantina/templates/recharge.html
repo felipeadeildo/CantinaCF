@@ -57,44 +57,44 @@ Recarga de Crédito
 
 {% block scripts %}
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-    let matriculaTag = document.getElementById('matricula');
-    let paymentMethodTag = document.getElementById('payment-method');
-    let proofContainerTag = document.getElementById('proof-container');
-    let submitBtnTag = document.getElementById('submit-btn');
+    document.addEventListener("DOMContentLoaded", function () {
+        let matriculaTag = document.getElementById('matricula');
+        let paymentMethodTag = document.getElementById('payment-method');
+        let proofContainerTag = document.getElementById('proof-container');
+        let submitBtnTag = document.getElementById('submit-btn');
 
-    matriculaTag.addEventListener('blur', function() {
-        let matricula = matriculaTag.value;
-        fetch('{{ url_for("get_user") }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                '{{ config["CSRF_HEADER_NAME"] }}': '{{ csrf_token() }}'
-            },
-            body: JSON.stringify({ id: matricula })
-        })
-        .then(response => response.json())
-        .then(data => {
-            M.Toast.dismissAll();
-            color = data.user ? 'green' : 'red';
-            matriculaTag.className = data.user ? 'validate valid' : 'validate invalid';
-            M.toast({ html: data.message, classes: `custom-toast ${color}` });
-        })
-        .catch((error) => {
-            console.error('Error:', error)
+        matriculaTag.addEventListener('blur', function () {
+            let matricula = matriculaTag.value;
+            fetch('{{ url_for("get_user") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    '{{ config["CSRF_HEADER_NAME"] }}': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ id: matricula })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    M.Toast.dismissAll();
+                    color = data.user ? 'green' : 'red';
+                    matriculaTag.className = data.user ? 'validate valid' : 'validate invalid';
+                    M.toast({ html: data.message, classes: `custom-toast ${color}` });
+                })
+                .catch((error) => {
+                    console.error('Error:', error)
+                });
         });
-    });
 
-    verify_proof_visualization = function() {
-        if (paymentMethodTag.value === 'cash') {
-            proofContainerTag.style.display = 'none';
-        } else {
-            proofContainerTag.style.display = 'block';
+        verify_proof_visualization = function () {
+            if (paymentMethodTag.value === 'cash') {
+                proofContainerTag.style.display = 'none';
+            } else {
+                proofContainerTag.style.display = 'block';
+            }
         }
-    }
-    verify_proof_visualization();
+        verify_proof_visualization();
 
-    paymentMethodTag.addEventListener('change', verify_proof_visualization);
-});
+        paymentMethodTag.addEventListener('change', verify_proof_visualization);
+    });
 </script>
 {% endblock %}

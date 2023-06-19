@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}
+Editar Perfil
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h4 class="center-align">Editar Perfil</h4>
+
+    <form action="{{ url_for('edit_profile', user_id=user.id ) }}" method="post">
+        <input type="hidden" name="{{ config['CSRF_COOKIE_NAME'] }}" value="{{ csrf_token() }}">
+        <div class="row">
+            <div class="input-field col s6">
+                <input id="username" type="text"
+                    class="{{ 'validate valid' if user.username not in (none, '') else 'validate' }}" name="username"
+                    value="{{ user.username if user.username not in (none, '') else '' }}">
+                <label for="username" class="{{ 'active' if user.username not in (none, '') }}">Nome de Usuário</label>
+            </div>
+
+            <div class="input-field col s6">
+                <input id="name" type="text"
+                    class="{{ 'validate valid' if user.name not in (none, '') else 'validate' }}" name="name"
+                    value="{{ user.name if user.name not in (none, '') else '' }}">
+                <label for="name" class="{{ 'active' if user.name not in (none, '') }}">Nome</label>
+            </div>
+
+            <div class="input-field col s6">
+                <input id="email" type="email"
+                    class="{{ 'validate valid' if user.email not in (none, '') else 'validate' }}" name="email"
+                    value="{{ user.email if user.email not in (none, '') else '' }}">
+                <label for="email" class="{{ 'active' if user.email not in (none, '') }}">Email</label>
+            </div>
+
+            <div class="input-field col s6">
+                <input id="telefone" type="text"
+                    class="{{ 'validate valid' if user.telefone not in (none, '') else 'validate' }}" name="telefone"
+                    value="{{ user.telefone if user.telefone not in (none, '') else '' }}">
+                <label for="telefone" class="{{ 'active' if user.telefone not in (none, '') }}">Telefone</label>
+            </div>
+
+            <div class="input-field col s6" id="serie-input">
+                <select id="serie" name="serie">
+                    {% for serie in series %}
+                    <option value="{{ loop.index0 }}" {{ 'selected' if serie==user.serie else '' }}>{{ serie }}</option>
+                    {% endfor %}
+                </select>
+                <label for="serie">Série</label>
+            </div>
+
+            <div class="input-field col s6">
+                <div class="input-field">
+                    <select id="role" name="role" required>
+                        {% for role in roles %}
+                        <option value="{{ role }}" {{ 'selected' if role==user.role else '' }}>{{ role }}</option>
+                        {% endfor %}
+                    </select>
+                    <label for="role">Cargo</label>
+                </div>
+            </div>
+
+            <div class="input-field col s6">
+                <input id="turma" type="text"
+                    class="{{ 'validate valid' if user.turma not in (none, '') else 'validate' }}" name="turma"
+                    value="{{ user.turma if user.turma not in (none, '') else '' }}">
+                <label for="turma" class="{{ 'active' if user.turma not in (none, '') }}">Turma</label>
+            </div>
+
+            <div class="input-field col s6">
+                <input id="cpf" type="text" class="{{ 'validate valid' if user.cpf not in (none, '') else 'validate' }}"
+                    name="cpf" value="{{ user.cpf if user.cpf not in (none, '') else '' }}">
+                <label for="cpf" class="{{ 'active' if user.cpf not in (none, '') }}">CPF</label>
+            </div>
+        </div>
+
+        <button class="btn waves-effect waves-light" type="submit" name="action">Editar
+            <i class="material-icons right">send</i>
+        </button>
+
+        <a href="{{ url_for('edit_password', user_id=user.id) }}" class="btn waves-effect waves-light">Editar Senha
+            <i class="material-icons right">lock</i>
+        </a>
+    </form>
+</div>
+{% endblock %}

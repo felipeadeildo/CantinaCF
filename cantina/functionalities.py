@@ -1,6 +1,6 @@
-from .db import get_user, get_users, insert_user, update_user_password, get_transactions, update_user_saldo, insert_recharge
+from .db import get_user, get_users, insert_user, update_user_password, get_transactions, update_user_saldo, insert_recharge, update_user_key
+from flask import abort, request, session, render_template, flash, redirect, url_for
 from .settings import PERMISSIONS, UPLOAD_FOLDER, ALLOWED_EXTENSIONS, SERIES
-from flask import abort, request, session, render_template, flash
 from werkzeug.security import generate_password_hash
 from werkzeug.utils import secure_filename
 from .auth import verify_password
@@ -68,15 +68,48 @@ def edit_password():
 
 @app.route("/perfil")
 def profile():
+    user_id = request.args.get("user_id")
+    if user_id is None:
+        user_id = session.get("user")["id"]
+    user = get_user(user_id)
     context = {
-        "user": session.get("user"),
-        "transactions": get_transactions(session["user"]["id"])
+        "user": user,
+        "transactions": get_transactions(user["id"])
     }
     return render_template("profile.html", **context)
 
-@app.route("/editar-perfil")
+
+@app.route("/editar-perfil", methods=("POST", "GET"))
 def edit_profile():
-    return render_template("edit-profile.html")
+    user = request.args.get("user_id")
+    if user is None:
+        flash("Por favor, insira a matricula do usuário!", category="error")
+        return redirect(url_for("profile"))
+    user = get_user(user)
+    if user is None:
+        flash("Usuário de ID {} não encontrado!".format(user), category="error")
+        return redirect(url_for("profile"))
+    
+    if request.method == "POST":
+        for key, value in request.form.items():
+            if key in (app.config["CSRF_COOKIE_NAME"], 'action'):
+                continue
+            if key == "serie":
+                value = SERIES[int(value)]
+            if key == "turma":
+                value = value.lower()
+            old_value = update_user_key(user["id"], key, value)
+            if old_value != value:
+                flash(f"Alteração de {key} foi feita com sucesso ({old_value} -> {value})!", category="success")
+
+    user = get_user(user["id"])
+    context = {
+        "user": user,
+        "roles": list(PERMISSIONS.keys()),
+        "series": SERIES
+    }
+    
+    return render_template("edit-profile.html", **context)
 
 
 def allowed_file(filename):

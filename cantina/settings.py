@@ -30,7 +30,8 @@ PERMISSIONS = {
         "profile", 
         "recharge", 
         "get_user",
-        "generate_random_username"
+        "generate_random_username",
+        "edit_profile"
     ],
     "user": [
         "static", 

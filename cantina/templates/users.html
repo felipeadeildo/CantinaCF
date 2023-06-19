@@ -13,6 +13,7 @@
                             <th>Nome</th>
                             <th>Usuário</th>
                             <th>Cargo</th>
+                            <th>Perfil</th>
                             <th>Editar</th>
                         </tr>
                     </thead>
@@ -24,7 +25,13 @@
                             <td>{{ user.username }}</td>
                             <td>{{ user.role }}</td>
                             <td>
-                                <a href="{{ url_for('edit_password', user_id=user.id) }}"
+                                <a href="{{ url_for('profile', user_id=user.id) }}"
+                                    class="btn waves-effect waves-light">
+                                    <i class="material-icons">person</i>
+                                </a>
+                            </td>
+                            <td>
+                                <a href="{{ url_for('edit_profile', user_id=user.id) }}"
                                     class="btn waves-effect waves-light">
                                     <i class="material-icons">edit</i>
                                 </a>
@@ -49,7 +56,8 @@
                     <div class="input-field">
                         <input id="username" class="validate" type="text" name="username" required>
                         <label for="username" id="username-label">Usuário</label>
-                        <button class="btn waves-effect waves-light" type="button" onclick="generateRandomUsername()">Usuário Aleatório</button>
+                        <button class="btn waves-effect waves-light" type="button"
+                            onclick="generateRandomUsername()">Usuário Aleatório</button>
                     </div>
                     <div class="input-field">
                         <input id="password" type="password" name="password" required>
@@ -84,6 +92,8 @@
                         <label for="turma">Turma</label>
                     </div>
 
+                    <input type="hidden" name="{{ config['CSRF_COOKIE_NAME'] }}" value="{{ csrf_token() }}">
+
                     <button class="btn waves-effect waves-light" type="submit" name="action">Adicionar Usuário
                         <i class="material-icons right">person_add</i>
                     </button>
@@ -108,7 +118,7 @@
     }
 
     let roleTag = document.getElementById("role");
-    roleTag.addEventListener("change", function() {
+    roleTag.addEventListener("change", function () {
         if (roleTag.value === "aluno") {
             document.getElementById("serie-input").style.display = 'block';
             document.getElementById("serie").required = true;
@@ -133,7 +143,7 @@
             body: JSON.stringify({
                 name: nameTag.value
             })
-            })
+        })
             .then(response => response.json())
             .then(data => {
                 let usernameTag = document.getElementById('username');
@@ -141,7 +151,7 @@
 
                 let usernameLabelTag = document.getElementById('username-label');
                 usernameLabelTag.className = 'active';
-        })
+            })
     }
 </script>
 {% endblock %}
