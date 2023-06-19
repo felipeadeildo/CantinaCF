@@ -77,7 +77,10 @@ def get_user():
 def generate_random_username():
     data = request.get_json()
     name = data.get("name", "aluno usuario").lower().split()
-    username = f"{name[0]}.{name[1]}"
+    if len(name) >= 2:
+        username = f"{name[0]}.{name[1]}"
+    else:
+        username = name[0]
     conn = get_conn()
     # get usersnames that startswith the username
     usernames = conn.execute("SELECT username FROM user WHERE username LIKE ?", ("%{}%".format(username),)).fetchall()

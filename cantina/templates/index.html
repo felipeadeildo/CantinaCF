@@ -85,6 +85,7 @@ Vendas
             method: "POST",
             headers: {
                 'Content-Type': 'application/json',
+                '{{ config["CSRF_HEADER_NAME"] }}': '{{ csrf_token() }}'
             },
             body: JSON.stringify({
                 query: query
@@ -126,6 +127,7 @@ Vendas
             method: "POST",
             headers: {
                 'Content-Type': 'application/json',
+                '{{ config["CSRF_HEADER_NAME"] }}': '{{ csrf_token() }}'
             },
             body: JSON.stringify({
                 id: id,
@@ -173,6 +175,7 @@ Vendas
             method: "POST",
             headers: {
                 'Content-Type': 'application/json',
+                '{{ config["CSRF_HEADER_NAME"] }}': '{{ csrf_token() }}'
             },
             body: JSON.stringify({
                 id: id,

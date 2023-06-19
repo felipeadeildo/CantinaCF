@@ -45,6 +45,8 @@ Recarga de Crédito
             </div>
         </div>
 
+        <input type="hidden" name="{{ config['CSRF_COOKIE_NAME'] }}" value="{{ csrf_token() }}">
+
         <button id="submit-btn" class="btn waves-effect waves-light" type="submit" name="action">
             Recarregar
             <i class="material-icons right">send</i>
@@ -66,7 +68,8 @@ document.addEventListener("DOMContentLoaded", function() {
         fetch('{{ url_for("get_user") }}', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                '{{ config["CSRF_HEADER_NAME"] }}': '{{ csrf_token() }}'
             },
             body: JSON.stringify({ id: matricula })
         })

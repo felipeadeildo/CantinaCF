@@ -70,7 +70,7 @@
                     </div>
 
                     <div class="input-field" id="serie-input" style="display: none;">
-                        <select id="serie" name="serie" required>
+                        <select id="serie" name="serie">
                             <option value="" disabled selected>Selecione Série</option>
                             {% for serie in series %}
                             <option value="{{ loop.index0 }}">{{ serie }}</option>
@@ -111,10 +111,14 @@
     roleTag.addEventListener("change", function() {
         if (roleTag.value === "aluno") {
             document.getElementById("serie-input").style.display = 'block';
+            document.getElementById("serie").required = true;
             document.getElementById("turma-input").style.display = 'block';
+            document.getElementById("turma").required = true;
         } else {
             document.getElementById("serie-input").style.display = 'none';
+            document.getElementById("serie").required = false;
             document.getElementById("turma-input").style.display = 'none';
+            document.getElementById("turma").required = false;
         }
     })
 
@@ -123,7 +127,8 @@
         fetch('{{ url_for("generate_random_username") }}', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                '{{ config["CSRF_HEADER_NAME"] }}': '{{ csrf_token() }}'
             },
             body: JSON.stringify({
                 name: nameTag.value

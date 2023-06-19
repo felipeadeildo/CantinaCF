@@ -9,6 +9,9 @@ DEBUG = debug.lower() == "true"
 SECRET_KEY = "".join([chr(random.randint(97, 122)) for i in range(32)])
 """Flask APP Secret Key"""
 
+CSRF_HEADER_NAME = "".join([chr(random.randint(97, 122)) for i in range(32)])
+"""Random CSRF Header Name"""
+
 DB_PATH = os.path.join(os.getcwd(), "database.sqlite")
 """Database Sqlite3 PATH"""
 
