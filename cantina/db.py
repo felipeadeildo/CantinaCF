@@ -217,6 +217,17 @@ def insert_recharge(user_id: int, allowed_by: int, value: float, payment_type: s
     conn.execute("INSERT INTO controle_pagamento (tipo_pagamento, descricao, aluno_id, liberado_por, data_hora, turno, comprovante, valor) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", (payment_type, observation, user_id, allowed_by, current_datetime_str, turno, filename, value))
     conn.commit()
 
+def update_user_key(user_id: int, key: str, value: str|int|float):
+    """
+    Updates a user's key.
+    """
+    conn = get_conn()
+    old_value = conn.execute(f"SELECT {key} FROM user WHERE id = ?", (user_id,)).fetchone()[0]
+    if old_value != value:
+        conn.execute(f"UPDATE user SET {key} = ? WHERE id = ?", (value, user_id))
+        conn.commit()
+    return old_value
+
 @app.cli.command("initdb")
 def init_db():
     """
