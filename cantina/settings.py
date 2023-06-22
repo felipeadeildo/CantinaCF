@@ -28,10 +28,12 @@ PERMISSIONS = {
         "confirm_purchase", 
         "remove_from_cart", 
         "profile", 
-        "recharge", 
         "get_user",
         "generate_random_username",
         "edit_profile"
+        "recharge",
+        "payments_verification",
+        "get_payments"
     ],
     "user": [
         "static", 
@@ -50,7 +52,8 @@ PERMISSIONS = {
         "login", 
         "logout",
         "profile",
-        "generate_random_username"
+        "generate_random_username",
+        "recharge",
     ],
     "guest": [
         "static", 

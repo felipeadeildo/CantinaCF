@@ -183,6 +183,7 @@ def get_transactions(user_id: int, type: str = "all"):
         result = conn.execute("SELECT * FROM controle_pagamento WHERE aluno_id = ?", (user_id,)).fetchall()
         for transaction in result:
             transaction = dict(transaction)
+            # TODO: Tratar erro quando liberado_por is None (tanto aqui, quanto na página)
             transaction["liberado_por"] = dict(get_user(transaction["liberado_por"]))
             transaction["tipo"] = "entrada"
             transactions.append(transaction)
@@ -198,7 +199,7 @@ def get_transactions(user_id: int, type: str = "all"):
     return transactions
 
 
-def insert_recharge(user_id: int, allowed_by: int, value: float, payment_type: str, **kwargs):
+def insert_recharge(user_id: int, value: float, payment_type: str, **kwargs):
     """
     Inserts a recharge into the database.
     """
@@ -214,7 +215,7 @@ def insert_recharge(user_id: int, allowed_by: int, value: float, payment_type: s
         filename = kwargs.get("filename")
     else:
         filename = None
-    conn.execute("INSERT INTO controle_pagamento (tipo_pagamento, descricao, aluno_id, liberado_por, data_hora, turno, comprovante, valor) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", (payment_type, observation, user_id, allowed_by, current_datetime_str, turno, filename, value))
+    conn.execute("INSERT INTO controle_pagamento (tipo_pagamento, descricao, aluno_id, data_hora, turno, comprovante, valor) VALUES (?, ?, ?, ?, ?, ?, ?)", (payment_type, observation, user_id, current_datetime_str, turno, filename, value))
     conn.commit()
 
 def update_user_key(user_id: int, key: str, value: str|int|float):

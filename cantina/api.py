@@ -89,3 +89,16 @@ def generate_random_username():
     return jsonify({
         "username": username
     })
+
+@app.route("/api/get-payments", methods=["POST"])
+def get_payments():
+    data = request.get_json()
+    query = data.get("query")
+    conn = get_conn()
+    payments = conn.execute("SELECT * FROM controle_pagamento WHERE (liberado_por IS NULL AND id LIKE ?) ORDER BY id ASC", ("%{}%".format(query),)).fetchall()
+    payments = [dict(payment) for payment in payments]
+    for payment in payments:
+        payment["user"] = dict(get_userdb(payment["aluno_id"]))
+        payment["is_approved"] = payment["liberado_por"] is not None
+        # TODO: Adicionar url para visualização do comprovante
+    return jsonify(payments)

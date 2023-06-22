@@ -118,10 +118,7 @@ def allowed_file(filename):
 
 
 def security_recharge():
-    user_id = request.form.get("matricula")
-    if user_id is None:
-        flash("Por favor, insira a matricula do usuário!", category="error")
-        return
+    user_id = session["user"]["id"]
     user = get_user(user_id)
     if user is None:
         flash("Usuário de ID {} não encontrado!".format(user_id), category="error")
@@ -145,12 +142,11 @@ def security_recharge():
         current_datetime_str = datetime.now().strftime("%Y-%m-%d %H-%M-%S")
         filename = secure_filename(f"{user_id}.{payment_method}.{current_datetime_str}.{file.filename}")
         file.save(os.path.join(UPLOAD_FOLDER, filename))
-        insert_recharge(user_id, session["user"]["id"], value, payment_method, filename=filename, observations=observations)
+        insert_recharge(user_id, value, payment_method, filename=filename, observations=observations)
     else:
-        insert_recharge(user_id, session["user"]["id"], value, payment_method, observations=observations)
+        insert_recharge(user_id, value, payment_method, observations=observations)
     update_user_saldo(user_id, new_value)
-    flash(f"Saldo de {user['name']} atualizado com sucesso!", category="success")
-    
+    flash(f"A solicitação de recarga de R$ {value} foi registrada com sucesso! Aguarde verificação!", category="success")
 
 
 @app.route('/recarregar', methods=["POST", "GET"])
@@ -158,3 +154,7 @@ def recharge():
     if request.method == "POST":
         security_recharge()
     return render_template('recharge.html')
+
+@app.route('/pagamentos-para-verificacao')
+def payments_verification():
+    return render_template('payments-verification.html')
