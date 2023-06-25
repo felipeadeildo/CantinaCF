@@ -1,4 +1,4 @@
-from .db import get_user, get_users, insert_user, update_user_password, get_transactions, update_user_saldo, insert_recharge, update_user_key
+from .db import get_user, get_users, insert_user, update_user_password, get_transactions, update_user_saldo, insert_recharge, update_user_key, get_refill_requests
 from flask import abort, request, session, render_template, flash, redirect, url_for
 from .settings import PERMISSIONS, UPLOAD_FOLDER, ALLOWED_EXTENSIONS, SERIES
 from werkzeug.security import generate_password_hash
@@ -145,7 +145,6 @@ def security_recharge():
         insert_recharge(user_id, value, payment_method, filename=filename, observations=observations)
     else:
         insert_recharge(user_id, value, payment_method, observations=observations)
-    update_user_saldo(user_id, new_value)
     flash(f"A solicitação de recarga de R$ {value} foi registrada com sucesso! Aguarde verificação!", category="success")
 
 
@@ -158,3 +157,11 @@ def recharge():
 @app.route('/pagamentos-para-verificacao')
 def payments_verification():
     return render_template('payments-verification.html')
+
+
+@app.route("/pedidos-recargas")
+def refill_requests():
+    context = {
+        "refill_requests": get_refill_requests()
+    }
+    return render_template('refill-requests.html', **context)

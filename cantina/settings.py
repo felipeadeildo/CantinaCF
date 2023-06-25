@@ -30,10 +30,12 @@ PERMISSIONS = {
         "profile", 
         "get_user",
         "generate_random_username",
-        "edit_profile"
+        "edit_profile",
         "recharge",
         "payments_verification",
-        "get_payments"
+        "get_payments",
+        "refill_manage_request",
+        "refill_requests"
     ],
     "user": [
         "static", 
@@ -62,7 +64,8 @@ PERMISSIONS = {
 }
 """Mapping of permissions to routes that can be accessed by roles"""
 
-UPLOAD_FOLDER = os.path.join(os.getcwd(), "uploads")
+# static/uploads
+UPLOAD_FOLDER = os.path.join(os.getcwd(), "cantina", "static", "uploads")
 """Upload folder to save uploaded files with proof of recharge"""
 
 if not os.path.exists(UPLOAD_FOLDER):

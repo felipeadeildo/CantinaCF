@@ -1,8 +1,8 @@
 from werkzeug.security import generate_password_hash
 from .settings import DB_PATH, SERIES
+from flask import g, abort, url_for
 from datetime import datetime
 from getpass import getpass
-from flask import g, abort
 from . import app
 import sqlite3
 import os
@@ -183,8 +183,12 @@ def get_transactions(user_id: int, type: str = "all"):
         result = conn.execute("SELECT * FROM controle_pagamento WHERE aluno_id = ?", (user_id,)).fetchall()
         for transaction in result:
             transaction = dict(transaction)
-            # TODO: Tratar erro quando liberado_por is None (tanto aqui, quanto na página)
-            transaction["liberado_por"] = dict(get_user(transaction["liberado_por"]))
+            liberado_por = get_user(transaction["liberado_por"])
+            if liberado_por is None:
+                liberado_por = {
+                    "name": "Não liberado..."
+                }
+            transaction["liberado_por"] = liberado_por
             transaction["tipo"] = "entrada"
             transactions.append(transaction)
     elif type == "saida":
@@ -228,6 +232,22 @@ def update_user_key(user_id: int, key: str, value: str|int|float):
         conn.execute(f"UPDATE user SET {key} = ? WHERE id = ?", (value, user_id))
         conn.commit()
     return old_value
+
+
+def get_refill_requests():
+    """
+    Retrieves all refill requests from the database.
+    """
+    conn = get_conn()
+
+    result = conn.execute("SELECT * FROM controle_pagamento WHERE liberado_por IS NULL").fetchall()
+    results = [dict(request) for request in result]
+    for result in results:
+        result["aluno"] = get_user(result["aluno_id"])
+        filename = f'uploads/{result["comprovante"]}'
+        result["comprovante_url"] = url_for("static", filename=filename)
+    return results
+
 
 @app.cli.command("initdb")
 def init_db():

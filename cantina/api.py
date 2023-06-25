@@ -1,4 +1,4 @@
-from .db import get_conn, get_product, update_product_quantity, get_user as get_userdb
+from .db import get_conn, get_product, update_product_quantity, get_user as get_userdb, update_user_saldo
 from flask import request, jsonify, session
 from . import app
 
@@ -102,3 +102,36 @@ def get_payments():
         payment["is_approved"] = payment["liberado_por"] is not None
         # TODO: Adicionar url para visualização do comprovante
     return jsonify(payments)
+
+@app.route("/api/manage-payments", methods=["POST"])
+def refill_manage_request():
+    data = request.get_json()
+    payment_id = data.get("id")
+    accepted = data.get("accept")
+    conn = get_conn()
+    payment_infos = conn.execute("SELECT * FROM controle_pagamento WHERE id = ?", (payment_id,)).fetchone()
+    if payment_infos is None:
+        return jsonify({
+            "message": f"Pagamento de ID {payment_id} não encontrado!",
+            "error": True
+        })
+    
+    requester = get_userdb(payment_infos["aluno_id"])
+    new_saldo = requester["saldo"] + payment_infos["valor"]
+    if accepted:
+        update_user_saldo(user_id=payment_infos["aluno_id"], new_saldo=new_saldo)
+        conn.execute("UPDATE controle_pagamento SET liberado_por = ? WHERE id = ?", (session["user"]["id"], payment_id))
+        conn.commit()
+        message = f"Pagamento de ID {payment_id} liberado com sucesso! Saldo atualizado para {new_saldo} para o usuário {requester['name']}"
+        ok = True
+    else:
+        conn.execute("DELETE FROM controle_pagamento WHERE id = ?", (payment_id,))
+        # TODO: apagar comprovante do static/uploads
+        conn.commit()
+        message = f"Pagamento de ID {payment_id} cancelado!"
+        ok = False
+    
+    return jsonify({
+        "message": message,
+        "ok": ok
+    })
