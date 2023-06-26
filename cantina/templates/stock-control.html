@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Controle de Estoque
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h4 class="center-align">Controle de Estoque</h4>
+
+    <form id="stock-form" action="{{ url_for('stock_control')}}" method="post">
+        <input type="hidden" name="{{ config['CSRF_COOKIE_NAME'] }}" value="{{ csrf_token() }}">
+        <div class="row" id="form-content">
+            <div class="input-field col s6" id="existing-product">
+                <select name="product" id="product">
+                    <option value="" disabled selected>Selecione um Produto Existente</option>
+                    {% for product in products %}
+                    <option value="{{ product.id }}">{{ product.nome }}</option>
+                    {% endfor %}
+                </select>
+                <label for="product">Produto</label>
+            </div>
+            <div class="input-field col s6">
+                <input type="number" name="quantity" id="quantity" class="validate" required>
+                <label for="quantity">Quantidade</label>
+            </div>
+            <div class="input-field col s12">
+                <input id="observations" type="text" class="validate" name="observations">
+                <label for="observations">Observações</label>
+            </div>
+            <button class="btn waves-effect waves-light" type="submit" name="action">
+                Adicionar ao Estoque
+                <i class="material-icons right">send</i>
+            </button>
+            <button class="btn waves-effect waves-light" id="add-new-product">
+                Adicionar Produto Novo
+                <i class="material-icons right">add_circle</i>
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %} 
+<script>
+document.querySelector('#add-new-product').addEventListener('click', function(event) {
+    event.preventDefault(); // não carrega a página
+    let formContent = document.querySelector("#form-content");
+    formContent.innerHTML = `
+        <input type="hidden" name="{{ config['CSRF_COOKIE_NAME'] }}" value="{{ csrf_token() }}">
+        <div class="input-field col s6">
+            <input id="product-name" type="text" class="validate" name="product_name" required>
+            <label for="product-name">Nome do Produto</label>
+        </div>
+        <div class="input-field col s6">
+            <input id="product-description" type="text" class="validate" name="product_description" required>
+            <label for="product-description">Descrição do Produto</label>
+        </div>
+        <div class="input-field col s6">
+            <input id="product-value" type="number" step="0.01" class="validate" name="product_value" required>
+            <label for="product-value">Valor (R$)</label>
+        </div>
+        <div class="input-field col s6">
+            <input id="product-type" type="text" class="validate" name="product_type" required list="product-types">
+            <datalist id="product-types">
+                {% for type in product_types %}
+                <option value="{{ type }}">
+                {% endfor %}
+            </datalist>
+            <label for="product-type">Tipo</label>
+        </div>
+        <div class="input-field col s6">
+            <input id="quantity" type="number" class="validate" name="quantity" required>
+            <label for="quantity">Quantidade</label>
+        </div>
+        <div class="input-field col s6">
+            <input id="observations" type="text" class="validate" name="observations">
+            <label for="observations">Observações</label>
+        </div>
+        <button class="btn waves-effect waves-light" id="add-existing-product">Adicionar Produto Existente
+            <i class="material-icons right">undo</i>
+        </button>        
+        <button class="btn waves-effect waves-light" type="submit" name="action">Adicionar ao Estoque
+            <i class="material-icons right">send</i>
+        </button>
+    `;
+    document.querySelector('#add-existing-product').addEventListener('click', function(event) {
+        event.preventDefault();
+        location.reload();
+    })
+})
+
+
+</script>
+{% endblock %}

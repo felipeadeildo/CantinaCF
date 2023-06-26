@@ -35,7 +35,9 @@ PERMISSIONS = {
         "payments_verification",
         "get_payments",
         "refill_manage_request",
-        "refill_requests"
+        "refill_requests",
+        "stock_control",
+        "stock_history"
     ],
     "user": [
         "static", 

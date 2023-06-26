@@ -1,4 +1,4 @@
-from .db import get_user, get_users, insert_user, update_user_password, get_transactions, update_user_saldo, insert_recharge, update_user_key, get_refill_requests
+from .db import get_user, get_users, insert_user, update_user_password, get_transactions, insert_recharge, update_user_key, get_refill_requests, get_products, get_product, update_product_quantity, insert_product, record_stock_history, get_stock_history
 from flask import abort, request, session, render_template, flash, redirect, url_for
 from .settings import PERMISSIONS, UPLOAD_FOLDER, ALLOWED_EXTENSIONS, SERIES
 from werkzeug.security import generate_password_hash
@@ -165,3 +165,60 @@ def refill_requests():
         "refill_requests": get_refill_requests()
     }
     return render_template('refill-requests.html', **context)
+
+
+def add_to_stock():
+    product_id = request.form.get("product")
+    product_quantity = int(request.form.get("quantity"))
+    observations = request.form.get("observations")
+    if product_quantity is None:
+        flash("Por favor, insira a quantidade!", category="error")
+        return
+
+    if product_id is not None:
+        product = get_product(id=product_id)
+        if product is None:
+            flash("Produto de ID {} não encontrado!".format(product_id), category="error")
+            return
+        new_quantity = product_quantity + product["quantidade"]
+        update_product_quantity(id=product_id, quantity=new_quantity)
+    else:
+        product_name = request.form.get("product_name")
+        product_description = request.form.get("product_description")
+        product_value = request.form.get("product_value")
+        product_type = request.form.get("product_type")
+        if None in (product_name, product_value, product_type):
+            flash("Por favor, insira todos os campos!", category="error")
+            return
+        product_id = insert_product(name=product_name, description=product_description, value=product_value, type=product_type, quantity=product_quantity)
+        product = get_product(id=product_id)
+    
+    record_stock_history(product_id, product_quantity, session["user"]["id"], description=observations)
+    flash(f"Produto {product['nome']} ({product_quantity} unidades) adicionado com sucesso!", category="success")
+
+
+
+@app.route("/controle-estoque", methods=["POST", "GET"])
+def stock_control():
+    if request.method == "POST":
+        add_to_stock()
+
+    context = {
+        "products": get_products()
+    }
+    context["types"] = set(map(lambda x: x['tipo'], context["products"]))
+    return render_template('stock-control.html', **context)
+
+@app.route("/historico-de-estoque")
+def stock_history():
+    page_number = request.args.get('page', 0, type=int)
+    page_size = request.args.get('page_size', 10, type=int)
+    
+    results = get_stock_history(page_number=page_number, page_size=page_size)
+    
+    context = {
+        "stock_history": results,
+        "prev_page_url": None if page_number == 0 else url_for("stock_history", page=page_number - 1),  # "/stock_history?page=" + str(page_number - 1),
+        "next_page_url": None if len(results) < page_size else url_for("stock_history", page=page_number + 1) # "/stock_history?page=" + str(page_number + 1)
+    }
+    return render_template('stock-history.html', **context)

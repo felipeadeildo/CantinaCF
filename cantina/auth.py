@@ -10,6 +10,7 @@ def login():
     user_id = session["user_id"] if session.get("user_id") != "guest" else None
     if user_id is not None:
         flash(f"Você já está logado como {session['user']['name']}.", category="warning")
+        return redirect(url_for("profile"))
     elif request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")

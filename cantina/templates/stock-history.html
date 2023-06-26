@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}
+Histórico de Estoque
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h4 class="center-align">Histórico de Estoque</h4>
+
+    <table class="striped centered">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Data/Hora</th>
+                <th>Produto</th>
+                <th>Quantidade</th>
+                <th>Recebido Por</th>
+                <th>Observações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in stock_history %}
+            <tr>
+                <td>{{ record.id }}</td>
+                <td>{{ record.data_hora }}</td>
+                <td>{{ record.produto.nome }}</td>
+                <td>{{ record.quantidade }}</td>
+                <td>{{ record.recebido_por.name }} (<a href="{{ url_for('profile', user_id=record.recebido_por.id )}}">{{ record.recebido_por.username }}</a>)</td>
+                <td>{{ record.descricao or '-'}}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <ul class="pagination">
+        <li class="{{ 'disabled' if not prev_page_url else 'waves-effect' }}"><a href="{{ prev_page_url or '#' }}"><i class="material-icons">chevron_left</i></a></li>
+        <li class="{{ 'disabled' if not next_page_url else 'waves-effect' }}"><a href="{{ next_page_url or '#' }}"><i class="material-icons">chevron_right</i></a></li>
+    </ul>
+</div>
+{% endblock %}

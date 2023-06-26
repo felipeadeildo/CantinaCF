@@ -148,6 +148,8 @@ def get_products():
 def get_product(by: str = "id", **kwargs):
     """
     Retrieves a product from the database.
+    :param by: A string indicating whether to search by ID or name.
+    :param kwargs: Additional parameters where "id" is the product's ID and "name" is the product's name.
     """
     conn = get_conn()
     if by == "id":
@@ -233,6 +235,30 @@ def update_user_key(user_id: int, key: str, value: str|int|float):
         conn.commit()
     return old_value
 
+def insert_product(**kwargs):
+    """
+    Inserts a product into the database.
+    :params kwargs: Product information: name, quantity, price, description.
+    """
+    conn = get_conn()
+    conn.execute(
+        "INSERT INTO produto (nome, quantidade, valor, descricao, tipo) VALUES (?, ?, ?, ?, ?)", 
+        (kwargs.get("name"), kwargs.get("quantity"), kwargs.get("value"), kwargs.get("description"), kwargs.get("type"))
+    )
+    conn.commit()
+    last_id = conn.execute("SELECT id FROM produto ORDER BY id DESC LIMIT 1").fetchone()[0]
+    return last_id
+
+
+def record_stock_history(product_id: int, quantity: int, received_by: int, **kwargs):
+    conn = get_conn()
+    conn.execute(
+        "INSERT INTO historico_abastecimento_estoque (descricao, produto_id, quantidade, recebido_por) VALUES (?, ?, ?, ?)",
+        (kwargs.get("description"), product_id, quantity, received_by)
+    )
+    conn.commit()
+
+
 
 def get_refill_requests():
     """
@@ -248,6 +274,17 @@ def get_refill_requests():
         result["comprovante_url"] = url_for("static", filename=filename)
     return results
 
+def get_stock_history(page_size, page_number):
+    """
+    Retrieves a page of stock from the database.
+    """
+    conn = get_conn()
+    result = conn.execute("SELECT * FROM historico_abastecimento_estoque ORDER BY id DESC LIMIT ? OFFSET ?", (page_size, page_number * page_size)).fetchall()
+    results = [dict(request) for request in result]
+    for result in results:
+        result["recebido_por"] = get_user(result["recebido_por"])
+        result["produto"] = get_product(id=result["produto_id"])
+    return results
 
 @app.cli.command("initdb")
 def init_db():
