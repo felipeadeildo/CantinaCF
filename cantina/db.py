@@ -250,11 +250,11 @@ def insert_product(**kwargs):
     return last_id
 
 
-def record_stock_history(product_id: int, quantity: int, received_by: int, **kwargs):
+def record_stock_history(product_id: int, quantity: int, received_by: int, valor_compra: float, valor_venda: float, **kwargs):
     conn = get_conn()
     conn.execute(
-        "INSERT INTO historico_abastecimento_estoque (descricao, produto_id, quantidade, recebido_por) VALUES (?, ?, ?, ?)",
-        (kwargs.get("description"), product_id, quantity, received_by)
+        "INSERT INTO historico_abastecimento_estoque (descricao, produto_id, quantidade, recebido_por, valor_compra, valor_venda) VALUES (?, ?, ?, ?, ?, ?)",
+        (kwargs.get("description"), product_id, quantity, received_by, valor_compra, valor_venda)
     )
     conn.commit()
 
@@ -274,12 +274,16 @@ def get_refill_requests():
         result["comprovante_url"] = url_for("static", filename=filename)
     return results
 
-def get_stock_history(page_size, page_number):
+def get_stock_history(page_size, page_number, **kwargs):
     """
     Retrieves a page of stock from the database.
     """
     conn = get_conn()
-    result = conn.execute("SELECT * FROM historico_abastecimento_estoque ORDER BY id DESC LIMIT ? OFFSET ?", (page_size, page_number * page_size)).fetchall()
+
+    start_date = kwargs.get("start_date") or datetime(year=2000, month=1, day=1).strftime("%Y-%m-%d %H:%M:%S")
+    end_date = kwargs.get("end_date") or datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    result = conn.execute("SELECT * FROM historico_abastecimento_estoque WHERE data_hora BETWEEN ? AND ? ORDER BY id DESC LIMIT ? OFFSET ?", (start_date, end_date, page_size, page_number * page_size)).fetchall()
     results = [dict(request) for request in result]
     for result in results:
         result["recebido_por"] = get_user(result["recebido_por"])

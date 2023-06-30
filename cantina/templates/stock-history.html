@@ -5,8 +5,17 @@ Histórico de Estoque
 {% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="">
     <h4 class="center-align">Histórico de Estoque</h4>
+
+    <div class="row">
+        <div class="input-field col s6">
+            <input type="text" class="datepicker" id="start-date" placeholder="Data inicial" value="{{ html_start_date }}">
+        </div>
+        <div class="input-field col s6">
+            <input type="text" class="datepicker" id="end-date" placeholder="Data final" value="{{ html_end_date }}">
+        </div>
+    </div>
 
     <table class="striped centered">
         <thead>
@@ -16,6 +25,8 @@ Histórico de Estoque
                 <th>Produto</th>
                 <th>Quantidade</th>
                 <th>Recebido Por</th>
+                <th>Valor de Compra</th>
+                <th>Valor de Venda</th>
                 <th>Observações</th>
             </tr>
         </thead>
@@ -27,6 +38,8 @@ Histórico de Estoque
                 <td>{{ record.produto.nome }}</td>
                 <td>{{ record.quantidade }}</td>
                 <td>{{ record.recebido_por.name }} (<a href="{{ url_for('profile', user_id=record.recebido_por.id )}}">{{ record.recebido_por.username }}</a>)</td>
+                <td>R$ {{ record.valor_compra }}</td>
+                <td>R$ {{ record.valor_venda }}</td>
                 <td>{{ record.descricao or '-'}}</td>
             </tr>
             {% endfor %}
@@ -38,4 +51,84 @@ Histórico de Estoque
         <li class="{{ 'disabled' if not next_page_url else 'waves-effect' }}"><a href="{{ next_page_url or '#' }}"><i class="material-icons">chevron_right</i></a></li>
     </ul>
 </div>
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let datepickers = document.querySelectorAll('.datepicker');
+    let instances = M.Datepicker.init(datepickers);
+
+    datepickers.forEach(function(datepicker) {
+        datepicker.addEventListener('change', function() {
+            let start_date = document.getElementById('start_date').value;
+            let end_date = document.getElementById('end_date').value;
+
+            let url = "{{ url_for('get_history_stock') }}";
+            let csrfToken = "{{ csrf_token() }}";
+            let csrfHeaderName = "{{ config['CSRF_HEADER_NAME'] }}";
+
+            fetch(url, {
+                method: "POST",
+                body: JSON.stringify({ 'start_date': start_date, 'end_date': end_date }),
+                headers: {
+                    "Content-Type": "application/json",
+                    [csrfHeaderName]: csrfToken
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                let stockTable = document.getElementById('stockTable');
+                stockTable.innerHTML = ""; // Limpe a tabela antes de preencher com novos dados
+
+                data.forEach(function (item) {
+                    let row = document.createElement('tr');
+
+                    let idCell = document.createElement('td');
+                    idCell.textContent = record.id;
+                    row.appendChild(idCell);
+
+                    let dateTimeCell = document.createElement('td');
+                    dateTimeCell.textContent = record.data_hora;
+                    row.appendChild(dateTimeCell);
+
+                    let productCell = document.createElement('td');
+                    productCell.textContent = record.produto.nome;
+                    row.appendChild(productCell);
+
+                    let quantityCell = document.createElement('td');
+                    quantityCell.textContent = record.quantidade;
+                    row.appendChild(quantityCell);
+
+                    let receivedByCell = document.createElement('td');
+                    let anchorElement = document.createElement('a');
+                    anchorElement.href = "{{ url_for('profile', user_id=" + record.recebido_por.id + " )}}";
+                    anchorElement.textContent = record.recebido_por.username;
+                    receivedByCell.textContent = record.recebido_por.name + " (";
+                    receivedByCell.appendChild(anchorElement);
+                    receivedByCell.append(")");
+                    row.appendChild(receivedByCell);
+
+                    let purchaseValueCell = document.createElement('td');
+                    purchaseValueCell.textContent = 'R$ ' + record.valor_compra;
+                    row.appendChild(purchaseValueCell);
+
+                    let sellValueCell = document.createElement('td');
+                    sellValueCell.textContent = 'R$ ' + record.valor_venda;
+                    row.appendChild(sellValueCell);
+
+                    let observationCell = document.createElement('td');
+                    observationCell.textContent = record.descricao || '-';
+                    row.appendChild(observationCell);
+
+                    stockTable.appendChild(row);
+                });
+            })
+            .catch(error => console.log(error));
+        });
+    });
+});
+</script>
+
 {% endblock %}

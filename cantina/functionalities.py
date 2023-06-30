@@ -154,10 +154,6 @@ def recharge():
         security_recharge()
     return render_template('recharge.html')
 
-@app.route('/pagamentos-para-verificacao')
-def payments_verification():
-    return render_template('payments-verification.html')
-
 
 @app.route("/pedidos-recargas")
 def refill_requests():
@@ -170,6 +166,7 @@ def refill_requests():
 def add_to_stock():
     product_id = request.form.get("product")
     product_quantity = int(request.form.get("quantity"))
+    product_purchase_price = request.form.get("purchase_price")
     observations = request.form.get("observations")
     if product_quantity is None:
         flash("Por favor, insira a quantidade!", category="error")
@@ -193,7 +190,14 @@ def add_to_stock():
         product_id = insert_product(name=product_name, description=product_description, value=product_value, type=product_type, quantity=product_quantity)
         product = get_product(id=product_id)
     
-    record_stock_history(product_id, product_quantity, session["user"]["id"], description=observations)
+    record_stock_history(
+        product_id = product_id, 
+        quantity = product_quantity, 
+        received_by = session["user"]["id"],
+        valor_compra = product_purchase_price,
+        valor_venda = product["valor"],
+        description = observations
+    )
     flash(f"Produto {product['nome']} ({product_quantity} unidades) adicionado com sucesso!", category="success")
 
 
@@ -209,13 +213,13 @@ def stock_control():
     context["types"] = set(map(lambda x: x['tipo'], context["products"]))
     return render_template('stock-control.html', **context)
 
+
 @app.route("/historico-de-estoque")
 def stock_history():
     page_number = request.args.get('page', 0, type=int)
     page_size = request.args.get('page_size', 10, type=int)
     
     results = get_stock_history(page_number=page_number, page_size=page_size)
-    
     context = {
         "stock_history": results,
         "prev_page_url": None if page_number == 0 else url_for("stock_history", page=page_number - 1),  # "/stock_history?page=" + str(page_number - 1),

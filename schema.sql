@@ -44,6 +44,8 @@ CREATE TABLE historico_abastecimento_estoque(
   produto_id INTEGER,
   quantidade INTEGER,
   recebido_por INTEGER,
+  valor_compra REAL,
+  valor_venda REAL,
   FOREIGN KEY(produto_id) REFERENCES produto(id),
   FOREIGN KEY(recebido_por) REFERENCES user(id)
 );

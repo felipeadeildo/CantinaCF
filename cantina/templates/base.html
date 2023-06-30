@@ -21,8 +21,8 @@
         <nav>
             <div class="nav-wrapper cyan darken-4">
                 <a href="#" class="brand-logo center">
-                    <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" style="height: 44px; margin: 0px 10px; vertical-align: middle;">
-                    <span style="vertical-align: middle;">CF Cantina</span>
+                    <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" class="logo" style="height: 44px; margin: 0px 10px; vertical-align: middle;">
+                    <span style="vertical-align: middle;" class="logo-text">CF Cantina</span>
                 </a>
                 <a href="#" data-target="slide-out" class="sidenav-trigger"><i class="material-icons">menu</i></a>
             </div>
@@ -37,7 +37,6 @@
             {% if session["user"]["role"] == 'admin' %}
             <li><a href="{{ url_for('index') }}">Cantina</a></li>
             <li><a href="{{ url_for('users') }}">Usuários</a></li>
-            <!-- <li><a href="{{ url_for('payments_verification') }}">Verificação de Pagamentos</a></li> -->
             <li><a href="{{ url_for('refill_requests') }}">Verificação de Pagamentos</a></li>
             <li><a href="{{ url_for('stock_control') }}">Controle de Estoque</a></li>
             <li><a href="{{ url_for('stock_history') }}">Histórico de Abastecimento</a></li>

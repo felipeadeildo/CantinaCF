@@ -128,3 +128,26 @@ main {
     right: auto;
     border-radius: 15px !important;
 }
+
+.logo {
+    height: 44px;
+}
+
+.logo-text {
+    font-size: 20px;
+}
+
+@media only screen and (max-width: 600px) {
+    .logo {
+        height: 24px;
+    }
+    .logo-text {
+        font-size: 16px;
+    }
+}
+
+@media only screen and (max-width: 600px) {
+    h4 {
+        font-size: 1.5em;
+    }
+}
