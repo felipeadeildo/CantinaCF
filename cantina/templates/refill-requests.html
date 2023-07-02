@@ -74,7 +74,7 @@ function openModal(url) {
 
 function manageRefillRequest(id, accept) {
     let card = document.getElementById('request-' + id);
-    let url = '{{ url_for("refill_manage_request") }}';
+    let url = '{{ url_for("refill_manage_request_api") }}';
     fetch(url, {
         method: 'POST',
         headers: {

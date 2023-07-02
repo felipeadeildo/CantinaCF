@@ -79,7 +79,7 @@ Vendas
 <script>
     function searchProducts() {
         var query = document.getElementById('product-search').value;
-        var urlSearchProducts = "{{ url_for('search_products') }}";
+        var urlSearchProducts = "{{ url_for('search_products_api') }}";
 
         fetch(urlSearchProducts, {
             method: "POST",
@@ -121,7 +121,7 @@ Vendas
     }
 
     function addToCart(id) {
-        var urlAddToCart = "{{ url_for('add_to_cart') }}";
+        var urlAddToCart = "{{ url_for('add_to_cart_api') }}";
 
         fetch(urlAddToCart, {
             method: "POST",
@@ -169,7 +169,7 @@ Vendas
     }
 
     function removeFromCart(id, cartId) {
-        var urlRemoveFromCart = "{{ url_for('remove_from_cart') }}";
+        var urlRemoveFromCart = "{{ url_for('remove_from_cart_api') }}";
 
         fetch(urlRemoveFromCart, {
             method: "POST",

@@ -4,7 +4,7 @@ from . import app
 
 
 @app.route("/api/search-product", methods=["GET", "POST"])
-def search_products():
+def search_products_api():
     data = request.get_json()
     query = data.get("query")
     conn = get_conn()
@@ -14,7 +14,7 @@ def search_products():
 
 
 @app.route("/api/add-to-cart", methods=["GET", "POST"])
-def add_to_cart():
+def add_to_cart_api():
     data = request.get_json()
     product_id = data.get("id")
     conn = get_conn()
@@ -40,7 +40,7 @@ def add_to_cart():
 
 
 @app.route("/api/remove-from-cart", methods=["POST"])
-def remove_from_cart():
+def remove_from_cart_api():
     data = request.get_json()
     product_id = data.get("id")
     for product in session["cart"]:
@@ -57,7 +57,7 @@ def remove_from_cart():
 
 
 @app.route("/api/get-user", methods=["POST"])
-def get_user():
+def get_user_api():
     data = request.get_json()
     user_id = data.get("id")
     user = get_userdb(user_id)
@@ -74,7 +74,7 @@ def get_user():
     return jsonify(context)
 
 @app.route("/api/generate-random-username", methods=["POST"])
-def generate_random_username():
+def generate_random_username_api():
     data = request.get_json()
     name = data.get("name", "aluno usuario").lower().split()
     if len(name) >= 2:
@@ -91,7 +91,7 @@ def generate_random_username():
     })
 
 @app.route("/api/get-payments", methods=["POST"])
-def get_payments():
+def get_payments_api():
     data = request.get_json()
     query = data.get("query")
     conn = get_conn()
@@ -104,7 +104,7 @@ def get_payments():
     return jsonify(payments)
 
 @app.route("/api/manage-payments", methods=["POST"])
-def refill_manage_request():
+def refill_manage_request_api():
     data = request.get_json()
     payment_id = data.get("id")
     accepted = data.get("accept")

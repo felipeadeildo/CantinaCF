@@ -17,27 +17,27 @@ DB_PATH = os.path.join(os.getcwd(), "database.sqlite")
 
 PERMISSIONS = {
     "admin": [
-        "static", 
-        "login", 
-        "logout", 
-        "users", 
-        "edit_password", 
-        "index", 
-        "search_products", 
-        "add_to_cart", 
-        "confirm_purchase", 
-        "remove_from_cart", 
-        "profile", 
-        "get_user",
-        "generate_random_username",
-        "edit_profile",
-        "recharge",
-        "payments_verification",
-        "get_payments",
-        "refill_manage_request",
-        "refill_requests",
-        "stock_control",
-        "stock_history"
+        "static",  # arquivos static
+        "login",  # rota de login
+        "logout",  # rota de logout
+        "users", # rota de usários (permite a inclusão de novos usários)
+        "edit_password",  # rota de editar senha (permite a alteração de senha)
+        "index", # rota da cantina (permite venda) 
+        "search_products_api",  # rota de pesquisa de produtos (usado na cantina)
+        "add_to_cart_api",  # rota de adicionar produtos ao carrinho
+        "confirm_purchase",  # rota de confirmar compra
+        "remove_from_cart_api",  # rota de remover produtos do carrinho
+        "profile",  # rota de perfil (mostra informações do perfil)
+        "get_user_api", # rota de obter dados do perfil
+        "generate_random_username_api", # rota de gerar nome de usuário (usado na criação de usuário)
+        "edit_profile",  # rota de editar perfil
+        "recharge",  # rota de recarga
+        "payments_verification", # rota de verificação de pagamentos feitos pelos alunos
+        "get_payments_api",  # rota de verificação de pagamentos feitos pelos alunos
+        "refill_manage_request_api", # rota de verificação de pagamentos feitos pelos alunos
+        "refill_requests", # rota de verificação de pagamentos feitos pelos alunos
+        "stock_control", # rota de controle de estoque
+        "stock_history" # rota de histórico de estoque
     ],
     "user": [
         "static", 
@@ -46,19 +46,40 @@ PERMISSIONS = {
         "edit_password", 
         "users", 
         "index", 
-        "add_to_cart", 
-        "search_products", 
+        "add_to_cart_api", 
+        "search_products_api", 
         "profile",
-        "generate_random_username"
+        "generate_random_username_api"
     ],
     "aluno": [
         "static",
         "login", 
         "logout",
         "profile",
-        "generate_random_username",
+        "generate_random_username_api",
         "recharge",
+        "edit_password",
     ],
+    "vendedor": [
+        "static",
+        "login",
+        "logout",
+        "profile",
+        "index",
+        "add_to_cart_api",
+        "search_products_api",
+        "confirm_purchase",
+        "remove_from_cart_api",
+    ],
+
+    "caixa": [
+        "static",
+        "login",
+        "logout",
+        "profile",
+        
+    ],
+
     "guest": [
         "static", 
         "login"

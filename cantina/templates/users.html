@@ -134,7 +134,7 @@
 
     function generateRandomUsername() {
         let nameTag = document.getElementById("name");
-        fetch('{{ url_for("generate_random_username") }}', {
+        fetch('{{ url_for("generate_random_username_api") }}', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
