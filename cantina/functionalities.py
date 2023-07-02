@@ -11,6 +11,16 @@ import os
 
 @app.route("/usuarios", methods=("POST", "GET"))
 def users():
+    """
+    A function that handles requests related to users. 
+
+    Parameters:
+        None
+
+    Returns:
+        The rendered template "users.html" with the context containing the list of users, 
+        roles, and series.
+    """
     if request.method == "POST":
         if session["user"]["role"] != "admin":
             abort(403)
@@ -35,6 +45,18 @@ def users():
     return render_template("users.html", **context)
 
 def security_edit_password(to_change_user, changer_user, old_password, new_password):
+    """
+    A function that allows a user with the role of "admin" to edit the password of another user.
+    
+    Args:
+        to_change_user (dict): A dictionary representing the user whose password will be changed.
+        changer_user (dict): A dictionary representing the user who is changing the password.
+        old_password (str): The old password of the user being changed. Required if the changer_user is not an admin.
+        new_password (str): The new password that will replace the old password.
+    
+    Returns:
+        None
+    """
     if new_password is None:
         flash("Por favor, insira a nova senha!", category="error") # no new password
         return
@@ -53,6 +75,9 @@ def security_edit_password(to_change_user, changer_user, old_password, new_passw
     
 @app.route("/editar-senha", methods=("POST", "GET"))
 def edit_password():
+    """
+    Edit the password of a user.
+    """
     to_change_user_id = request.args.get("user_id") or session.get("user")["id"]
     to_change_user = get_user(to_change_user_id, by="id")
     changer_user = session.get("user")
@@ -68,6 +93,15 @@ def edit_password():
 
 @app.route("/perfil")
 def profile():
+    """
+    Renders the profile page for a user.
+
+    Parameters:
+    - None
+
+    Return:
+    - str: The rendered HTML template for the profile page.
+    """
     user_id = request.args.get("user_id")
     if user_id is None:
         user_id = session.get("user")["id"]
@@ -81,6 +115,15 @@ def profile():
 
 @app.route("/editar-perfil", methods=("POST", "GET"))
 def edit_profile():
+    """
+    Edit the user's profile.
+
+    Parameters:
+    - None
+
+    Returns:
+    - None
+    """
     user = request.args.get("user_id")
     if user is None:
         flash("Por favor, insira a matricula do usuário!", category="error")
@@ -99,7 +142,7 @@ def edit_profile():
             if key == "turma":
                 value = value.lower()
             old_value = update_user_key(user["id"], key, value)
-            if old_value != value:
+            if old_value != value and old_value is not None:
                 flash(f"Alteração de {key} foi feita com sucesso ({old_value} -> {value})!", category="success")
 
     user = get_user(user["id"])
@@ -113,11 +156,29 @@ def edit_profile():
 
 
 def allowed_file(filename):
+    """
+    Check if the given filename is allowed based on its extension.
+
+    Parameters:
+        filename (str): The name of the file to check.
+
+    Returns:
+        bool: True if the file is allowed, False otherwise.
+    """
     return "." in filename and \
            filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 def security_recharge():
+    """
+    Recharges the user's account balance with a specified value.
+
+    Parameters:
+        None
+
+    Returns:
+        None
+    """
     user_id = session["user"]["id"]
     user = get_user(user_id)
     if user is None:
@@ -150,6 +211,15 @@ def security_recharge():
 
 @app.route('/recarregar', methods=["POST", "GET"])
 def recharge():
+    """
+    A function that handles the '/recarregar' route for both POST and GET requests.
+    
+    Parameters:
+        None
+        
+    Returns:
+        The HTML content of the 'recharge.html' template.
+    """
     if request.method == "POST":
         security_recharge()
     return render_template('recharge.html')
@@ -157,6 +227,12 @@ def recharge():
 
 @app.route("/pedidos-recargas")
 def refill_requests():
+    """
+    A function that handles requests to refill orders.
+
+    Returns:
+        The rendered template for the refill requests page.
+    """
     context = {
         "refill_requests": get_refill_requests()
     }
@@ -164,6 +240,15 @@ def refill_requests():
 
 
 def add_to_stock():
+    """
+    Adds the specified product to the stock.
+
+    Parameters:
+        None
+
+    Returns:
+        None
+    """
     product_id = request.form.get("product")
     product_quantity = int(request.form.get("quantity"))
     product_purchase_price = request.form.get("purchase_price")
@@ -204,6 +289,16 @@ def add_to_stock():
 
 @app.route("/controle-estoque", methods=["POST", "GET"])
 def stock_control():
+    """
+    Perform stock control operations based on the HTTP request method.
+    If the method is POST, add products to the stock.
+    
+    Parameters:
+        None
+        
+    Returns:
+        The rendered stock-control.html template with the updated context.
+    """
     if request.method == "POST":
         add_to_stock()
 
@@ -214,8 +309,18 @@ def stock_control():
     return render_template('stock-control.html', **context)
 
 
-@app.route("/historico-de-estoque")
+@app.route("/historico-estoque")
 def stock_history():
+    """
+    Retrieves the stock history data for a given page number and page size.
+
+    Args:
+        page (int): The page number to retrieve. Default is 0.
+        page_size (int): The number of results per page. Default is 10.
+
+    Returns:
+        str: The rendered stock history HTML page.
+    """
     page_number = request.args.get('page', 0, type=int)
     page_size = request.args.get('page_size', 10, type=int)
     

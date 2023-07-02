@@ -7,6 +7,12 @@ from . import app
 @app.route("/")
 @app.route("/venda-produtos")
 def index():
+    """
+    A function that handles the index route and the venda-produtos route.
+
+    Returns:
+        The rendered index.html template with the products as the context.
+    """
     context = {
         "products": get_products()
     }
@@ -15,12 +21,21 @@ def index():
 
 @app.route("/venda-produtos/confirmar-compra", methods=["POST", "GET"])
 def confirm_purchase():
+    """
+    A function that confirms a purchase by processing the purchase details and rendering the 'confirm-purchase.html' template.
+    """
     if request.method == "POST":
         process_purchase(request.form)
     return render_template("confirm-purchase.html")
 
 
 def process_purchase(form):
+    """
+    Process a purchase using the given form data.
+
+    Args:
+        form (dict): A dictionary containing the form data.
+    """
     matricula = form.get("matricula")
     password = form.get("password")
     if None in (matricula, password):

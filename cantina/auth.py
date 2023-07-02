@@ -7,6 +7,7 @@ from . import app
 
 @app.route("/login", methods=("GET", "POST"))
 def login():
+    """Login page"""
     user_id = session["user_id"] if session.get("user_id") != "guest" else None
     if user_id is not None:
         flash(f"Você já está logado como {session['user']['name']}.", category="warning")
@@ -26,17 +27,20 @@ def login():
     return render_template("login.html")
 
 
-@app.route('/logout')
+@app.route('/sair')
 def logout():
+    """Logout"""
     session.clear()
     return redirect(url_for("login"))
 
 
 def verify_password(password, hashed_password):
+    """Verify password"""
     return check_password_hash(hashed_password, password)
 
 
 def login_user(user):
+    """Login user"""
     session["user_id"] = user["id"]
     session["user"] = dict(user)
 

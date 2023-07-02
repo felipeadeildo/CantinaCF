@@ -251,6 +251,20 @@ def insert_product(**kwargs):
 
 
 def record_stock_history(product_id: int, quantity: int, received_by: int, valor_compra: float, valor_venda: float, **kwargs):
+    """
+    Insert a record into the stock history table.
+
+    Parameters:
+        product_id (int): The ID of the product.
+        quantity (int): The quantity of the product.
+        received_by (int): The ID of the person who received the product.
+        valor_compra (float): The purchase value of the product.
+        valor_venda (float): The selling value of the product.
+        **kwargs: Additional keyword arguments.
+
+    Returns:
+        None
+    """
     conn = get_conn()
     conn.execute(
         "INSERT INTO historico_abastecimento_estoque (descricao, produto_id, quantidade, recebido_por, valor_compra, valor_venda) VALUES (?, ?, ?, ?, ?, ?)",
