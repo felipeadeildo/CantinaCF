@@ -352,15 +352,9 @@ def stock_history():
     params.extend([offset, per_page])
 
 
-    # obtém a hash da query e verifica se ela já foi executada anteriormente (cache)
-    hashed_query = hashlib.sha256(query.encode('utf-8')).hexdigest()
-    if cache.get(hashed_query) is not None:
-        results_obj = cache.get(hashed_query)
-    else:
-        results_obj = cur.execute(query, params).fetchall()
-        results_obj = list(map(dict, results_obj))
-        cache.set(hashed_query, results_obj)
-    
+    results_obj = cur.execute(query, params).fetchall()
+    results_obj = list(map(dict, results_obj))
+
     results = []
     # define e trata os resultados
     for result in results_obj:
@@ -381,9 +375,14 @@ def stock_history():
         total_params.append(recebido_por)
         total_params.append(start_date)
         total_params.append(end_date)
-    total_query = total_query.replace("*", "COUNT(*)")
-    total = cur.execute(total_query, total_params).fetchone()
-    total = 0 if total is None else total[0]
+    
+    identificador = f"historico-estoque-{recebido_por}-{start_date}-{end_date}-{session['user']['id']}"
+    hashed_query = hashlib.sha256(identificador.encode('utf-8')).hexdigest()
+    results_obj = cur.execute(total_query, total_params).fetchall()
+    results_obj = list(map(dict, results_obj))
+    cache.set(hashed_query, results_obj)
+
+    total = len(results_obj)
 
     # define paginação
     pagination = Pagination(page=page, per_page=per_page, total=total, css_framework='materialize')
