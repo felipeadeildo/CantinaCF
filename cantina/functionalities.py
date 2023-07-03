@@ -1,11 +1,13 @@
-from .db import get_user, get_users, insert_user, update_user_password, get_transactions, insert_recharge, update_user_key, get_refill_requests, get_products, get_product, update_product_quantity, insert_product, record_stock_history, get_stock_history
+from .db import get_user, get_users, insert_user, update_user_password, get_transactions, insert_recharge, update_user_key, get_refill_requests, get_products, get_product, update_product_quantity, insert_product, record_stock_history, get_conn
 from flask import abort, request, session, render_template, flash, redirect, url_for
 from .settings import PERMISSIONS, UPLOAD_FOLDER, ALLOWED_EXTENSIONS, SERIES
+from flask_paginate import Pagination, get_page_args
 from werkzeug.security import generate_password_hash
 from werkzeug.utils import secure_filename
+from datetime import datetime, timedelta
 from .auth import verify_password
-from datetime import datetime
-from . import app
+from . import app, cache
+import hashlib
 import os
 
 
@@ -72,7 +74,6 @@ def security_edit_password(to_change_user, changer_user, old_password, new_passw
     update_user_password(to_change_user["id"], new_password) # if old_password is corrrect and got here, update password
     flash("Senha alterada com sucesso!", category="success")
 
-    
 @app.route("/editar-senha", methods=("POST", "GET"))
 def edit_password():
     """
@@ -286,7 +287,6 @@ def add_to_stock():
     flash(f"Produto {product['nome']} ({product_quantity} unidades) adicionado com sucesso!", category="success")
 
 
-
 @app.route("/controle-estoque", methods=["POST", "GET"])
 def stock_control():
     """
@@ -311,23 +311,88 @@ def stock_control():
 
 @app.route("/historico-estoque")
 def stock_history():
-    """
-    Retrieves the stock history data for a given page number and page size.
+    # Obtém conexão com banco de dados
+    conn = get_conn()
+    cur  = conn.cursor()
 
-    Args:
-        page (int): The page number to retrieve. Default is 0.
-        page_size (int): The number of results per page. Default is 10.
+    # Obtém dados para filtro
+    recebido_por = request.args.get("recebido_por", "")
+    order_by = request.args.get("order_by", "")
+    start_date = request.args.get("start_date", "")
+    end_date = request.args.get("end_date", "")
 
-    Returns:
-        str: The rendered stock history HTML page.
-    """
-    page_number = request.args.get('page', 0, type=int)
-    page_size = request.args.get('page_size', 10, type=int)
+    # Define a query inicial e os parametros iniciais
+    query = "SELECT * FROM historico_abastecimento_estoque"
+    params = []
+
+    if recebido_por: # se recebido_por for diferente de ""
+        query += ' INNER JOIN user ON historico_abastecimento_estoque.recebido_por = user.id WHERE user.username LIKE ?'
+        params.extend([f"%{recebido_por}%"])
+
+    if start_date or end_date: # se start_date ou end_date for diferente de ""
+        if start_date: # se a data inicial for diferente de ""
+            start_date = datetime.strptime(start_date, "%b %d, %Y").strftime("%Y-%m-%d") # transforma a data inicial em datetime
+        else: # se a data inicial for igual a ""
+            start_date = datetime(year=2000, month=1, day=1).strftime("%Y-%m-%d") # transforma a data inicial em datetime com início em 2000
+        
+        if end_date: # se a data final for diferente de ""
+            end_date = datetime.strptime(end_date, "%b %d, %Y").strftime("%Y-%m-%d") # transforma a data final em datetime
+        else: # se a data final for igual a ""
+            end_date = datetime.now().strftime("%Y-%m-%d") # transforma a data final em datetime onde a data atual é a de agora
+        query += f" {'WHERE' if not query.endswith('LIKE ?') else 'AND'} data_hora BETWEEN ? AND datetime(?, '+1 day', '-1 second')"
+        params.extend([start_date, end_date])
     
-    results = get_stock_history(page_number=page_number, page_size=page_size)
+    if order_by: # se é pra ordernar
+        query += f" ORDER BY {order_by}" # adiciona a ordenação
+    
+    page, per_page, offset = get_page_args(page_parameter='page', per_page_parameter='per_page') # obtém a página e o número de páginas
+    offset = (page - 1) * per_page
+
+    query += " LIMIT ?, ?" # adiciona os limites
+    params.extend([offset, per_page])
+
+
+    # obtém a hash da query e verifica se ela já foi executada anteriormente (cache)
+    hashed_query = hashlib.sha256(query.encode('utf-8')).hexdigest()
+    if cache.get(hashed_query) is not None:
+        results_obj = cache.get(hashed_query)
+    else:
+        results_obj = cur.execute(query, params).fetchall()
+        results_obj = list(map(dict, results_obj))
+        cache.set(hashed_query, results_obj)
+    
+    results = []
+    # define e trata os resultados
+    for result in results_obj:
+        result = dict(result)
+        result["recebido_por"] = dict(get_user(result["recebido_por"]))
+        result["produto"] = dict(get_product(id=result["produto_id"]))
+        result["data_hora"] = datetime.strptime(result["data_hora"], "%Y-%m-%d %H:%M:%S").strftime("%d/%m/%Y às %H:%M:%S")
+        results.append(result)
+
+    total_query = query.split("LIMIT")[0].split('ORDER BY')[0].strip() # obtém o total
+    total_params = []
+    if total_query.count("?") == 1:
+        total_params.append(recebido_por)
+    elif total_query.count("?") == 2:
+        total_params.append(start_date)
+        total_params.append(end_date)
+    elif total_query.count("?") == 3:
+        total_params.append(recebido_por)
+        total_params.append(start_date)
+        total_params.append(end_date)
+    total_query = total_query.replace("*", "COUNT(*)")
+    total = cur.execute(total_query, total_params).fetchone()
+    total = 0 if total is None else total[0]
+
+    # define paginação
+    pagination = Pagination(page=page, per_page=per_page, total=total, css_framework='materialize')
+
     context = {
-        "stock_history": results,
-        "prev_page_url": None if page_number == 0 else url_for("stock_history", page=page_number - 1),  # "/stock_history?page=" + str(page_number - 1),
-        "next_page_url": None if len(results) < page_size else url_for("stock_history", page=page_number + 1) # "/stock_history?page=" + str(page_number + 1)
+        "results": results,
+        "pagination": pagination,
+        "page": page,
+        "per_page": per_page,
+        "result_id": hashed_query
     }
-    return render_template('stock-history.html', **context)
+    return render_template("stock-history.html", **context)

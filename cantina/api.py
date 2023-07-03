@@ -1,6 +1,8 @@
 from .db import get_conn, get_product, update_product_quantity, get_user, update_user_saldo
-from flask import request, jsonify, session
-from . import app
+from flask import request, jsonify, session, send_file
+from . import app, cache
+from io import BytesIO
+import pandas as pd
 
 
 @app.route("/api/pesquisar-produto", methods=["POST"])
@@ -196,3 +198,26 @@ def refill_manage_request_api():
         "message": message,
         "ok": ok
     })
+
+
+@app.route("/api/exportar-para-excel", methods=["GET"])
+def export_to_excel_api():
+    """
+    A function to export a cached result to an Excel file.
+
+    Returns:
+        A response containing the Excel file.
+    """
+    result_id = request.args.get("result_id")
+    data = cache.get(result_id)
+    if data is None:
+        return jsonify({
+            "message": f"Resultado de ID {result_id} não encontrado ou expirado...!",
+        })
+    df = pd.DataFrame(data)
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine="xlsxwriter") as writter:
+        df.to_excel(writter, index=False, sheet_name='Sheet1')
+    output.seek(0)
+
+    return send_file(output, as_attachment=True, download_name=f"{result_id}.xlsx")

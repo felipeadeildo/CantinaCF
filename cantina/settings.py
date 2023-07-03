@@ -37,7 +37,8 @@ PERMISSIONS = {
         "refill_manage_request_api", # rota de verificação de pagamentos feitos pelos alunos
         "refill_requests", # rota de verificação de pagamentos feitos pelos alunos
         "stock_control", # rota de controle de estoque
-        "stock_history" # rota de histórico de estoque
+        "stock_history", # rota de histórico de estoque
+        "export_to_excel_api"
     ],
     "user": [
         "static", 

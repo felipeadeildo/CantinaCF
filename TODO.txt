@@ -1,12 +1,12 @@
 Coisas pra Fazer:
 
-[ ] Cadastro de Novos cargos
+[X] Cadastro de Novos cargos
 
 [X] Adicionar No Histórico de Estoque Valor de Compra e Valor Unitário
 
-[ ] Implementar filtros no Histórico de Estoque
+[X] Implementar filtros no Histórico de Estoque
 
-[ ] Implementar exportação de historico de estoque (abasteciento) para excel
+[X] Implementar exportação de historico de estoque (abasteciento) para excel
 
 [ ] Melhorar a forma de gerar senhas aleatórias na criação de usuários (javascript)
 

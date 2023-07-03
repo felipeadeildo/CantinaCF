@@ -13,7 +13,7 @@
 
     <!-- Add icon -->
     <link rel="shortcut icon" href="{{ url_for('static', filename='img/fantastico.ico') }}">
-    <title>{% block title %}{% endblock %} - CF Cantina</title>
+    <title>{% block title %}{% endblock %} - {{ config['SITE_NAME'] }}</title>
 </head>
 
 <body>
@@ -22,7 +22,7 @@
             <div class="nav-wrapper cyan darken-4">
                 <a href="#" class="brand-logo center">
                     <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" class="logo" style="height: 44px; margin: 0px 10px; vertical-align: middle;">
-                    <span style="vertical-align: middle;" class="logo-text">CF Cantina</span>
+                    <span style="vertical-align: middle;" class="logo-text">{{ config['SITE_NAME'] }}</span>
                 </a>
                 <a href="#" data-target="slide-out" class="sidenav-trigger"><i class="material-icons">menu</i></a>
             </div>
@@ -31,16 +31,34 @@
             {% if session['user_id'] == 'guest' %}
             <li><a href="{{ url_for('login') }}">Login</a></li>
             {% else %}
-            <li><a href="{{ url_for('profile') }}">Meu Perfil</a></li>
-            <li><a href="{{ url_for('recharge') }}">Recarga</a></li>
+            
+                {% if 'profile' in session['permissions'] %}
+                <li><a href="{{ url_for('profile') }}">Meu Perfil</a></li>
+                {% endif %}
+                    
+                {% if 'recharge' in session['permissions'] %}
+                <li><a href="{{ url_for('recharge') }}">Recarga</a></li>
+                {% endif %}
 
-            {% if session["user"]["role"] == 'admin' %}
-            <li><a href="{{ url_for('index') }}">Cantina</a></li>
-            <li><a href="{{ url_for('users') }}">Usuários</a></li>
-            <li><a href="{{ url_for('refill_requests') }}">Verificação de Pagamentos</a></li>
-            <li><a href="{{ url_for('stock_control') }}">Controle de Estoque</a></li>
-            <li><a href="{{ url_for('stock_history') }}">Histórico de Abastecimento</a></li>
-            {% endif %}
+                {% if 'index' in session['permissions'] %}
+                <li><a href="{{ url_for('index') }}">Cantina</a></li>
+                {% endif %}
+
+                {% if 'users' in session['permissions'] %}
+                <li><a href="{{ url_for('users') }}">Usuários</a></li>
+                {% endif %}
+
+                {% if 'refill_requests' in session['permissions'] %}
+                <li><a href="{{ url_for('refill_requests') }}">Verificação de Pagamentos</a></li>
+                {% endif %}
+                
+                {% if 'stock_control' in session['permissions'] %}
+                <li><a href="{{ url_for('stock_control') }}">Controle de Estoque</a></li>
+                {% endif %}
+
+                {% if 'stock_history' in session['permissions'] %}
+                <li><a href="{{ url_for('stock_history') }}">Histórico do Estoque</a></li>
+                {% endif %}
 
             <li><a href="{{ url_for('logout') }}">Sair</a></li>
             {% endif %}

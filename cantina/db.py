@@ -1,7 +1,7 @@
 from werkzeug.security import generate_password_hash
+from datetime import datetime
 from .settings import DB_PATH, SERIES
 from flask import g, abort, url_for
-from datetime import datetime
 from getpass import getpass
 from . import app
 import sqlite3
@@ -286,22 +286,6 @@ def get_refill_requests():
         result["aluno"] = get_user(result["aluno_id"])
         filename = f'uploads/{result["comprovante"]}'
         result["comprovante_url"] = url_for("static", filename=filename)
-    return results
-
-def get_stock_history(page_size, page_number, **kwargs):
-    """
-    Retrieves a page of stock from the database.
-    """
-    conn = get_conn()
-
-    start_date = kwargs.get("start_date") or datetime(year=2000, month=1, day=1).strftime("%Y-%m-%d %H:%M:%S")
-    end_date = kwargs.get("end_date") or datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-    result = conn.execute("SELECT * FROM historico_abastecimento_estoque WHERE data_hora BETWEEN ? AND ? ORDER BY id DESC LIMIT ? OFFSET ?", (start_date, end_date, page_size, page_number * page_size)).fetchall()
-    results = [dict(request) for request in result]
-    for result in results:
-        result["recebido_por"] = get_user(result["recebido_por"])
-        result["produto"] = get_product(id=result["produto_id"])
     return results
 
 @app.cli.command("initdb")

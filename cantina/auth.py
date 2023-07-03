@@ -48,6 +48,7 @@ def login_user(user):
 @app.before_request
 def check_permission():
     """Check user permission before each request"""
+    session["permissions"] = PERMISSIONS["guest"].copy()
     current_user_id = session.get("user_id")
     if current_user_id is None: # the first request to the app
         set_guest_user() # set user_id to 'guest' in session
@@ -61,6 +62,7 @@ def check_permission():
     if current_user_id != "guest":
         user = get_user(current_user_id, by="id")
         session["user"] = dict(user)
+        session["permissions"] = PERMISSIONS.get(user["role"], [])
         if user is None:
             abort(404) # user not found
         if not role_has_permission(user["role"]):
