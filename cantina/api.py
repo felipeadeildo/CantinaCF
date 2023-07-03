@@ -128,9 +128,11 @@ def generate_random_username_api():
     data = request.get_json()
     name = data.get("name", "aluno usuario").lower().split()
     if len(name) >= 2:
-        username = f"{name[0]}.{name[1]}"
-    else:
+        username = f"{name[0]}.{name[-1]}"
+    elif len(name) == 1:
         username = name[0]
+    else:
+        username = "aluno"
     conn = get_conn()
     # get usersnames that startswith the username
     usernames = conn.execute("SELECT username FROM user WHERE username LIKE ?", ("%{}%".format(username),)).fetchall()

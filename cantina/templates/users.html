@@ -108,10 +108,15 @@
 {% block scripts %}
 <script>
     function generateRandomPassword() {
-        let randomPassword = Math.random().toString(36).slice(-12);
+        let randomPassword = '';
+        const possibleChars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+        for (let i = 0; i < 8; i++) {
+            randomPassword += possibleChars[Math.floor(Math.random() * possibleChars.length)];
+        }
         document.getElementById("password").value = randomPassword;
         document.getElementById("password_label").classList.add("active");
     }
+
     function viewPassword() {
         let password_tag = document.getElementById("password");
         password_tag.type === 'password' ? password_tag.type = 'text' : password_tag.type = 'password';

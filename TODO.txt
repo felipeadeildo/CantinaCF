@@ -8,7 +8,7 @@ Coisas pra Fazer:
 
 [X] Implementar exportação de historico de estoque (abasteciento) para excel
 
-[ ] Melhorar a forma de gerar senhas aleatórias na criação de usuários (javascript)
+[X] Melhorar a forma de gerar senhas aleatórias na criação de usuários (javascript)
 
 [ ] Implementar função de alimentar com um excel e adicionar usuários automaticamente (precisa saer as colunas)
 
@@ -16,6 +16,6 @@ Coisas pra Fazer:
 
 [ ] Adicionar páginas de lista de produtos e possibilidade de os editar
 
-[ ]  Implementar página de Histórico de vendas tem que dois filtros principais data de início e data final, filtro por aluno e gerar um relatório no Excel que seja exportável
+[ ] Implementar página de Histórico de vendas tem que dois filtros principais data de início e data final, filtro por aluno e gerar um relatório no Excel que seja exportável
 
-[ ] Todas as páginas que possui filtros por perídoso de tempo Tem que ter uns botões pra filtrar só "por hoje", por exemplo.
+[ ] Todas as páginas que possui filtros por períodos de tempo Tem que ter uns botões pra filtrar só "por hoje", por exemplo.

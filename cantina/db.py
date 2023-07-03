@@ -1,6 +1,6 @@
 from werkzeug.security import generate_password_hash
-from datetime import datetime
 from .settings import DB_PATH, SERIES
+from datetime import datetime
 from flask import g, abort, url_for
 from getpass import getpass
 from . import app
@@ -169,6 +169,9 @@ def update_product_quantity(by: str = "id", **kwargs):
         conn.execute("UPDATE produto SET quantidade = ? WHERE name = ?", (kwargs.get("quantity"), kwargs.get("name")))
     conn.commit()
 
+def normalize_datetime(date: str, format: str = "%Y-%m-%d %H:%M:%S", output_format: str = "%d/%m/%y %H:%M"):
+    return datetime.strptime(date, format).strftime(output_format)
+
 def get_transactions(user_id: int, type: str = "all"):
     """
     Retrieves all transactions from the database.
@@ -185,13 +188,9 @@ def get_transactions(user_id: int, type: str = "all"):
         result = conn.execute("SELECT * FROM controle_pagamento WHERE aluno_id = ?", (user_id,)).fetchall()
         for transaction in result:
             transaction = dict(transaction)
-            liberado_por = get_user(transaction["liberado_por"])
-            if liberado_por is None:
-                liberado_por = {
-                    "name": "Não liberado..."
-                }
-            transaction["liberado_por"] = liberado_por
+            transaction["liberado_por"] = get_user(transaction["liberado_por"])
             transaction["tipo"] = "entrada"
+            transaction["data_hora"] = normalize_datetime(transaction["data_hora"])
             transactions.append(transaction)
     elif type == "saida":
         result = conn.execute("SELECT * FROM venda_produto WHERE vendido_para = ?", (user_id,)).fetchall()
@@ -200,8 +199,9 @@ def get_transactions(user_id: int, type: str = "all"):
             transaction["product"] = dict(get_product("id", id=transaction["produto_id"]))
             transaction["vendido_por"] = dict(get_user(transaction["vendido_por"]))
             transaction["tipo"] = "saida"
+            transaction["data_hora"] = normalize_datetime(transaction["data_hora"])
             transactions.append(transaction)
-    transactions.sort(key=lambda x: x["data_hora"])
+    transactions.sort(key=lambda x: x["data_hora"], reverse=True)
     return transactions
 
 

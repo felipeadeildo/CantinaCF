@@ -40,10 +40,17 @@ Meu Perfil - {{ user.name }}
           <p><strong>CPF:</strong> <span class="blue-text">{{ user.cpf }}</span></p>
           {% endif %}
         </div>
-        {% if session.user.role == 'admin' %}
+        {% if 'edit_profile' in session['permissions'] %}
         <div class="col s12 m3 right-align">
           <a class="btn-floating waves-effect waves-light tooltipped" data-position="bottom"
             data-tooltip="Editar Perfil" href="{{ url_for('edit_profile', user_id=user.id) }}">
+            <i class="material-icons">edit</i>
+          </a>
+        </div>
+        {% elif 'edit_password' in session['permissions'] %}
+        <div class="col s12 m3 right-align">
+          <a class="btn-floating waves-effect waves-light tooltipped" data-position="bottom"
+            data-tooltip="Editar Senha" href="{{ url_for('edit_password', user_id=user.id) }}">
             <i class="material-icons">edit</i>
           </a>
         </div>
@@ -55,13 +62,23 @@ Meu Perfil - {{ user.name }}
   <h4 class="center">Transações</h4>
   <div class="transactions row" style="max-height:400px; overflow-y:auto;">
     {% for transaction in transactions %}
-    {% if transaction.tipo == 'entrada' %}
+    {% if transaction.tipo == 'entrada' and transaction.liberado_por %}
     <div class="card green lighten-4 col s12 m6 l4">
       <div class="card-content">
         <span class="card-title">{{ transaction.data_hora }} - Recarga</span>
         <p>Tipo de pagamento: {{ transaction.tipo_pagamento }}</p>
         <p>Valor: R$ {{ transaction.valor }}</p>
         <p>Liberado por: {{ transaction.liberado_por.name }}</p>
+        <p>Turno: {{ transaction.turno }}</p>
+      </div>
+    </div>
+    {% elif transaction.tipo == 'entrada' and not transaction.liberado_por %}
+    <div class="card yellow lighten-4 col s12 m6 l4">
+      <div class="card-content">
+        <span class="card-title">{{ transaction.data_hora }} - Recarga Pendente</span>
+        <p>Tipo de pagamento: {{ transaction.tipo_pagamento }}</p>
+        <p>Valor: R$ {{ transaction.valor }}</p>
+        <p>Liberado por: Pendente</p>
         <p>Turno: {{ transaction.turno }}</p>
       </div>
     </div>
@@ -79,5 +96,4 @@ Meu Perfil - {{ user.name }}
     {% endif %}
     {% endfor %}
   </div>
-</div>
-{% endblock content %}
+  {% endblock content %}
