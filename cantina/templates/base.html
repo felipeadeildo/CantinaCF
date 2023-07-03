@@ -43,11 +43,15 @@
                 {% if 'index' in session['permissions'] %}
                 <li><a href="{{ url_for('index') }}">Cantina</a></li>
                 {% endif %}
-
+                
                 {% if 'products' in session['permissions'] %}
                 <li><a href="{{ url_for('products') }}">Produtos da Cantina</a></li>
                 {% endif %}
-
+                
+                {% if 'sales_history' in session['permissions'] %}
+                <li><a href="{{ url_for('sales_history') }}">Histórico de Vendas</a></li>
+                {% endif %}
+                
                 {% if 'users' in session['permissions'] %}
                 <li><a href="{{ url_for('users') }}">Usuários</a></li>
                 {% endif %}
@@ -63,6 +67,7 @@
                 {% if 'stock_history' in session['permissions'] %}
                 <li><a href="{{ url_for('stock_history') }}">Histórico do Estoque</a></li>
                 {% endif %}
+
 
             <li><a href="{{ url_for('logout') }}">Sair</a></li>
             {% endif %}

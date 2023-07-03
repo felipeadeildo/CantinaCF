@@ -41,6 +41,7 @@ PERMISSIONS = {
         "export_to_excel_api", # rota que permite exportar para escel determinado resultado em cache
         "products", # rota que faz listagem paginada dos produtos
         "edit_product", # rota que perite a editção de um determinado produto especificado
+        "sales_history", # rota que lisa o o histórico de vendas paginado (salva resultado em cache para export_to_excel_api)
     ],
     "user": [
         "static", 

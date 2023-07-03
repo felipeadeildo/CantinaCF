@@ -107,6 +107,9 @@ def profile():
     if user_id is None:
         user_id = session.get("user")["id"]
     user = get_user(user_id)
+    if user is None:
+        flash("Usuário de ID {} não encontrado!".format(user_id), category="error")
+        abort(404)
     context = {
         "user": user,
         "transactions": get_transactions(user["id"])

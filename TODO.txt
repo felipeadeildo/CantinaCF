@@ -14,8 +14,8 @@ Coisas pra Fazer:
 
 [ ] Implementar tabela de Acumulativos para funcionários, e adicionar nova label em recarga de crédito que seria desconto em folha que salva o débito no do funcionário
 
-[ ] Adicionar páginas de lista de produtos e possibilidade de os editar
+[X] Adicionar páginas de lista de produtos e possibilidade de os editar
 
-[ ] Implementar página de Histórico de vendas tem que dois filtros principais data de início e data final, filtro por aluno e gerar um relatório no Excel que seja exportável
+[X] Implementar página de Histórico de vendas tem que dois filtros principais data de início e data final, filtro por aluno e gerar um relatório no Excel que seja exportável
 
 [ ] Todas as páginas que possui filtros por períodos de tempo Tem que ter uns botões pra filtrar só "por hoje", por exemplo.
