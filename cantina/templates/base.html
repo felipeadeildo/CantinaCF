@@ -44,6 +44,10 @@
                 <li><a href="{{ url_for('index') }}">Cantina</a></li>
                 {% endif %}
 
+                {% if 'products' in session['permissions'] %}
+                <li><a href="{{ url_for('products') }}">Produtos da Cantina</a></li>
+                {% endif %}
+
                 {% if 'users' in session['permissions'] %}
                 <li><a href="{{ url_for('users') }}">Usuários</a></li>
                 {% endif %}

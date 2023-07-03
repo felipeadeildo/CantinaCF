@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h3>{% block title %}Lista de Produtos{% endblock title%}</h3>
+
+<hr>
+
+<table class="striped centered">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nome</th>
+            <th>Descrição</th>
+            <th>Valor</th>
+            <th>Tipo</th>
+            <th>Quantidade</th>
+            {% if 'edit_product' in session['permissions'] %}
+            <th>Editar</th>
+            {% endif %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for product in products %}
+        <tr>
+            <td>{{ product.id }}</td>
+            <td>{{ product.nome }}</td>
+            <td>{{ product.descricao or '-'}}</td>
+            <td>R$ {{ product.valor }}</td>
+            <td>{{ product.tipo }}</td>
+            <td>{{ product.quantidade }}</td>
+            {% if 'edit_product' in session['permissions'] %}
+            <td>
+                <a class="btn-floating btn-small waves-effect waves-light tooltipped"
+                    data-position="right"
+                    data-tooltip="Editar Produto"
+                    href="{{ url_for('edit_product', product_id=product.id) }}">
+                    <i class="material-icons">edit</i>
+                </a>
+            </td>
+            {% endif %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div class="pagination">
+    {{ pagination.info|safe }}
+    {{ pagination.links|safe }}
+</div>
+
+{% endblock %}

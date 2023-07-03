@@ -38,7 +38,9 @@ PERMISSIONS = {
         "refill_requests", # rota de verificação de pagamentos feitos pelos alunos
         "stock_control", # rota de controle de estoque
         "stock_history", # rota de histórico de estoque
-        "export_to_excel_api"
+        "export_to_excel_api", # rota que permite exportar para escel determinado resultado em cache
+        "products", # rota que faz listagem paginada dos produtos
+        "edit_product", # rota que perite a editção de um determinado produto especificado
     ],
     "user": [
         "static", 

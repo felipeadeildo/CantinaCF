@@ -137,13 +137,25 @@ def get_users():
     return conn.execute("SELECT * FROM user").fetchall()
 
 
-def get_products():
+def get_products(**kwargs):
     """
     Retrieves all products from the database.
+
+    :param kwargs: Additional parameters "offset" and "per_page".
+    :param kwargs: Paramter "return_total" is a boolean indicating whether to return the total number of products. (products, total)
     """
     conn = get_conn()
-    return conn.execute("SELECT * FROM produto").fetchall()
-
+    if 'offset' in kwargs and 'per_page' in kwargs:
+        products = conn.execute("SELECT * FROM produto LIMIT ? OFFSET ?", (kwargs.get('per_page'), kwargs.get('offset'))).fetchall()
+    else:
+        products = conn.execute("SELECT * FROM produto").fetchall()
+    
+    products = list(map(dict, products))
+    if 'return_total' in kwargs:
+        total = conn.execute("SELECT COUNT(*) FROM produto").fetchone()
+        total = 0 if total is None else total[0]
+        return products, total
+    return products
 
 def get_product(by: str = "id", **kwargs):
     """
@@ -232,6 +244,17 @@ def update_user_key(user_id: int, key: str, value: str|int|float):
     old_value = conn.execute(f"SELECT {key} FROM user WHERE id = ?", (user_id,)).fetchone()[0]
     if old_value != value:
         conn.execute(f"UPDATE user SET {key} = ? WHERE id = ?", (value, user_id))
+        conn.commit()
+    return old_value
+
+def update_product_key(product_id: int, key: str, value: str|int|float):
+    """
+    Updates a product's key.
+    """
+    conn = get_conn()
+    old_value = conn.execute(f"SELECT {key} FROM produto WHERE id = ?", (product_id,)).fetchone()[0]
+    if old_value != value:
+        conn.execute(f"UPDATE produto SET {key} = ? WHERE id = ?", (value, product_id))
         conn.commit()
     return old_value
 
