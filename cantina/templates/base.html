@@ -68,6 +68,10 @@
                 <li><a href="{{ url_for('stock_history') }}">Histórico do Estoque</a></li>
                 {% endif %}
 
+                {% if 'affiliates' in session['permissions'] %}
+                <li><a href="{{ url_for('affiliates') }}">Afiliados</a></li>
+                {% endif %}
+
 
             <li><a href="{{ url_for('logout') }}">Sair</a></li>
             {% endif %}

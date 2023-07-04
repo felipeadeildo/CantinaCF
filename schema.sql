@@ -66,34 +66,25 @@ CREATE TABLE controle_pagamento(
   FOREIGN KEY(liberado_por) REFERENCES user(id)
 );
 
--- Create the "controle_vale_lanche" table
-CREATE TABLE folha_de_pagamento(
-  id INTEGER PRIMARY KEY,
-  valor REAL,
-  user_id INTEGER,
-  data_hora DATETIME DEFAULT CURRENT_TIMESTAMP,
-  recebido_por INTEGER,
-  vale_lanche_pago BOOLEAN,
-  FOREIGN KEY(aluno_id) REFERENCES user(id),
-  FOREIGN KEY(recebido_por) REFERENCES user(id)
-);
-
 -- Create relationship between users (user_id funcionário and ohter users)
-CREATE TABLE rel_user_funcionario(
-  user_id INTEGER,
-  funcionario_id INTEGER,
+CREATE TABLE affiliation(
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER, -- quem é afiliado
+  entidade_id INTEGER, -- quem ta acima desse cara
   FOREIGN KEY(user_id) REFERENCES user(id),
-  FOREIGN KEY(funcionario_id) REFERENCES user
+  FOREIGN KEY(entidade_id) REFERENCES user(id)
 );
 
 -- Create folha de pagamento
 CREATE TABLE folha_de_pagamento(
   id INTEGER PRIMARY KEY,
   valor REAL,
-  user_id INTEGER,
+  entidade_id INTEGER, -- é o funcionário = pessoa que vai pagar no finaol de tudo
+  affiliation_id INTEGER,
   data_hora DATETIME DEFAULT CURRENT_TIMESTAMP,
-  recebido_por INTEGER,
+  liberado_por INTEGER,
   foi_pago BOOLEAN,
-  FOREIGN KEY(user_id) REFERENCES user(id),
-  FOREIGN KEY(recebido_por) REFERENCES user
+  FOREIGN KEY(entidade_id) REFERENCES user(id),
+  FOREIGN KEY(liberado_por) REFERENCES user(id),
+  FOREIGN KEY(affiliation_id) REFERENCES affiliation(id)
 );

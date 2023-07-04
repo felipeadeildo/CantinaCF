@@ -382,3 +382,49 @@ def stock_history():
         "result_id": hashed_query
     }
     return render_template("stock-history.html", **context)
+
+
+@app.route("/afiliados", methods=["POST", "GET"])
+def affiliates():
+    # normalmente eu deixaria o trabalho da db com o DB, porém tem umas verificações de segurança aqui que devem ser feitas antes de qlqr coisa
+    conn = get_conn()
+    action = request.args.get("action", "")
+    if action == "remove":
+        user_id = request.args.get("user_id")
+        if user_id is None:
+            flash("Por favor, insira o ID do usuário!", category="error")
+            return redirect(url_for("affiliates"))
+        user = get_user(user_id)
+        if user is None:
+            flash("Usuário de ID {} não encontrado!".format(user_id), category="error")
+            return redirect(url_for("affiliates"))
+        is_affiliate = conn.execute("SELECT * FROM affiliation WHERE user_id = ? AND entidade_id = ?", (user_id, session["user"]["id"])).fetchone() is not None
+        if not is_affiliate:
+            flash("Usuário não é seu afiliado!", category="error")
+            return redirect(url_for("affiliates"))
+        conn.execute("DELETE FROM affiliation WHERE user_id = ? AND entidade_id = ?", (user_id, session["user"]["id"]))
+        conn.commit()
+        flash("Usuário removido com sucesso!", category="success")
+    if request.method == 'POST':
+        if action != 'add':
+            flash("O que estás tentando fazer..?!", category="error")
+            return redirect(url_for("affiliates"))
+        matricula = request.form.get("matricula")
+        user = get_user(matricula, by="matricula")
+        if user is None:
+            flash("Matrícula {} não encontrada!".format(matricula), category="error")
+            return redirect(url_for("affiliates"))
+        is_affiliate = conn.execute("SELECT * FROM affiliation WHERE user_id = ?", (user['id'],)).fetchone()
+        if is_affiliate is not None:
+            flash("Usuário já é afiliado do usuário de ID {}!".format(is_affiliate['entidade_id']), category="error")
+            return redirect(url_for("affiliates"))
+        conn.execute("INSERT INTO affiliation (user_id, entidade_id) VALUES (?, ?)", (user['id'], session["user"]["id"]))
+        conn.commit()
+        flash("Usuário adicionado com sucesso!", category="success")
+    
+    afiliados = conn.execute("SELECT * FROM affiliation WHERE entidade_id = ?", (session["user"]["id"],)).fetchall()
+    afiliados = [get_user(affiliate['user_id']) for affiliate in afiliados]    
+    context = {
+        "afiliados": afiliados
+    } 
+    return render_template("affiliates.html", **context)

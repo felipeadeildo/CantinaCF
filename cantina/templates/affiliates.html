@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Afiliados{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col s8">
+        <div class="card">
+            <div class="card-content">
+                <span class="card-title">Gerenciamento de Afiliados</span>
+                <table class="responsive-table stripped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>Usuário</th>
+                            <th>Cargo</th>
+                            <th>Saldo</th>
+                            <th>Perfil</th>
+                            <th>Remover</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for afiliado in afiliados %}
+                        <tr>
+                            <td>{{ afiliado.id }}</td>
+                            <td>{{ afiliado.name }}</td>
+                            <td>{{ afiliado.username }}</td>
+                            <td>{{ afiliado.role }}</td>
+                            <td>R$ {{ afiliado.saldo }}</td>
+                            <td>
+                                <a href="{{ url_for('profile', user_id=afiliado.id) }}"
+                                    class="btn waves-effect waves-light">
+                                    <i class="material-icons">person</i>
+                                </a>
+                            </td>
+                            <td>
+                                <a href="{{ url_for('affiliates', user_id=afiliado.id, action='remove') }}"
+                                    class="btn waves-effect waves-light">
+                                    <i class="material-icons">delete</i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col s4">
+        <div class="card">
+            <div class="card-content">
+                <span class="card-title">Adicionar Afiliado</span>
+                <form method="post" action="{{ url_for('affiliates', action='add') }}">
+                    <div class="input-field">
+                        <input id="matricula" type="text" name="matricula">
+                        <label for="matricula">Matrícula</label>
+                    </div>
+                    <input type="hidden" name="{{ config['CSRF_COOKIE_NAME'] }}" value="{{ csrf_token() }}">
+                    <button class="btn waves-effect waves-light" type="submit" name="action">
+                        Adicionar Afiliado
+                        <i class="material-icons right">person_add</i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -42,6 +42,7 @@ PERMISSIONS = {
         "products", # rota que faz listagem paginada dos produtos
         "edit_product", # rota que perite a editção de um determinado produto especificado
         "sales_history", # rota que lisa o o histórico de vendas paginado (salva resultado em cache para export_to_excel_api)
+        "affiliates", # rota que permite que um funcionário possa gerenciar seus afiliados (adicionar, remover, visualizar)
     ],
     "user": [
         "static", 
@@ -74,6 +75,7 @@ PERMISSIONS = {
         "search_products_api",
         "confirm_purchase",
         "remove_from_cart_api",
+        "affiliates",
     ],
 
     "caixa": [
@@ -81,7 +83,11 @@ PERMISSIONS = {
         "login",
         "logout",
         "profile",
-        
+        "affiliates",
+        "payments_verification",
+        "get_payments_api", 
+        "refill_manage_request_api",
+        "refill_requests",
     ],
 
     "guest": [

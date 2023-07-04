@@ -312,7 +312,6 @@ def record_stock_history(product_id: int, quantity: int, received_by: int, valor
     conn.commit()
 
 
-
 def get_refill_requests():
     """
     Retrieves all refill requests from the database.
@@ -326,6 +325,7 @@ def get_refill_requests():
         filename = f'uploads/{result["comprovante"]}'
         result["comprovante_url"] = url_for("static", filename=filename)
     return results
+
 
 @app.cli.command("initdb")
 def init_db():
