@@ -117,7 +117,7 @@ PAYMENT_TYPES = {
 }
 
 SERIES = [
-    '3º EM', '2º EM', '1º EM',
+    '1º EM', '2º EM', '3º EM',
     '1º EF', '2º EF', '3º EF',
     '4º EF', '5º EF', '6º EF',
     '7º EF', '8º EF', '9º EF',

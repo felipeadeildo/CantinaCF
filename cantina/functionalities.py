@@ -417,8 +417,16 @@ def affiliates():
         flash("Usuário adicionado com sucesso!", category="success")
     
     afiliados = conn.execute("SELECT * FROM affiliation WHERE entidade_id = ?", (session["user"]["id"],)).fetchall()
-    afiliados = [get_user(affiliate['user_id']) for affiliate in afiliados]    
+    afiliados = [get_user(affiliate['user_id']) for affiliate in afiliados]
+    ammount = conn.execute("SELECT valor FROM folha_de_pagamento WHERE entidade_id = ?", (session["user"]["id"],)).fetchall()
+    ammount = sum(v['valor'] for v in ammount)
     context = {
-        "afiliados": afiliados
+        "afiliados": afiliados,
+        "ammount": ammount
     } 
     return render_template("affiliates.html", **context)
+
+
+@app.route("/afiliados/historico")
+def affiliates_history():
+    return render_template("affiliates-history.html")
