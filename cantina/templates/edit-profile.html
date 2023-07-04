@@ -15,7 +15,7 @@ Editar Perfil
                 <input id="username" type="text"
                     class="{{ 'validate valid' if user.username not in (none, '') else 'validate' }}" name="username"
                     value="{{ user.username if user.username not in (none, '') else '' }}">
-                <label for="username" class="{{ 'active' if user.username not in (none, '') }}">Nome de Usuário</label>
+                <label for="username" class="{{ 'active' if user.username not in (none, '') }}">Usuário</label>
             </div>
 
             <div class="input-field col s6">
@@ -39,8 +39,9 @@ Editar Perfil
                 <label for="telefone" class="{{ 'active' if user.telefone not in (none, '') }}">Telefone</label>
             </div>
 
-            <div class="input-field col s6" id="serie-input">
+            <div class="input-field col s4" id="serie-input">
                 <select id="serie" name="serie">
+                    <option value="" {{ 'selected' if user.serie in ('', none) else '' }} disabled>Série</option>
                     {% for serie in series %}
                     <option value="{{ loop.index0 }}" {{ 'selected' if serie==user.serie else '' }}>{{ serie }}</option>
                     {% endfor %}
@@ -48,15 +49,21 @@ Editar Perfil
                 <label for="serie">Série</label>
             </div>
 
-            <div class="input-field col s6">
-                <div class="input-field">
-                    <select id="role" name="role" required>
-                        {% for role in roles %}
-                        <option value="{{ role }}" {{ 'selected' if role==user.role else '' }}>{{ role }}</option>
-                        {% endfor %}
-                    </select>
-                    <label for="role">Cargo</label>
-                </div>
+            <div class="input-field col s4">
+                <select id="role" name="role" id="role" required>
+                    <option value="" {{ 'selected' if user.role in ('', none) else '' }} disabled>Cargo</option>
+                    {% for role in roles %}
+                    <option value="{{ role }}" {{ 'selected' if role==user.role else '' }}>{{ role }}</option>
+                    {% endfor %}
+                </select>
+                <label for="role">Cargo</label>
+            </div>
+
+            <div class="input-field col s4">
+                <input type="text" class="{{ 'validate valid' if user.matricula not in (none, '') else 'validate' }}"
+                    name="matricula" id="matricula"
+                    value="{{ user.matricula if user.matricula not in (none, '') else '' }}">
+                <label for="matricula">Matrícula</label>
             </div>
 
             <div class="input-field col s6">

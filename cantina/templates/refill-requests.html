@@ -14,21 +14,21 @@ Pedidos de Recargas
         height: 75%;
         overflow-y: auto;
     }
+
     .modal-footer {
         height: 5%;
     }
-
 </style>
 
 <div class="container">
     <h4 class="center-align">Pedidos de Recargas</h4>
     {% if refill_requests %}
-    {% for request in refill_requests %}
-    <div class="row" id="request-{{ request.id }}">
-        <div class="col s12 m6 l4">
+    <div class="row">
+        {% for request in refill_requests %}
+        <div class="col s6 m6 l4" id="request-{{ request.id }}">
             <div class="card teal darken-3 hoverable">
                 <div class="card-content white-text">
-                    <span class="card-title">{{ request.aluno.name }}</span>
+                    <span class="card-title">{{ request.aluno.name }} ({{ request.aluno.matricula }})</span>
                     <p><strong>Data e Hora:</strong> {{ request.data_hora }}</p>
                     <p><strong>Turno:</strong> {{ request.turno }}</p>
                     <p><strong>Tipo de Pagamento:</strong> {{ request.tipo_pagamento }}</p>
@@ -39,14 +39,27 @@ Pedidos de Recargas
                     <p><strong>Username:</strong> {{ request.aluno.username }}</p>
                 </div>
                 <div class="card-action">
-                    <a href="#" onclick="manageRefillRequest('{{ request.id }}', true)" class="waves-effect waves-light btn-small green"><i class="material-icons left">check</i>Liberar Saldo</a>
-                    <a href="#" onclick="manageRefillRequest('{{ request.id }}', false)" class="waves-effect waves-light btn-small red"><i class="material-icons left">close</i>Rejeitar Saldo</a>
-                    <a href="#" onclick="openModal('{{ request.comprovante_url }}')" class="waves-effect waves-light btn-small blue"><i class="material-icons left">visibility</i>Ver Comprovante</a>
+                    <a href="#" onclick="manageRefillRequest('{{ request.id }}', true)"
+                        class="waves-effect waves-light btn-small green">
+                        <i class="material-icons left">check</i>
+                        Liberar Saldo
+                    </a>
+
+                    <a href="#" onclick="manageRefillRequest('{{ request.id }}', false)"
+                        class="waves-effect waves-light btn-small red">
+                        <i class="material-icons left">close</i>
+                        Rejeitar Saldo
+                    </a>
+                    <a href="#" onclick="openModal('{{ request.comprovante_url }}')"
+                        class="waves-effect waves-light btn-small blue">
+                        <i class="material-icons left">visibility</i>
+                        Ver Comprovante
+                    </a>
                 </div>
             </div>
         </div>
-    </div>    
-    {% endfor %}
+        {% endfor %}
+    </div>
     {% else %}
     <h6 class="red-text center-align">Sem Pedidos de recargas até o momento</h6>
     {% endif %}
@@ -65,41 +78,41 @@ Pedidos de Recargas
 
 {% block scripts %}
 <script>
-function openModal(url) {
-    document.getElementById("comprovante-frame").src = url;
-    let instance = M.Modal.getInstance(document.getElementById('modal-comprovante'));
-    instance.open();
-};
+    function openModal(url) {
+        document.getElementById("comprovante-frame").src = url;
+        let instance = M.Modal.getInstance(document.getElementById('modal-comprovante'));
+        instance.open();
+    };
 
 
-function manageRefillRequest(id, accept) {
-    let card = document.getElementById('request-' + id);
-    let url = '{{ url_for("refill_manage_request_api") }}';
-    fetch(url, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            '{{ config["CSRF_HEADER_NAME"] }}': '{{ csrf_token() }}'
-        },
-        body: JSON.stringify({
-            'id': id,
-            'accept': accept
+    function manageRefillRequest(id, accept) {
+        let card = document.getElementById('request-' + id);
+        let url = '{{ url_for("refill_manage_request_api") }}';
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                '{{ config["CSRF_HEADER_NAME"] }}': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({
+                'id': id,
+                'accept': accept
+            })
         })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data['error']) {
-            M.toast({ html: data['message'] });
-            return
-        }
-        if (data['ok']) {
-            card.remove();
-            M.toast({ html: data['message'] });
-        } else {
-            card.remove();
-            M.toast({ html: data['message'] });
-        }
-    })
-};
+            .then(response => response.json())
+            .then(data => {
+                if (data['error']) {
+                    M.toast({ html: data['message'] });
+                    return
+                }
+                if (data['ok']) {
+                    card.remove();
+                    M.toast({ html: data['message'] });
+                } else {
+                    card.remove();
+                    M.toast({ html: data['message'] });
+                }
+            })
+    };
 </script>
 {% endblock %}

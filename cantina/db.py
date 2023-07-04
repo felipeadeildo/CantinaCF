@@ -50,22 +50,30 @@ def after_request(response):
     return response
 
 
-def get_user(identification: int, by: str = "id"):
+def get_user(identification: int, by: str = "id", safe: bool = False):
     """
     Retrieves a user from the database by either their ID or username.
 
     :param identification: An integer representing the user's ID or a string representing their username.
-    :param by: A string indicating whether to search by ID or username. Defaults to "id".
-    :return: A tuple representing the user's information from the database or None if not found.
+    :param by: A string indicating whether to search by ID, username or matricula. Defaults to "id".
+    :param safe: A boolean indicating whether to not return 'password' if the user is found. Defaults to False.
+    :return: A tuple representing the user's information from the database or None if not found. 
     :raises: Exception if an invalid 'by' parameter is provided.
     """
     conn = get_conn()
+    user = None
     if by == "id":
-        return conn.execute("SELECT * FROM user WHERE id = ?", (identification,)).fetchone()
+        user = conn.execute("SELECT * FROM user WHERE id = ?", (identification,)).fetchone()
     elif by == "username":
-        return conn.execute("SELECT * FROM user WHERE username = ?", (identification,)).fetchone()
-    raise Exception("Invalid by parameter")
-
+        user =conn.execute("SELECT * FROM user WHERE username = ?", (identification,)).fetchone()
+    elif by == "matricula":
+        user = conn.execute("SELECT * FROM user WHERE matricula = ?", (identification,)).fetchone()
+    else:
+        raise Exception("Invalid 'by' parameter")
+    if user is not None and safe:
+        user = dict(user)
+        user["password"] = None
+    return user
 
 def insert_user(username: str, hashed_password: str, role: str, **kwargs):
     """
@@ -87,15 +95,19 @@ def insert_user(username: str, hashed_password: str, role: str, **kwargs):
     turma = kwargs.get("turma")
     if turma is not None:
         turma = turma.lower()
+    matricula = kwargs.get("matricula")
 
     conn = get_conn()
-    conn.execute("INSERT INTO user (username, password, role, name, serie, turma) VALUES (?, ?, ?, ?, ?, ?)", (username, hashed_password, role, name, serie, turma))
+    conn.execute("INSERT INTO user (username, password, role, name, serie, turma, matricula) VALUES (?, ?, ?, ?, ?, ?, ?)", (username, hashed_password, role, name, serie, turma, matricula))
     conn.commit()
 
 
 def update_user_password(identification: int, new_password: str):
     """
     Updates a user's password.
+
+    :param identification: An integer representing the user's ID.
+    :param new_password: A string representing the user's new password.
     """
     conn = get_conn()
     conn.execute("UPDATE user SET password = ? WHERE id = ?", (generate_password_hash(new_password), identification))
@@ -114,6 +126,10 @@ def update_user_saldo(user_id: int, new_saldo: float):
 def insert_product_sales(sold_by: int, sold_to: int, products: list):
     """
     Inserts a product sale into the database.
+
+    :param sold_by: An integer representing the user's ID of the person who sold the product.
+    :param sold_to: An integer representing the user's ID of the person who bought the product.
+    :param products: A list of dictionaries representing the product sold.
     """
     current_datetime = datetime.now()
     current_datetime_str = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
@@ -245,7 +261,7 @@ def update_user_key(user_id: int, key: str, value: str|int|float):
     if old_value != value:
         conn.execute(f"UPDATE user SET {key} = ? WHERE id = ?", (value, user_id))
         conn.commit()
-    return old_value
+    return str(old_value)
 
 def update_product_key(product_id: int, key: str, value: str|int|float):
     """

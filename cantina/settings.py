@@ -107,6 +107,7 @@ PAYMENT_TYPES = {
     'debit_card': 'Cartão de Débito',
     'credit_card': 'Cartão de Crédito',
     'pix': 'PIX',
+    'folha_de_pagamento': 'Folha de Pagamento',
 }
 
 SERIES = [

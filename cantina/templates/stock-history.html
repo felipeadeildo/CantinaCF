@@ -5,32 +5,53 @@
 
 <form method="get">
     <div class="row">
-        <div class="input-field col s6">
-            <input type="text" name="recebido_por" id="recebido_por" placeholder="Recebido por" value="{{ request.args.get('recebido_por', '') }}">
+        <div class="input-field col s5">
+            <input type="text" name="recebido_por" id="recebido_por" placeholder="Recebido por"
+                value="{{ request.args.get('recebido_por', '') }}">
+            <label for="recebido_por">Recebido por</label>
         </div>
-        <div class="input-field col s6">
+        <div class="input-field col s5">
             <select name="order_by" id="order_by">
-                <option value="" disabled {{ request.args.get( 'order_by' ) if request.args.get( 'order_by' ) else 'selected' }}>Ordenar Por</option>
-                <option value="data_hora" {{ 'selected' if request.args.get( 'order_by' ) == 'data_hora' else ''}}>Data e Hora</option>
-                <option value="recebido_por" {{ 'selected' if request.args.get( 'order_by' ) == 'recebido_por' else ''}}>Pessoa que recebeu</option>
-                <option value="valor_compra" {{ 'selected' if request.args.get( 'order_by' ) == 'valor_compra' else ''}}>Valor de Compra</option>
-                <option value="valor_venda" {{ 'selected' if request.args.get( 'order_by' ) == 'valor_venda' else '' }}>Valor de Venda</option>
-                <option value="id" {{ 'selected' if request.args.get( 'order_by' ) == 'id' else ''}}>ID</option>
+                <option value="" disabled {{ request.args.get( 'order_by' ) if request.args.get( 'order_by' )
+                    else 'selected' }}>Ordenar Por</option>
+                <option value="data_hora" {{ 'selected' if request.args.get( 'order_by' )=='data_hora' else '' }}>Data e
+                    Hora</option>
+                <option value="recebido_por" {{ 'selected' if request.args.get( 'order_by' )=='recebido_por' else '' }}>
+                    Pessoa que recebeu</option>
+                <option value="valor_compra" {{ 'selected' if request.args.get( 'order_by' )=='valor_compra' else '' }}>
+                    Valor de Compra</option>
+                <option value="valor_venda" {{ 'selected' if request.args.get( 'order_by' )=='valor_venda' else '' }}>
+                    Valor de Venda</option>
+                <option value="id" {{ 'selected' if request.args.get( 'order_by' )=='id' else '' }}>ID</option>
             </select>
             <label for="order_by">Ordenar por</label>
+        </div>
+        <div class="input-field col s2">
+            <select name="order_mode" id="order_mode">
+                <option value="" disabled {{ request.args.get( 'order_mode' ) if request.args.get( 'order_mode' )
+                    else 'selected' }}>Ordenação</option>
+                <option value="ASC" {{ 'selected' if request.args.get( 'order_mode' )=='ASC' else '' }}>Crescente
+                </option>
+                <option value="DESC" {{ 'selected' if request.args.get( 'order_mode' )=='DESC' else '' }}>Decrescente
+                </option>
+                <label for="order_mode">Ordenação</label>
+            </select>
         </div>
     </div>
     <div class="row">
         <div class="input-field col s6">
-            <input type="text" id="start_date" name="start_date" class="datepicker" value="{{ request.args.get('start_date', '')}}">
+            <input type="text" id="start_date" name="start_date" class="datepicker"
+                value="{{ request.args.get('start_date', '')}}">
             <label for="start_date">Data Inicial</label>
         </div>
 
         <div class="input-field col s6">
-            <input type="text" id="end_date" name="end_date" class="datepicker" value="{{ request.args.get('end_date', '')}}">
+            <input type="text" id="end_date" name="end_date" class="datepicker"
+                value="{{ request.args.get('end_date', '')}}">
             <label for="end_date">Data Final</label>
         </div>
-        <button class="btn waves-effect waves-light tooltiped" type="submit" name="action" data-position="bottom" data-tooltip="Filtrar Resultados">
+        <button class="btn waves-effect waves-light tooltiped" type="submit" name="action" data-position="bottom"
+            data-tooltip="Filtrar Resultados">
             Pesquisar
             <i class="material-icons right">send</i>
         </button>
@@ -41,20 +62,22 @@
 
 <h3>
     Resultados
-    <a class="btn waves-effect waves-light tooltipped" data-position="bottom" data-tooltip="Exportar para Excel" href="{{ url_for('export_to_excel_api', result_id=result_id) }}">
-    Download
-    <i class="material-icons right">get_app</i>
-</a></h3>
+    <a class="btn waves-effect waves-light tooltipped" data-position="bottom" data-tooltip="Exportar para Excel"
+        href="{{ url_for('export_to_excel_api', result_id=result_id) }}">
+        Download
+        <i class="material-icons right">get_app</i>
+    </a>
+</h3>
 <ul class="collection">
     {% for result in results %}
     <li class="collection-item s6">
-            <!-- Add a card here -->
-            <strong>ID</strong>: {{ result.id }} <br>
-            <strong>Recebido Por</strong>: {{ result.recebido_por.name }} <br>
-            <strong>Valor de Compra</strong>: R$ {{ result.valor_compra }} <br>
-            <strong>Valor de Venda</strong>: R$ {{ result.valor_venda }}  <br>
-            <strong>Data</strong>: {{ result.data_hora }} <br>
-            <strong>Produto</strong>: {{ result.produto.nome }}
+        <!-- Add a card here -->
+        <strong>ID</strong>: {{ result.id }} <br>
+        <strong>Recebido Por</strong>: {{ result.recebido_por.name }} <br>
+        <strong>Valor de Compra</strong>: R$ {{ result.valor_compra }} <br>
+        <strong>Valor de Venda</strong>: R$ {{ result.valor_venda }} <br>
+        <strong>Data</strong>: {{ result.data_hora }} <br>
+        <strong>Produto</strong>: {{ result.produto.nome }}
     </li>
     {% else %}
     <li class="collection-item">Nenhum Resultado Encontrado</li>

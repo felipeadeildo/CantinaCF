@@ -48,13 +48,13 @@ def process_purchase(form):
         flash("Preencha todos os campos", "error")
         return
     
-    user = get_user(matricula)
+    user = get_user(matricula, by="matricula") or get_user(matricula, by="id")
     if user is None:
-        flash(f"Matrícula e/ou Senha incorretos...", "error")
+        flash("Identificação (matrícula ou id) e/ou Senha incorretos...", "error")
         return
     
     if not verify_password(password, user["password"]):
-        flash(f"Matrícula e/ou Senha incorretos...", "error")
+        flash(f"Identificação (matrícula ou id) e/ou Senha incorretos...", "error")
         return
     
     total_compra = sum(product["valor"] for product in session["cart"])
@@ -126,6 +126,7 @@ def sales_history():
     order_by = request.args.get("order_by", "id")
     start_date = request.args.get("start_date", "")
     end_date = request.args.get("end_date", "")
+    order_mode = request.args.get("order_mode", "ASC")
 
     query = "SELECT * FROM venda_produto"
     params = []
@@ -135,12 +136,12 @@ def sales_history():
         query += ' INNER JOIN user ON (venda_produto.vendido_por = user.id OR venda_produto.vendido_para = user.id)'
 
     if vendido_por: # se vendido_por for diferente de ""
-        query += ' WHERE user.username LIKE ?' if 'WHERE' not in query else ' AND user.username LIKE ?'
-        params.extend([f"%{vendido_por}%"])
+        query += ' WHERE (user.username LIKE ? or user.matricula LIKE ?)' if 'WHERE' not in query else ' AND (user.username LIKE ? or user.matricula LIKE ?) '
+        params.extend([f"%{vendido_por}%", f"%{vendido_por}%"])
         
     if vendido_para: # se vendido_para for diferente de ""
-        query += ' WHERE user.username LIKE ?' if 'WHERE' not in query else ' AND user.username LIKE ?'
-        params.extend([f"%{vendido_para}%"])
+        query += ' WHERE (user.username LIKE ? or user.matricula LIKE ?)' if 'WHERE' not in query else ' AND (user.username LIKE ? or user.matricula LIKE ?)'
+        params.extend([f"%{vendido_para}%", f"%{vendido_para}%"])
 
     
     if start_date or end_date: # se start_date ou end_date for diferente de ""
@@ -156,7 +157,7 @@ def sales_history():
         query += f" {'WHERE' if not query.endswith('LIKE ?') else 'AND'} data_hora BETWEEN ? AND datetime(?, '+1 day', '-1 second')"
         params.extend([start_date, end_date])
     
-    query += f" ORDER BY {order_by}"
+    query += f" ORDER BY {order_by} {order_mode}"
 
     page, per_page, offset = get_page_args(page_parameter="page", per_page_parameter="per_page")
     offset = (page - 1) * per_page
@@ -170,20 +171,20 @@ def sales_history():
     results = []
     for result in results_obj:
         result = dict(result)
-        result["vendido_por"] = dict(get_user(result["vendido_por"]))
-        result["vendido_para"] = dict(get_user(result["vendido_para"]))
+        result["vendido_por"] = dict(get_user(result["vendido_por"], safe=True))
+        result["vendido_para"] = dict(get_user(result["vendido_para"]), safe=True)
         result["produto"] = dict(get_product(id=result["produto_id"]))
         result["data_hora"] = datetime.strptime(result["data_hora"], "%Y-%m-%d %H:%M:%S").strftime("%d/%m/%Y às %H:%M:%S")
         results.append(result)
     
     total_query = query.split("LIMIT")[0].split("ORDER BY")[0].strip()
     total_params = []
-    if total_query.count("?") == 1:
-        total_params.extend([vendido_por])
-    elif total_query.count("?") == 2:
-        total_params.extend([vendido_por, vendido_para])
+    if total_query.count("?") == 2:
+        total_params.extend([f"%{vendido_por}%", f"%{vendido_por}%"])
     elif total_query.count("?") == 4:
-        total_params.extend([vendido_por, vendido_para, start_date, end_date])
+        total_params.extend([f"%{vendido_por}%", f"%{vendido_por}%", f"%{vendido_para}%", f"%{vendido_para}%"])
+    elif total_query.count("?") == 6:
+        total_params.extend([f"%{vendido_por}%", f"%{vendido_por}%", f"%{vendido_para}%", f"%{vendido_para}%", start_date, end_date])
     
     identificador = f"historico-vendas-{vendido_por}-{vendido_para}-{start_date}-{end_date}-{session['user']['id']}"
     hashed_query = hashlib.sha256(identificador.encode("utf-8")).hexdigest()

@@ -1,6 +1,7 @@
 -- Create the "user" table
 CREATE TABLE user(
-  id INTEGER PRIMARY KEY,
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  matricula INTEGER,
   name TEXT NOT NULL,
   username TEXT NOT NULL,
   password TEXT NOT NULL,
@@ -66,14 +67,33 @@ CREATE TABLE controle_pagamento(
 );
 
 -- Create the "controle_vale_lanche" table
-CREATE TABLE controle_vale_lanche(
+CREATE TABLE folha_de_pagamento(
   id INTEGER PRIMARY KEY,
-  turno TEXT,
   valor REAL,
-  aluno_id INTEGER,
+  user_id INTEGER,
   data_hora DATETIME DEFAULT CURRENT_TIMESTAMP,
   recebido_por INTEGER,
   vale_lanche_pago BOOLEAN,
   FOREIGN KEY(aluno_id) REFERENCES user(id),
   FOREIGN KEY(recebido_por) REFERENCES user(id)
+);
+
+-- Create relationship between users (user_id funcionário and ohter users)
+CREATE TABLE rel_user_funcionario(
+  user_id INTEGER,
+  funcionario_id INTEGER,
+  FOREIGN KEY(user_id) REFERENCES user(id),
+  FOREIGN KEY(funcionario_id) REFERENCES user
+);
+
+-- Create folha de pagamento
+CREATE TABLE folha_de_pagamento(
+  id INTEGER PRIMARY KEY,
+  valor REAL,
+  user_id INTEGER,
+  data_hora DATETIME DEFAULT CURRENT_TIMESTAMP,
+  recebido_por INTEGER,
+  foi_pago BOOLEAN,
+  FOREIGN KEY(user_id) REFERENCES user(id),
+  FOREIGN KEY(recebido_por) REFERENCES user
 );

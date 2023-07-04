@@ -15,7 +15,7 @@ def login():
     elif request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")
-        user = get_user(username, by="username")
+        user = get_user(username, by="username") or get_user(username, by="matricula")
         if user is None:
             flash("Usuário e/ou Senha incorretos.", category="error")
         elif not verify_password(password, user["password"]):

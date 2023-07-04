@@ -15,13 +15,6 @@ import os
 def users():
     """
     A function that handles requests related to users. 
-
-    Parameters:
-        None
-
-    Returns:
-        The rendered template "users.html" with the context containing the list of users, 
-        roles, and series.
     """
     if request.method == "POST":
         if session["user"]["role"] != "admin":
@@ -32,11 +25,12 @@ def users():
         role = request.form.get("role")
         serie = request.form.get("serie")
         turma = request.form.get("turma")
-        if get_user(username, by="username") is None:
-            insert_user(username, generate_password_hash(password), role, name=name, serie=serie, turma=turma)
+        matricula = request.form.get("matricula")
+        if get_user(username, by="username") is None and get_user(matricula, by="matricula") is None:
+            insert_user(username, generate_password_hash(password), role, name=name, serie=serie, turma=turma, matricula=matricula)
             flash(f"Usuário {username} foi registrado com sucesso!", category="success")
         else:
-            flash(f"Usuário {username} já existe!", category="warning")
+            flash(f"Usuário {username}{f' ou matrícula {matricula} ' if matricula else ' '}já existe!", category="warning")
     
     context = {
         "users": get_users(),
@@ -96,12 +90,6 @@ def edit_password():
 def profile():
     """
     Renders the profile page for a user.
-
-    Parameters:
-    - None
-
-    Return:
-    - str: The rendered HTML template for the profile page.
     """
     user_id = request.args.get("user_id")
     if user_id is None:
@@ -121,16 +109,10 @@ def profile():
 def edit_profile():
     """
     Edit the user's profile.
-
-    Parameters:
-    - None
-
-    Returns:
-    - None
     """
     user = request.args.get("user_id")
     if user is None:
-        flash("Por favor, insira a matricula do usuário!", category="error")
+        flash("Por favor, insira o ID do usuário!", category="error")
         return redirect(url_for("profile"))
     user = get_user(user)
     if user is None:
@@ -197,9 +179,9 @@ def security_recharge():
         flash("Por favor, insira o valor!", category="error")
         return
     value = float(value)
-    new_value = user["saldo"] + value
+    # new_value = user["saldo"] + value
     observations = request.form.get("observations")
-    if payment_method != 'cash':
+    if payment_method not in ('cash', 'folha_de_pagamento'):
         file = request.files.get("proof")
         if file is None:
             flash("Por favor, insira o documento de pagamento!", category="error")
@@ -323,6 +305,7 @@ def stock_history():
     order_by = request.args.get("order_by", "")
     start_date = request.args.get("start_date", "")
     end_date = request.args.get("end_date", "")
+    order_mode = request.args.get("order_mode", "ASC")
 
     # Define a query inicial e os parametros iniciais
     query = "SELECT * FROM historico_abastecimento_estoque"
@@ -346,7 +329,7 @@ def stock_history():
         params.extend([start_date, end_date])
     
     if order_by: # se é pra ordernar
-        query += f" ORDER BY {order_by}" # adiciona a ordenação
+        query += f" ORDER BY {order_by} {order_mode}" # adiciona a ordenação
     
     page, per_page, offset = get_page_args(page_parameter='page', per_page_parameter='per_page') # obtém a página e o número de páginas
     offset = (page - 1) * per_page
@@ -362,7 +345,7 @@ def stock_history():
     # define e trata os resultados
     for result in results_obj:
         result = dict(result)
-        result["recebido_por"] = dict(get_user(result["recebido_por"]))
+        result["recebido_por"] = dict(get_user(result["recebido_por"], safe=True))
         result["produto"] = dict(get_product(id=result["produto_id"]))
         result["data_hora"] = datetime.strptime(result["data_hora"], "%Y-%m-%d %H:%M:%S").strftime("%d/%m/%Y às %H:%M:%S")
         results.append(result)
@@ -386,6 +369,7 @@ def stock_history():
     cache.set(hashed_query, results_obj)
 
     total = len(results_obj)
+
 
     # define paginação
     pagination = Pagination(page=page, per_page=per_page, total=total, css_framework='materialize')

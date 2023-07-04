@@ -45,12 +45,12 @@ Controle de Estoque
 </div>
 {% endblock %}
 
-{% block scripts %} 
+{% block scripts %}
 <script>
-document.querySelector('#add-new-product').addEventListener('click', function(event) {
-    event.preventDefault(); // não carrega a página
-    let formContent = document.querySelector("#form-content");
-    formContent.innerHTML = `
+    document.querySelector('#add-new-product').addEventListener('click', function (event) {
+        event.preventDefault(); // não carrega a página
+        let formContent = document.querySelector("#form-content");
+        formContent.innerHTML = `
         <input type="hidden" name="{{ config['CSRF_COOKIE_NAME'] }}" value="{{ csrf_token() }}">
         <div class="input-field col s6">
             <input id="product-name" type="text" class="validate" name="product_name" required>
@@ -92,11 +92,11 @@ document.querySelector('#add-new-product').addEventListener('click', function(ev
             <i class="material-icons right">send</i>
         </button>
     `;
-    document.querySelector('#add-existing-product').addEventListener('click', function(event) {
-        event.preventDefault();
-        location.reload();
+        document.querySelector('#add-existing-product').addEventListener('click', function (event) {
+            event.preventDefault();
+            location.reload();
+        })
     })
-})
 
 
 </script>

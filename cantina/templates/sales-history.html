@@ -11,7 +11,7 @@
 <form method="get">
     <div class="row">
         <div class="input-field col s6">
-            <input type="text" name="vendido_para" id="vendido_para"  value="{{ request.args.get('vendido_para', '') }}">
+            <input type="text" name="vendido_para" id="vendido_para" value="{{ request.args.get('vendido_para', '') }}">
             <label for="vendido_para">Vendido Para</label>
         </div>
 
@@ -20,31 +20,50 @@
             <label for="vendido_para">Vendido Por</label>
         </div>
 
-        <div class="input-field col s12">
+        <div class="input-field col s6">
             <select name="order_by" id="order_by">
-                <option value="" disabled {{ request.args.get( 'order_by' ) if request.args.get( 'order_by' ) else 'selected' }}>Ordenar Por</option>
-                <option value="data_hora" {{ 'selected' if request.args.get( 'order_by' ) == 'data_hora' else ''}}>Data e Hora</option>
-                <option value="vendido_por" {{ 'selected' if request.args.get( 'order_by' ) == 'vendido_por' else ''}}>Pessoa que recebeu</option>
-                <option value="vendido_para" {{ 'selected' if request.args.get( 'order_by' ) == 'vendido_para' else ''}}>Pessoa que comprou</option>
-                <option value="turno" {{ 'selected' if request.args.get( 'order_by' ) == 'turno' else ''}}>Turno</option>
-                <option value="id" {{ 'selected' if request.args.get( 'order_by' ) == 'id' else ''}}>ID</option>
+                <option value="" disabled {{ request.args.get( 'order_by' ) if request.args.get( 'order_by' )
+                    else 'selected' }}>Ordenar Por</option>
+                <option value="data_hora" {{ 'selected' if request.args.get( 'order_by' )=='data_hora' else '' }}>Data e
+                    Hora</option>
+                <option value="vendido_por" {{ 'selected' if request.args.get( 'order_by' )=='vendido_por' else '' }}>
+                    Pessoa que recebeu</option>
+                <option value="vendido_para" {{ 'selected' if request.args.get( 'order_by' )=='vendido_para' else '' }}>
+                    Pessoa que comprou</option>
+                <option value="turno" {{ 'selected' if request.args.get( 'order_by' )=='turno' else '' }}>Turno</option>
+                <option value="id" {{ 'selected' if request.args.get( 'order_by' )=='id' else '' }}>ID</option>
                 <label for="order_by">Ordenar por</label>
+            </select>
+        </div>
+
+        <div class="input-field col s6">
+            <select name="order_mode" id="order_mode">
+                <option value="" disabled {{ request.args.get( 'order_mode' ) if request.args.get( 'order_mode' )
+                    else 'selected' }}>Ordenação</option>
+                <option value="ASC" {{ 'selected' if request.args.get( 'order_mode' )=='ASC' else '' }}>Crescente
+                </option>
+                <option value="DESC" {{ 'selected' if request.args.get( 'order_mode' )=='DESC' else '' }}>Decrescente
+                </option>
+                <label for="order_mode">Ordenação</label>
             </select>
         </div>
 
         <div class="input-field">
             <div class="input-field col s6">
-                <input type="text" id="start_date" name="start_date" class="datepicker" value="{{ request.args.get('start_date', '')}}">
+                <input type="text" id="start_date" name="start_date" class="datepicker"
+                    value="{{ request.args.get('start_date', '')}}">
                 <label for="start_date">Data Inicial</label>
             </div>
         </div>
-    
+
         <div class="input-field col s6">
-            <input type="text" id="end_date" name="end_date" class="datepicker" value="{{ request.args.get('end_date', '')}}">
+            <input type="text" id="end_date" name="end_date" class="datepicker"
+                value="{{ request.args.get('end_date', '')}}">
             <label for="end_date">Data Final</label>
         </div>
 
-        <button class="btn waves-effect waves-light tooltiped" type="submit" name="action" data-position="bottom" data-tooltip="Filtrar Resultados">
+        <button class="btn waves-effect waves-light tooltiped" type="submit" name="action" data-position="bottom"
+            data-tooltip="Filtrar Resultados">
             Pesquisar
             <i class="material-icons right">send</i>
         </button>
@@ -55,7 +74,8 @@
 
 <h3>
     Resultados
-    <a class="btn waves-effect waves-light tooltipped" data-position="bottom" data-tooltip="Exportar para Excel" href="{{ url_for('export_to_excel_api', result_id=result_id) }}">
+    <a class="btn waves-effect waves-light tooltipped" data-position="bottom" data-tooltip="Exportar para Excel"
+        href="{{ url_for('export_to_excel_api', result_id=result_id) }}">
         Download
         <i class="material-icons right">get_app</i>
     </a>
@@ -65,14 +85,16 @@
 <ul class="collection">
     {% for result in results %}
     <li class="collection-item s6">
-            <!-- Add a card here -->
-            <strong>ID</strong>: {{ result.id }} <br>
-            <strong>Vendido Por</strong>: {{ result.vendido_por.name }} (<a href="{{ url_for('profile', user_id=result.vendido_por.id ) }}">Perfil</a>) <br>
-            <strong>Vendido Para</strong>: {{ result.vendido_para.name }} (<a href="{{ url_for('profile', user_id=result.vendido_para.id ) }}">Perfil</a>) <br>
-            <strong>Produto</strong>: {{ result.produto.nome }}
-            <strong>Valor de Compra</strong>: R$ {{ result.produto.valor }} <br>
-            <strong>Data</strong>: {{ result.data_hora }} <br>
-            <strong>Turno</strong>: {{ result.turno }} <br>
+        <!-- Add a card here -->
+        <strong>ID</strong>: {{ result.id }} <br>
+        <strong>Vendido Por</strong>: {{ result.vendido_por.name }} (<a
+            href="{{ url_for('profile', user_id=result.vendido_por.id ) }}">Perfil</a>) <br>
+        <strong>Vendido Para</strong>: {{ result.vendido_para.name }} (<a
+            href="{{ url_for('profile', user_id=result.vendido_para.id ) }}">Perfil</a>) <br>
+        <strong>Produto</strong>: {{ result.produto.nome }} <br>
+        <strong>Valor de Compra</strong>: R$ {{ result.produto.valor }} <br>
+        <strong>Data</strong>: {{ result.data_hora }} <br>
+        <strong>Turno</strong>: {{ result.turno }} <br>
     </li>
     {% else %}
     <li class="collection-item">Nenhum Resultado Encontrado</li>

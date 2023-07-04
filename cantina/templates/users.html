@@ -86,10 +86,14 @@
                         </select>
                     </div>
 
-
                     <div class="input-field" id="turma-input" style="display: none;">
                         <input id="turma" type="text" name="turma">
                         <label for="turma">Turma</label>
+                    </div>
+
+                    <div class="input-field" id="matricula-input" style="display: none;">
+                        <input id="matricula" type="text" name="matricula">
+                        <label for="matricula">Matrícula</label>
                     </div>
 
                     <input type="hidden" name="{{ config['CSRF_COOKIE_NAME'] }}" value="{{ csrf_token() }}">
@@ -129,11 +133,15 @@
             document.getElementById("serie").required = true;
             document.getElementById("turma-input").style.display = 'block';
             document.getElementById("turma").required = true;
+            document.getElementById("matricula-input").style.display = 'block';
+            document.getElementById("matricula").required = true;
         } else {
             document.getElementById("serie-input").style.display = 'none';
             document.getElementById("serie").required = false;
             document.getElementById("turma-input").style.display = 'none';
             document.getElementById("turma").required = false;
+            document.getElementById("matricula-input").style.display = 'none';
+            document.getElementById("matricula").required = false;
         }
     })
 

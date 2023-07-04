@@ -30,10 +30,8 @@
             <td>{{ product.quantidade }}</td>
             {% if 'edit_product' in session['permissions'] %}
             <td>
-                <a class="btn-floating btn-small waves-effect waves-light tooltipped"
-                    data-position="right"
-                    data-tooltip="Editar Produto"
-                    href="{{ url_for('edit_product', product_id=product.id) }}">
+                <a class="btn-floating btn-small waves-effect waves-light tooltipped" data-position="right"
+                    data-tooltip="Editar Produto" href="{{ url_for('edit_product', product_id=product.id) }}">
                     <i class="material-icons">edit</i>
                 </a>
             </td>
