@@ -15,6 +15,7 @@ Recarga de Crédito
                 <option value="debit_card">Cartão de Débito</option>
                 <option value="credit_card">Cartão de Crédito</option>
                 <option value="cash">Espécie</option>
+                <option value="payroll">Folha de Pagamento</option> <!-- Famoso "papai pagaaaa" -->
             </select>
             <label for="payment-method">Forma de Pagamento</label>
         </div>
@@ -58,7 +59,7 @@ Recarga de Crédito
         let submitBtnTag = document.getElementById('submit-btn');
 
         verify_proof_visualization = function () {
-            if (paymentMethodTag.value === 'cash') {
+            if (paymentMethodTag.value === 'cash' || paymentMethodTag.value == 'payroll') {
                 proofContainerTag.style.display = 'none';
             } else {
                 proofContainerTag.style.display = 'block';

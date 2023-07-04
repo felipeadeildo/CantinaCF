@@ -187,7 +187,14 @@ def refill_manage_request_api():
         update_user_saldo(user_id=payment_infos["aluno_id"], new_saldo=new_saldo)
         conn.execute("UPDATE controle_pagamento SET liberado_por = ? WHERE id = ?", (session["user"]["id"], payment_id))
         conn.commit()
-        message = f"Pagamento de ID {payment_id} liberado com sucesso! Saldo atualizado para R$ {new_saldo} para o usuário {requester['name']}"
+        if payment_infos["tipo_pagamento"] == "payroll":
+            affiliation = conn.execute("SELECT * FROM affiliation WHERE user_id = ?", (payment_infos["aluno_id"],)).fetchone()
+            conn.execute(
+                "INSERT INTO folha_de_pagamento (valor, entidade_id, affiliation_id, liberado_por, foi_pago) VALUES (?, ?, ?, ?, ?)", 
+                (payment_infos["valor"], affiliation["entidade_id"], affiliation["id"], session["user"]["id"], False)
+            )
+            conn.commit()
+        message = f"Pagamento de ID {payment_id} liberado com sucesso! Saldo do usuário {requester['name']} foi alterado de R$ {payment_infos['valor']} para R$ {new_saldo}"
         ok = True
     else:
         conn.execute("DELETE FROM controle_pagamento WHERE id = ?", (payment_id,))

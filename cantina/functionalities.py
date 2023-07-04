@@ -158,12 +158,6 @@ def allowed_file(filename):
 def security_recharge():
     """
     Recharges the user's account balance with a specified value.
-
-    Parameters:
-        None
-
-    Returns:
-        None
     """
     user_id = session["user"]["id"]
     user = get_user(user_id)
@@ -181,10 +175,10 @@ def security_recharge():
     value = float(value)
     # new_value = user["saldo"] + value
     observations = request.form.get("observations")
-    if payment_method not in ('cash', 'folha_de_pagamento'):
+    if payment_method not in ('cash', 'payroll'):
         file = request.files.get("proof")
         if file is None:
-            flash("Por favor, insira o documento de pagamento!", category="error")
+            flash("Por favor, insira o comprovante de pagamento!", category="error")
             return
         current_datetime_str = datetime.now().strftime("%Y-%m-%d %H-%M-%S")
         filename = secure_filename(f"{user_id}.{payment_method}.{current_datetime_str}.{file.filename}")
