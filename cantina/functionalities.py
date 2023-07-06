@@ -4,7 +4,7 @@ from .settings import PERMISSIONS, UPLOAD_FOLDER, ALLOWED_EXTENSIONS, SERIES
 from flask_paginate import Pagination, get_page_args
 from werkzeug.security import generate_password_hash
 from werkzeug.utils import secure_filename
-from datetime import datetime, timedelta
+from datetime import datetime
 from .auth import verify_password
 from . import app, cache
 import hashlib
@@ -37,7 +37,6 @@ def users():
         "roles": list(PERMISSIONS.keys()),
         "series": SERIES
     }
-
     return render_template("users.html", **context)
 
 def security_edit_password(to_change_user, changer_user, old_password, new_password):
@@ -65,7 +64,9 @@ def security_edit_password(to_change_user, changer_user, old_password, new_passw
         flash("Senha antiga incorreta!", category="error") # old password is incorrect
         return
     
-    update_user_password(to_change_user["id"], new_password) # if old_password is corrrect and got here, update password
+    motivo = request.form.get("motivo", "Não informado")
+    
+    update_user_password(to_change_user["id"], new_password, motivo=motivo) # if old_password is corrrect and got here, update password
     flash("Senha alterada com sucesso!", category="success")
 
 @app.route("/editar-senha", methods=("POST", "GET"))

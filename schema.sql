@@ -12,7 +12,8 @@ CREATE TABLE user(
   turma TEXT, -- A, B, C
   telefone TEXT,
   email TEXT,
-  cpf TEXT
+  cpf TEXT,
+  added_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Create the "produto" table
@@ -88,12 +89,4 @@ CREATE TABLE folha_de_pagamento(
   FOREIGN KEY(entidade_id) REFERENCES user(id),
   FOREIGN KEY(liberado_por) REFERENCES user(id),
   FOREIGN KEY(affiliation_id) REFERENCES affiliation(id)
-);
-
--- Cria tabela de histórico de edições de produtos e usuários
-CREATE TABLE history_edits (
-  id INTEGER PRIMARY KEY,
-  data_hora DATETIME DEFAULT CURRENT_TIMESTAMP,
-  action_type INTEGER NOT NULL, -- 1 = edita produto, 2 = edita usuário, 3 = adiciona usuário, 4 = remove usuário, 5 = adiciona produto, 6 = remove produto
-  action_data JSON NOT NULL,
 );

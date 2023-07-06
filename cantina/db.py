@@ -1,7 +1,7 @@
 from werkzeug.security import generate_password_hash
+from flask import g, abort, url_for, session
 from .settings import DB_PATH, SERIES
 from datetime import datetime
-from flask import g, abort, url_for
 from getpass import getpass
 from . import app
 import sqlite3
@@ -326,7 +326,6 @@ def get_refill_requests():
         filename = f'uploads/{result["comprovante"]}'
         result["comprovante_url"] = url_for("static", filename=filename)
     return results
-
 
 @app.cli.command("initdb")
 def init_db():
