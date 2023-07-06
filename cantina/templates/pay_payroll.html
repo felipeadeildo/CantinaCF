@@ -1,33 +1,33 @@
 {% extends 'base.html' %}
 
 {% block title %}
-Recarga de Crédito
-{% endblock %}
+Pagamento de Folha de Pagamento :D
+{% ednblock title %}
 
 {% block content %}
 <div class="container">
-    <h4 class="center">Recarga de Crédito</h4>
-    <form action="{{ url_for('recharge') }}" method="post" enctype="multipart/form-data">
+    <h4 class="center">Pagamento da Folha de Pagamento</h4>
+    <h6>Olá {{ session.user.name }}, no momento você deve R$ {{ session.user.saldo_payroll }}</h6>
+    <form action="{{ url_for('pay_payroll') }}" method="post" enctype="multipart/form-data">
         <div class="input-field">
-            <select name="payment-method" id="payment-method" class="validate" name="payment-method" required>
+            <select name="payment-method" id="payment-method" class="validate">
                 <option value="" disabled selected>Escolha forma de Pagamento</option>
                 <option value="pix">PIX</option>
                 <option value="debit_card">Cartão de Débito</option>
                 <option value="credit_card">Cartão de Crédito</option>
                 <option value="cash">Espécie</option>
-                <option value="payroll">Folha de Pagamento</option> <!-- Famoso "papai pagaaaa" -->
             </select>
             <label for="payment-method">Forma de Pagamento</label>
         </div>
 
         <div class="input-field">
-            <input type="number" class="validate" id="reload-value" name="reload-value" min="0" step="0.01" required>
-            <label for="reload-value">Valor da Recarga</label>
+            <input type="number" class="validate" id="payment-value" name="payment-value" min="0" step="0.01" max="{{ session.user.saldo_payroll }}">
+            <label for="payment-value">Valor (R$)</label>
         </div>
 
         <div class="input-field">
-            <input type="text" class="validate" id="observations" name="observations">
-            <label for="observations">Observações</label>
+            <input type="text" class="validate" id="obs" name="obs">
+            <label for="obs">Observações</label>
         </div>
 
         <div class="file-field input-field" id="proof-container" style="display:none;">
@@ -44,29 +44,28 @@ Recarga de Crédito
         <input type="hidden" name="{{ config['CSRF_COOKIE_NAME'] }}" value="{{ csrf_token() }}">
 
         <button id="submit-btn" class="btn waves-effect waves-light" type="submit" name="action">
-            Recarregar
+            Pagar
             <i class="material-icons right">send</i>
         </button>
     </form>
 </div>
-{% endblock %}
+{% endblock content %}
 
 {% block scripts %}
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        let paymentMethodTag = document.getElementById('payment-method');
-        let proofContainerTag = document.getElementById('proof-container');
-
-        verify_proof_visualization = function () {
-            if (paymentMethodTag.value === 'cash' || paymentMethodTag.value == 'payroll') {
-                proofContainerTag.style.display = 'none';
-            } else {
-                proofContainerTag.style.display = 'block';
-            }
+document.addEventListener('DOMContentLoaded', function() {
+    let paymentMethodTag = document.getElementById('payment-method');
+    let proofContainerTag = document.getElementById('proof-container');
+    verify_proof = function() {
+        if (paymentMethodTag.value === 'cash') {
+            proofContainerTag.style.display = 'none';
+        } else {
+            proofContainerTag.style.display = 'block';
         }
-        verify_proof_visualization();
+    }
+    verify_proof();
 
-        paymentMethodTag.addEventListener('change', verify_proof_visualization);
-    });
+    paymentMethodTag.addEventListener('change', verify_proof);
+});
 </script>
 {% endblock %}

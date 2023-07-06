@@ -4,6 +4,10 @@
 <head>
     <!--Import Google Icon Font-->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <!-- Import Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
     <!--Import materialize.css-->
     <link type="text/css" rel="stylesheet" href="{{url_for('static', filename='css/materialize.min.css')}}" />
     <link type="text/css" rel="stylesheet" href="{{url_for('static', filename='css/styles.css')}}" />
@@ -24,6 +28,11 @@
                     <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" class="logo" style="height: 44px; margin: 0px 10px; vertical-align: middle;">
                     <span style="vertical-align: middle;" class="logo-text">{{ config['SITE_NAME'] }}</span>
                 </a>
+                <ul id="nav-mobile" class="right hide-on-med-and-down">
+                    <li>Bem vindo, 
+                        {% if session.user_id == 'guest' %} Visitante :D {% else %} {{ session.user.name }} {% endif %}
+                    </li>
+                </ul>
                 <a href="#" data-target="slide-out" class="sidenav-trigger"><i class="material-icons">menu</i></a>
             </div>
         </nav>
@@ -126,6 +135,25 @@
             </div>
         </div>
     </main>
+    <footer class="page-footer cyan darken-4 smaller-footer">
+        <div class="container">
+            <div class="row">
+                <div class="col l6 s12">
+                    <p class="grey-text text-lighten-4">Desenvolvido com ❤️ por {{ config['AUTHOR'].name }}</p>
+                </div>
+                <div class="col l4 offset-l2 s12">
+                    <h6 class="white-text">Connect</h6>
+                    <ul class="social-links">
+                        <li><a class="grey-text text-lighten-3" href="https://api.whatsapp.com/send?phone={{ config['AUTHOR'].whatsapp }}"><i class="fab fa-whatsapp"></i></a></li>
+                        <li><a class="grey-text text-lighten-3" href="https://instagram.com/{{ config['AUTHOR'].instagram }}"><i class="fab fa-instagram"></i></a></li>
+                        <li><a class="grey-text text-lighten-3" href="https://www.linkedin.com/in/{{ config['AUTHOR'].linkedin }}"><i class="fab fa-linkedin-in"></i></a></li>
+                        <li><a class="grey-text text-lighten-3" href="https://github.com/{{ config['AUTHOR'].github }}"><i class="fab fa-github"></i></a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </footer>       
+
 
     <!--JavaScript at end of body for optimized loading-->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>

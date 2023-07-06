@@ -35,7 +35,15 @@ settings_map = {
     'SITE_NAME': 'CF Cantina',
     'CACHE_TYPE': CACHE_TYPE,
     'CACHE_DIR': CACHE_DIR,
-    'CACHE_DEFAULT_TIMEOUT': CACHE_DEFAULT_TIMEOUT
+    'CACHE_DEFAULT_TIMEOUT': CACHE_DEFAULT_TIMEOUT,
+    'AUTHOR': {
+        'name': 'Felipe Adeildo',
+        'whatsapp': '558294011841',
+        'email': 'oie.eu.sou.um@gmail.com',
+        'instagram': 'felipe.adeildo',
+        'linkedin': 'felipe-adeildo',
+        'github': 'sr-pato',
+    }
 }
 
 

@@ -48,12 +48,10 @@
             </select>
         </div>
 
-        <div class="input-field">
-            <div class="input-field col s6">
-                <input type="text" id="start_date" name="start_date" class="datepicker"
-                    value="{{ request.args.get('start_date', '')}}">
-                <label for="start_date">Data Inicial</label>
-            </div>
+        <div class="input-field col s6">
+            <input type="text" id="start_date" name="start_date" class="datepicker"
+                value="{{ request.args.get('start_date', '')}}">
+            <label for="start_date">Data Inicial</label>
         </div>
 
         <div class="input-field col s6">
@@ -81,25 +79,45 @@
     </a>
 </h3>
 
+<div class="table-wrapper" style="overflow:auto; height: 60lvh;">
+    <table class="striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Vendido Por</th>
+                <th>Vendido Para</th>
+                <th>Produto</th>
+                <th>Valor de Compra</th>
+                <th>Data</th>
+                <th>Turno</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for result in results %}
+            <tr>
+                <td>{{ result.id }}</td>
+                <td>
+                    {{ result.vendido_por.name }} (<a
+                        href="{{ url_for('profile', user_id=result.vendido_por.id ) }}">Perfil</a>)
+                </td>
+                <td>
+                    {{ result.vendido_para.name }} (<a
+                        href="{{ url_for('profile', user_id=result.vendido_para.id ) }}">Perfil</a>)
+                </td>
+                <td>{{ result.produto.nome }}</td>
+                <td>R$ {{ result.produto.valor }}</td>
+                <td>{{ result.data_hora }}</td>
+                <td>{{ result.turno }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7">Nenhum Resultado Encontrado</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 
-<ul class="collection">
-    {% for result in results %}
-    <li class="collection-item s6">
-        <!-- Add a card here -->
-        <strong>ID</strong>: {{ result.id }} <br>
-        <strong>Vendido Por</strong>: {{ result.vendido_por.name }} (<a
-            href="{{ url_for('profile', user_id=result.vendido_por.id ) }}">Perfil</a>) <br>
-        <strong>Vendido Para</strong>: {{ result.vendido_para.name }} (<a
-            href="{{ url_for('profile', user_id=result.vendido_para.id ) }}">Perfil</a>) <br>
-        <strong>Produto</strong>: {{ result.produto.nome }} <br>
-        <strong>Valor de Compra</strong>: R$ {{ result.produto.valor }} <br>
-        <strong>Data</strong>: {{ result.data_hora }} <br>
-        <strong>Turno</strong>: {{ result.turno }} <br>
-    </li>
-    {% else %}
-    <li class="collection-item">Nenhum Resultado Encontrado</li>
-    {% endfor %}
-</ul>
 
 <div class="pagination">
     {{ pagination.info|safe }}

@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col s9">
+        <h3 class="center-align">
+            {% block title %}
+            Histórico de Transações de Afiliados
+            {% endblock title %}
+        </h3>
+
+        <form method="get">
+            <div class="row">
+                <div class="input-field col s6">
+                    <input type="text" id="start_date" name="start_date" class="datepicker"
+                        value="{{ request.args.get('start_date', '')}}">
+                    <label for="start_date">Data Inicial</label>
+                </div>
+                <div class="input-field col s6">
+                    <input type="text" id="end_date" name="end_date" class="datepicker"
+                        value="{{ request.args.get('end_date', '')}}">
+                    <label for="end_date">Data Final</label>
+                </div>
+                <div class="center-align">
+                    <button class="btn waves-effect waves-light tooltiped" type="submit" name="action" data-position="bottom"
+                        data-tooltip="Filtrar Resultados">
+                        Filtrar
+                        <i class="material-icons right">send</i>
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        <hr>
+
+        <h3>
+            Resultados
+            <!-- NOT USED
+
+            <a href="{{ url_for('export_to_excel_api', result_id=result_id) }}" class="btn waves-effect waves-light tooltiped"
+            data-position="bottom" data-tooltip="Exportar para Excel">
+                Download
+                <i class="material-icons right">get_app</i>
+            </a>
+
+            -->
+        </h3>
+
+        <div class="table-wrapper" style="overflow:auto; height: 60vh;">
+            <table class="striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Afiliado</th>
+                        <th>Valor</th>
+                        <th>Data / Hora</th>
+                        <th>Liberado Por</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in results %}
+                    <tr>
+                        <td>{{ result.id }}</td>
+                        <td>
+                            {{ result.afiliado.name }}
+                            (<a href="{{ url_for('profile', user_id=result.afiliado.id) }}">{{ result.afiliado.username }}</a>)
+                        </td>
+                        <td>R$ {{ result.valor }}</td>
+                        <td>{{ result.data_hora }}</td>
+                        <td>
+                            {{ result.liberado_por.name }}
+                            (<a href="{{ url_for('profile', user_id=result.liberado_por.id) }}">{{ result.liberado_por.username
+                                }}</a>)
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6">Nenhum Resultado Encontrado</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="pagination">
+            {{ pagination.info|safe }}
+            {{ pagination.links|safe }}
+        </div>
+    </div>
+    <div class="col s3 sticky-action">
+        <div class="card">
+            <div class="card-content">
+                <span class="card-title">Total Não Pago</span>
+                <p>R$ {{ session["user"]["saldo_payroll"] }}</p>
+            </div>
+        </div>
+        <div class="card-action">
+            <a class="waves-effect waves-light btn" href="{{ url_for('pay_payroll') }}">
+                <i class="material-icons left">payment</i>
+                Pagar
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock content %}

@@ -151,3 +151,22 @@ main {
         font-size: 1.5em;
     }
 }
+
+.smaller-footer {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.social-links {
+    list-style: none;
+    padding: 0;
+}
+
+.social-links li {
+display: inline-block;
+margin-right: 15px;
+}
+
+.social-links li:last-child {
+margin-right: 0;
+}

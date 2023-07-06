@@ -1,4 +1,4 @@
-from .db import get_conn, get_product, update_product_quantity, get_user, update_user_saldo
+from .db import get_conn, get_product, update_product_quantity, get_user, update_user_saldo, update_user_key
 from flask import request, jsonify, session, send_file
 from . import app, cache
 from io import BytesIO
@@ -184,15 +184,23 @@ def refill_manage_request_api():
     requester = get_user(payment_infos["aluno_id"])
     new_saldo = requester["saldo"] + payment_infos["valor"]
     if accepted:
-        update_user_saldo(user_id=payment_infos["aluno_id"], new_saldo=new_saldo)
+        if payment_infos['is_payroll']:
+            new_saldo = requester["saldo_payroll"] - payment_infos["valor"]
+            update_user_key(user_id=payment_infos["aluno_id"], key="saldo_payroll", value=new_saldo)
+        else:
+            update_user_saldo(user_id=payment_infos["aluno_id"], new_saldo=new_saldo)
         conn.execute("UPDATE controle_pagamento SET liberado_por = ? WHERE id = ?", (session["user"]["id"], payment_id))
         conn.commit()
-        if payment_infos["tipo_pagamento"] == "payroll":
+        if payment_infos["tipo_pagamento"] == "payroll": # isso nunca vai acontecer se payment_infos.is_payroll for verdade.
             affiliation = conn.execute("SELECT * FROM affiliation WHERE user_id = ?", (payment_infos["aluno_id"],)).fetchone()
             conn.execute(
-                "INSERT INTO folha_de_pagamento (valor, entidade_id, affiliation_id, liberado_por, foi_pago) VALUES (?, ?, ?, ?, ?)", 
-                (payment_infos["valor"], affiliation["entidade_id"], affiliation["id"], session["user"]["id"], False)
+                "INSERT INTO folha_de_pagamento (valor, entidade_id, affiliation_id, liberado_por) VALUES (?, ?, ?, ?)", 
+                (payment_infos["valor"], affiliation["entidade_id"], affiliation["id"], session["user"]["id"])
             )
+            conn.commit()
+            financiador = get_user(affiliation["entidade_id"])
+            new_payroll_saldo = financiador["saldo_payroll"] + payment_infos["valor"]
+            conn.execute("UPDATE user SET saldo_payroll = ? WHERE id = ?", (new_payroll_saldo, financiador['id']))
             conn.commit()
         message = f"Pagamento de ID {payment_id} liberado com sucesso! Saldo do usuário {requester['name']} foi alterado de R$ {payment_infos['valor']} para R$ {new_saldo}"
         ok = True

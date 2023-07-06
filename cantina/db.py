@@ -249,7 +249,8 @@ def insert_recharge(user_id: int, value: float, payment_type: str, **kwargs):
         filename = kwargs.get("filename")
     else:
         filename = None
-    conn.execute("INSERT INTO controle_pagamento (tipo_pagamento, descricao, aluno_id, data_hora, turno, comprovante, valor) VALUES (?, ?, ?, ?, ?, ?, ?)", (payment_type, observation, user_id, current_datetime_str, turno, filename, value))
+    is_payroll = kwargs.get("is_payroll", False)
+    conn.execute("INSERT INTO controle_pagamento (tipo_pagamento, descricao, aluno_id, data_hora, turno, comprovante, valor, is_payroll) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", (payment_type, observation, user_id, current_datetime_str, turno, filename, value, is_payroll))
     conn.commit()
 
 def update_user_key(user_id: int, key: str, value: str|int|float):

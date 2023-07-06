@@ -1,4 +1,4 @@
-from .db import get_products, get_user, update_user_saldo, insert_product_sales, get_product, update_product_key, get_conn
+from .db import get_products, get_user, update_user_saldo, insert_product_sales, get_product, update_product_key, get_conn, record_stock_history
 from flask import render_template, request, flash, session, redirect, url_for
 from flask_paginate import Pagination, get_page_args
 from .auth import verify_password
@@ -104,12 +104,19 @@ def edit_product():
         return redirect(url_for('products'))
     
     if request.method == "POST":
+        motivo = request.form.get("motivo")
+        if motivo is None:
+            flash("Por favor, insira o motivo, é obrigatório!", category="error")
+            return redirect(url_for('products')) # TODO: trocar isso daqui para redirecionar para a página de edição de produto em si
         for key, value in request.form.items():
-            if key in (app.config["CSRF_COOKIE_NAME"], 'action'):
+            if key in (app.config["CSRF_COOKIE_NAME"], 'action', 'motivo'):
                 continue
             old_value = update_product_key(product_id=product_id, key=key, value=value)
             if str(old_value) != str(value) and old_value is not None:
                 flash(f"Alteração de {key} foi feita com sucesso ({old_value} -> {value})!", category="success")
+        
+        
+        
 
     context = {
         "product": get_product(id=product_id)

@@ -193,12 +193,6 @@ def security_recharge():
 def recharge():
     """
     A function that handles the '/recarregar' route for both POST and GET requests.
-    
-    Parameters:
-        None
-        
-    Returns:
-        The HTML content of the 'recharge.html' template.
     """
     if request.method == "POST":
         security_recharge()
@@ -429,4 +423,110 @@ def affiliates():
 
 @app.route("/afiliados/historico")
 def affiliates_history():
-    return render_template("affiliates-history.html")
+    start_date = request.args.get("start_date", "")
+    end_date = request.args.get("end_date", "")
+    conn = get_conn()
+    query = "SELECT * FROM folha_de_pagamento WHERE entidade_id = ?"
+    params = [session["user"]["id"]]
+
+    if start_date or end_date:
+        if start_date:
+            start_date = datetime.strptime(start_date, "%b %d, %Y").strftime("%Y-%m-%d")
+        else:
+            start_date = datetime(year=2000, month=1, day=1).strftime("%Y-%m-%d")
+        
+        if end_date:
+            end_date = datetime.strptime(end_date, "%b %d, %Y").strftime("%Y-%m-%d")
+        else:
+            end_date = datetime.now().strftime("%Y-%m-%d")
+        query += f" {'WHERE' if not query.endswith('?') else 'AND'} data_hora BETWEEN ? AND datetime(?, '+1 day', '-1 second')"
+        params.extend([start_date, end_date])
+    
+    query += " ORDER BY data_hora DESC"
+
+    page, per_page, offset = get_page_args(page_parameter='page', per_page_parameter='per_page')
+    offset = (page - 1) * per_page
+
+    query += " LIMIT ?, ?"
+    params.extend([offset, per_page])
+    
+    result_obj = conn.execute(query, params).fetchall()
+    result_obj = list(map(dict, result_obj))
+    results = []
+    for item in result_obj:
+        item["data_hora"] = datetime.strptime(item["data_hora"], "%Y-%m-%d %H:%M:%S").strftime("%d/%m/%Y às %H:%M:%S")
+        item["afiliado"] = get_user(item["affiliation_id"])
+        item["liberado_por"] = get_user(item["liberado_por"])
+        results.append(item)
+    
+    total_query = query.split("LIMIT")[0].split('ORDER BY')[0].strip()
+    total_params = []
+    if total_query.count("?") == 1:
+        total_params.append(session["user"]["id"])
+    elif total_query.count("?") == 3:
+        total_params.extend([session["user"]["id"], start_date, end_date])
+
+    result_obj = conn.execute(total_query, total_params).fetchall()
+    total = len(result_obj)
+
+    pagination = Pagination(page=page, per_page=per_page, total=total, css_framework='materialize')
+
+    context = {
+        "results": results,
+        "pagination": pagination,
+    }
+    
+    return render_template("affiliates-history.html", **context)
+
+
+def security_pay_payroll():
+    user_id = session["user"]["id"]
+    user = get_user(user_id)
+    if user is None:
+        flash("Usuário de ID {} não encontrado!".format(user_id), category="error")
+        return redirect(url_for("login"))
+    payment_method = request.args.get("payment-method")
+    if payment_method is None:
+        flash("Por favor, insira o método de pagamento!", category="error")
+        return
+    payment_value = request.args.get("payment-value")
+    if payment_value is None:
+        flash("Por favor, insira o valor do pagamento!", category="error")
+        return
+    value = float(payment_value)
+    observations = request.args.get("obs")
+    if payment_method not in ('cash', ):
+        file = request.files.get('proof')
+        if file is None:
+            flash("Por favor, insira o documento de pagamento!", category="error")
+            return
+        if not allowed_file(file.filename):
+            flash("Arquivo não permitido!", category="error")
+            return
+        current_datetime_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        filename = secure_filename(f"{user_id}-{payment_method}-{value}-{current_datetime_str}.{file.filename}")
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        insert_recharge(user_id, payment_method, value, filename=filename, observations=observations, is_payroll=True)
+    else:
+        insert_recharge(user_id, payment_method, value, observations=observations, is_payroll=True)
+    flash(f"A solicitação de quitação de dívida no valor de R$ {value} foi realizada com sucesso! O saldo devedor em seu perfil será atualizado caso a solicitação seja aceita.", category="success")
+
+
+@app.route("/afiliados/pagar", methods=["POST", "GET"])
+def pay_payroll():
+    if request.method == 'POST':
+        security_pay_payroll()
+    return render_template("pay-payroll.html")
+
+
+@app.route("/auditorias")
+def audits():
+    return render_template("audits.html")
+
+
+@app.route("/historico-edições")
+def history_edits():
+    conn = get_conn()
+    page, per_page, offset = get_page_args(page_parameter='page', per_page_parameter='per_page')
+    offset = (page - 1) * per_page
+    
