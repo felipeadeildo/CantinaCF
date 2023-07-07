@@ -81,6 +81,7 @@ PERMISSIONS = {
         "stock_control",
         "stock_history",
         "sales_history",
+        "export_to_excel_api"
     ],
     "Caixa": [
         "static",
@@ -100,6 +101,7 @@ PERMISSIONS = {
         "refill_requests",
         "filter_today_sales",
         "sales_history",
+        "export_to_excel_api"
     ],
     "guest": [
         "static", 
