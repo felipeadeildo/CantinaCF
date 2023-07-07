@@ -66,7 +66,7 @@ def security_edit_password(to_change_user, changer_user, old_password, new_passw
     
     motivo = request.form.get("motivo", "Não informado")
     
-    update_user_password(to_change_user["id"], new_password, motivo=motivo) # if old_password is corrrect and got here, update password
+    update_user_password(to_change_user["id"], new_password) # if old_password is corrrect and got here, update password
     flash("Senha alterada com sucesso!", category="success")
 
 @app.route("/editar-senha", methods=("POST", "GET"))
