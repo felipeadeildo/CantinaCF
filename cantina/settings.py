@@ -32,7 +32,6 @@ PERMISSIONS = {
         "generate_random_username_api", # rota de gerar nome de usuário (usado na criação de usuário)
         "edit_profile",  # rota de editar perfil
         "recharge",  # rota de recarga
-        "payments_verification", # rota de verificação de pagamentos feitos pelos alunos
         "get_payments_api",  # rota de verificação de pagamentos feitos pelos alunos
         "refill_manage_request_api", # rota de verificação de pagamentos feitos pelos alunos
         "refill_requests", # rota de verificação de pagamentos feitos pelos alunos
@@ -47,30 +46,26 @@ PERMISSIONS = {
         "filter_today_sales", # aliases para filtrar resultados de vendas somente por HOJE
         "pay_payroll", # permite fazer o pagamento do que se tem acumulado na folha de pagamento
     ],
-    "user": [
+    "Funcionário": [
         "static", 
         "login", 
         "logout", 
         "edit_password", 
-        "users", 
-        "index", 
-        "add_to_cart_api", 
-        "search_products_api", 
         "profile",
-        "generate_random_username_api",
         "affiliates",
         "affiliates_history",
+        "recharge",
+        "pay_payroll"
     ],
-    "aluno": [
+    "Aluno": [
         "static",
         "login", 
         "logout",
         "profile",
-        "generate_random_username_api",
-        "recharge",
         "edit_password",
+        "recharge",
     ],
-    "vendedor": [
+    "Vendedor": [
         "static",
         "login",
         "logout",
@@ -82,25 +77,33 @@ PERMISSIONS = {
         "remove_from_cart_api",
         "affiliates",
         "affiliates_history",
+        "recharge",
+        "stock_control",
+        "stock_history",
+        "sales_history",
     ],
-
-    "caixa": [
+    "Caixa": [
         "static",
         "login",
         "logout",
         "profile",
-        "affiliates",
-        "payments_verification",
+        "recharge",
         "get_payments_api", 
         "refill_manage_request_api",
         "refill_requests",
         "affiliates",
         "affiliates_history",
+        "stock_control",
+        "stock_history",
+        "get_payments_api",
+        "refill_manage_request_api", 
+        "refill_requests",
+        "filter_today_sales",
+        "sales_history",
     ],
-
     "guest": [
         "static", 
-        "login"
+        "login",
     ]
 }
 """Mapping of permissions to routes that can be accessed by roles"""
