@@ -18,6 +18,8 @@
     <!-- Add icon -->
     <link rel="shortcut icon" href="{{ url_for('static', filename='img/fantastico.ico') }}">
     <title>{% block title %}{% endblock %} - {{ config['SITE_NAME'] }}</title>
+
+    {% block additional_css %}{% endblock %}
 </head>
 
 <body>

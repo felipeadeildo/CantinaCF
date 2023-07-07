@@ -1,5 +1,26 @@
 {% extends "base.html" %}
 
+{% block additional_css %}
+<style>
+    /* CSS para tornar as linhas da tabela alternadamente escuras */
+    .striped tbody tr:nth-child(odd) {
+        background-color: #f2f2f2;
+    }
+
+    /* CSS para adicionar uma divisória entre o formulário e as estatísticas */
+    .form-divider {
+        border-right: 1px solid #000;
+        margin-bottom: 20px;
+        padding-bottom: 20px;
+    }
+
+    .table-wrapper {
+        border: 1px solid #000;
+        padding: 20px;
+        margin-top: 20px;
+    }
+</style>
+{% endblock additional_css %}
 
 {% block content %}
 <h3 class="center-align">
@@ -8,120 +29,159 @@
     {% endblock title %}
 </h3>
 
-<form method="get">
-    <div class="row">
-        <div class="input-field col s6">
-            <input type="text" name="vendido_para" id="vendido_para" value="{{ request.args.get('vendido_para', '') }}">
-            <label for="vendido_para">Vendido Para</label>
-        </div>
+<div class="row">
+    <div class="col s7 form-divider">
+        <form method="get">
+            <div class="row">
+                <div class="input-field col s6">
+                    <input type="text" name="vendido_para" id="vendido_para" value="{{ request.args.get('vendido_para', '') }}">
+                    <label for="vendido_para">Vendido Para</label>
+                </div>
 
-        <div class="input-field col s6">
-            <input type="text" name="vendido_por" id="vendido_por" value="{{ request.args.get('vendido_por', '') }}">
-            <label for="vendido_para">Vendido Por</label>
-        </div>
+                <div class="input-field col s6">
+                    <input type="text" name="vendido_por" id="vendido_por" value="{{ request.args.get('vendido_por', '') }}">
+                    <label for="vendido_para">Vendido Por</label>
+                </div>
 
-        <div class="input-field col s6">
-            <select name="order_by" id="order_by">
-                <option value="" disabled {{ request.args.get( 'order_by' ) if request.args.get( 'order_by' )
-                    else 'selected' }}>Ordenar Por</option>
-                <option value="data_hora" {{ 'selected' if request.args.get( 'order_by' )=='data_hora' else '' }}>Data e
-                    Hora</option>
-                <option value="vendido_por" {{ 'selected' if request.args.get( 'order_by' )=='vendido_por' else '' }}>
-                    Pessoa que recebeu</option>
-                <option value="vendido_para" {{ 'selected' if request.args.get( 'order_by' )=='vendido_para' else '' }}>
-                    Pessoa que comprou</option>
-                <option value="turno" {{ 'selected' if request.args.get( 'order_by' )=='turno' else '' }}>Turno</option>
-                <option value="id" {{ 'selected' if request.args.get( 'order_by' )=='id' else '' }}>ID</option>
-                <label for="order_by">Ordenar por</label>
-            </select>
-        </div>
+                <div class="input-field col s6">
+                    <select name="order_by" id="order_by">
+                        <option value="" disabled {{ request.args.get( 'order_by' ) if request.args.get( 'order_by' )
+                            else 'selected' }}>Ordenar Por</option>
+                        <option value="data_hora" {{ 'selected' if request.args.get( 'order_by' )=='data_hora' else '' }}>Data e
+                            Hora</option>
+                        <option value="vendido_por" {{ 'selected' if request.args.get( 'order_by' )=='vendido_por' else '' }}>
+                            Pessoa que recebeu</option>
+                        <option value="vendido_para" {{ 'selected' if request.args.get( 'order_by' )=='vendido_para' else '' }}>
+                            Pessoa que comprou</option>
+                        <option value="turno" {{ 'selected' if request.args.get( 'order_by' )=='turno' else '' }}>Turno</option>
+                        <option value="id" {{ 'selected' if request.args.get( 'order_by' )=='id' else '' }}>ID</option>
+                        <label for="order_by">Ordenar por</label>
+                    </select>
+                </div>
 
-        <div class="input-field col s6">
-            <select name="order_mode" id="order_mode">
-                <option value="" disabled {{ request.args.get( 'order_mode' ) if request.args.get( 'order_mode' )
-                    else 'selected' }}>Ordenação</option>
-                <option value="ASC" {{ 'selected' if request.args.get( 'order_mode' )=='ASC' else '' }}>Crescente
-                </option>
-                <option value="DESC" {{ 'selected' if request.args.get( 'order_mode' )=='DESC' else '' }}>Decrescente
-                </option>
-                <label for="order_mode">Ordenação</label>
-            </select>
-        </div>
+                <div class="input-field col s6">
+                    <select name="order_mode" id="order_mode">
+                        <option value="" disabled {{ request.args.get( 'order_mode' ) if request.args.get( 'order_mode' )
+                            else 'selected' }}>Ordenação</option>
+                        <option value="ASC" {{ 'selected' if request.args.get( 'order_mode' )=='ASC' else '' }}>Crescente
+                        </option>
+                        <option value="DESC" {{ 'selected' if request.args.get( 'order_mode' )=='DESC' else '' }}>Decrescente
+                        </option>
+                        <label for="order_mode">Ordenação</label>
+                    </select>
+                </div>
 
-        <div class="input-field col s6">
-            <input type="text" id="start_date" name="start_date" class="datepicker"
-                value="{{ request.args.get('start_date', '')}}">
-            <label for="start_date">Data Inicial</label>
-        </div>
+                <div class="input-field col s6">
+                    <input type="text" id="start_date" name="start_date" class="datepicker"
+                        value="{{ request.args.get('start_date', '')}}">
+                    <label for="start_date">Data Inicial</label>
+                </div>
 
-        <div class="input-field col s6">
-            <input type="text" id="end_date" name="end_date" class="datepicker"
-                value="{{ request.args.get('end_date', '')}}">
-            <label for="end_date">Data Final</label>
-        </div>
+                <div class="input-field col s6">
+                    <input type="text" id="end_date" name="end_date" class="datepicker"
+                        value="{{ request.args.get('end_date', '')}}">
+                    <label for="end_date">Data Final</label>
+                </div>
 
-        <button class="btn waves-effect waves-light tooltiped" type="submit" name="action" data-position="bottom"
-            data-tooltip="Filtrar Resultados">
-            Pesquisar
-            <i class="material-icons right">send</i>
-        </button>
+                <button class="btn waves-effect waves-light tooltiped" type="submit" name="action" data-position="bottom"
+                    data-tooltip="Filtrar Resultados">
+                    Pesquisar
+                    <i class="material-icons right">send</i>
+                </button>
+
+                <a href="{{ url_for('filter_today_sales') }}" class="btn waves-effect waves-light" style="margin-left: 10px;">
+                    Filtrar só por hoje
+                </a>
+            </div>
+        </form>
     </div>
-</form>
 
-<hr>
+    <div class="col s5">
+        <h5>Estatísticas</h5>
+        <div class="table-wrapper" style="overflow:auto;">
+            <table class="striped centered">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Produto</th>
+                        <th>Quantidade Vendida</th>
+                        <th>Preco Unitário</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product_name in stats %}
+                    <tr>
+                        <td>{{ stats[product_name].id }}</td>
+                        <td>{{ product_name }}</td>
+                        <td>{{ stats[product_name].quantity }}</td>
+                        <td>R$ {{ stats[product_name].valor }}</td>
+                        <td>R$ {{ stats[product_name].ammount }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5">Nenhuma Estatística Encontrada</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="col s12">
+        <h3>
+            Resultados
+            <a class="btn waves-effect waves-light tooltipped" data-position="bottom" data-tooltip="Exportar para Excel"
+                href="{{ url_for('export_to_excel_api', result_id=result_id) }}">
+                Download
+                <i class="material-icons right">get_app</i>
+            </a>
+        </h3>
 
-<h3>
-    Resultados
-    <a class="btn waves-effect waves-light tooltipped" data-position="bottom" data-tooltip="Exportar para Excel"
-        href="{{ url_for('export_to_excel_api', result_id=result_id) }}">
-        Download
-        <i class="material-icons right">get_app</i>
-    </a>
-</h3>
+        <div class="table-wrapper" style="overflow:auto; height: 60vh;"">
+            <table class="striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Vendido Por</th>
+                        <th>Vendido Para</th>
+                        <th>Produto</th>
+                        <th>Valor de Compra</th>
+                        <th>Data</th>
+                        <th>Turno</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in results %}
+                    <tr>
+                        <td>{{ result.id }}</td>
+                        <td>
+                            {{ result.vendido_por.name }} (<a
+                                href="{{ url_for('profile', user_id=result.vendido_por.id ) }}">Perfil</a>)
+                        </td>
+                        <td>
+                            {{ result.vendido_para.name }} (<a
+                                href="{{ url_for('profile', user_id=result.vendido_para.id ) }}">Perfil</a>)
+                        </td>
+                        <td>{{ result.produto.nome }}</td>
+                        <td>R$ {{ result.produto.valor }}</td>
+                        <td>{{ result.data_hora }}</td>
+                        <td>{{ result.turno }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7">Nenhum Resultado Encontrado</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
 
-<div class="table-wrapper" style="overflow:auto; height: 60lvh;">
-    <table class="striped">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Vendido Por</th>
-                <th>Vendido Para</th>
-                <th>Produto</th>
-                <th>Valor de Compra</th>
-                <th>Data</th>
-                <th>Turno</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for result in results %}
-            <tr>
-                <td>{{ result.id }}</td>
-                <td>
-                    {{ result.vendido_por.name }} (<a
-                        href="{{ url_for('profile', user_id=result.vendido_por.id ) }}">Perfil</a>)
-                </td>
-                <td>
-                    {{ result.vendido_para.name }} (<a
-                        href="{{ url_for('profile', user_id=result.vendido_para.id ) }}">Perfil</a>)
-                </td>
-                <td>{{ result.produto.nome }}</td>
-                <td>R$ {{ result.produto.valor }}</td>
-                <td>{{ result.data_hora }}</td>
-                <td>{{ result.turno }}</td>
-            </tr>
-            {% else %}
-            <tr>
-                <td colspan="7">Nenhum Resultado Encontrado</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+        <div class="pagination">
+            {{ pagination.info|safe }}
+            {{ pagination.links|safe }}
+        </div>
+    </div>
 </div>
 
-
-<div class="pagination">
-    {{ pagination.info|safe }}
-    {{ pagination.links|safe }}
-</div>
 
 {% endblock content %}

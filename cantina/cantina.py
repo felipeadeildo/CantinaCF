@@ -161,7 +161,7 @@ def sales_history():
             end_date = datetime.strptime(end_date, "%b %d, %Y").strftime("%Y-%m-%d") # transforma a data final em datetime
         else: # se a data final for igual a ""
             end_date = datetime.now().strftime("%Y-%m-%d") # transforma a data final em datetime onde a data atual é a de agora
-        query += f" {'WHERE' if not query.endswith('LIKE ?') else 'AND'} data_hora BETWEEN ? AND datetime(?, '+1 day', '-1 second')"
+        query += f" {'AND' if (query.endswith('LIKE ?)') or query.endswith('LIKE ?')) else 'WHERE'} data_hora BETWEEN ? AND datetime(?, '+1 day', '-1 second')"
         params.extend([start_date, end_date])
     
     query += f" ORDER BY {order_by} {order_mode}"
@@ -171,7 +171,6 @@ def sales_history():
 
     query += f" LIMIT ?, ?"
     params.extend([offset, per_page])
-
     results_obj = cur.execute(query, params).fetchall()
     results_obj = list(map(dict, results_obj))
 
@@ -185,29 +184,44 @@ def sales_history():
         results.append(result)
     
     total_query = query.split("LIMIT")[0].split("ORDER BY")[0].strip()
-    total_params = []
-    if total_query.count("?") == 2:
-        total_params.extend([f"%{vendido_por}%", f"%{vendido_por}%"])
-    elif total_query.count("?") == 4:
-        total_params.extend([f"%{vendido_por}%", f"%{vendido_por}%", f"%{vendido_para}%", f"%{vendido_para}%"])
-    elif total_query.count("?") == 6:
-        total_params.extend([f"%{vendido_por}%", f"%{vendido_por}%", f"%{vendido_para}%", f"%{vendido_para}%", start_date, end_date])
+    total_params = params[:-2]
     
     identificador = f"historico-vendas-{vendido_por}-{vendido_para}-{start_date}-{end_date}-{session['user']['id']}"
     hashed_query = hashlib.sha256(identificador.encode("utf-8")).hexdigest()
     results_obj = cur.execute(total_query, total_params).fetchall()
     results_obj = list(map(dict, results_obj))
+    stats = {}
+    for result in results_obj:
+        product = dict(get_product(id=result["produto_id"]))
+        if product["nome"] in stats:
+            stats[product["nome"]]['ammount'] += product["valor"]
+            stats[product["nome"]]['quantity'] += 1
+        else:
+            stats[product["nome"]] = {}
+            stats[product["nome"]]['id'] = product['id']
+            stats[product["nome"]]['quantity'] = 1
+            stats[product["nome"]]['valor'] = product['valor']
+            stats[product["nome"]]['ammount'] = product['valor']
     cache.set(hashed_query, results_obj)
 
     total = len(results_obj)
     
     pagination = Pagination(page=page, per_page=per_page, total=total, css_framework="materialize")
-
     context = {
         "results": results,
         "pagination": pagination,
         "page": page,
         "per_page": per_page,
-        "result_id": hashed_query
+        "result_id": hashed_query,
+        "stats": stats
     }
     return render_template("sales-history.html", **context)
+
+@app.route('/vendas-hoje')
+def filter_today_sales():
+    today_str = datetime.now().strftime(datetime.now().strftime("%b %d, %Y"))
+    args = request.args.copy()
+    args.pop('page', None)
+    args['start_date'] = today_str
+    args['end_date'] = today_str
+    return redirect(url_for('sales_history', **args))

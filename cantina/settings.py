@@ -44,6 +44,7 @@ PERMISSIONS = {
         "sales_history", # rota que lisa o o histórico de vendas paginado (salva resultado em cache para export_to_excel_api)
         "affiliates", # rota que permite que um funcionário possa gerenciar seus afiliados (adicionar, remover, visualizar)
         "affiliates_history", # permite que o funcionário veja o histórico de transações de seus afiliados na categoria de folha de pagamento pra que pague
+        "filter_today_sales", # aliases para filtrar resultados de vendas somente por HOJE
     ],
     "user": [
         "static", 
