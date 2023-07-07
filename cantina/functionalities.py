@@ -456,7 +456,12 @@ def affiliates_history():
     results = []
     for item in result_obj:
         item["data_hora"] = datetime.strptime(item["data_hora"], "%Y-%m-%d %H:%M:%S").strftime("%d/%m/%Y às %H:%M:%S")
-        item["afiliado"] = get_user(item["affiliation_id"])
+        affiliation_id = conn.execute("SELECT user_id FROM affiliation WHERE id = ?", (item["affiliation_id"],)).fetchone()
+        if affiliation_id is not None:
+            affiliation_id = affiliation_id['user_id']
+            item["afiliado"] = get_user(affiliation_id)
+        else:
+            item["afiliado"] = None
         item["liberado_por"] = get_user(item["liberado_por"])
         results.append(item)
     
@@ -486,16 +491,16 @@ def security_pay_payroll():
     if user is None:
         flash("Usuário de ID {} não encontrado!".format(user_id), category="error")
         return redirect(url_for("login"))
-    payment_method = request.args.get("payment-method")
+    payment_method = request.form.get("payment-method")
     if payment_method is None:
         flash("Por favor, insira o método de pagamento!", category="error")
         return
-    payment_value = request.args.get("payment-value")
+    payment_value = request.form.get("payment-value")
     if payment_value is None:
         flash("Por favor, insira o valor do pagamento!", category="error")
         return
     value = float(payment_value)
-    observations = request.args.get("obs")
+    observations = request.form.get("obs")
     if payment_method not in ('cash', ):
         file = request.files.get('proof')
         if file is None:
@@ -507,14 +512,15 @@ def security_pay_payroll():
         current_datetime_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         filename = secure_filename(f"{user_id}-{payment_method}-{value}-{current_datetime_str}.{file.filename}")
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        insert_recharge(user_id, payment_method, value, filename=filename, observations=observations, is_payroll=True)
+        insert_recharge(user_id, value, payment_method, filename=filename, observations=observations, is_payroll=True)
     else:
-        insert_recharge(user_id, payment_method, value, observations=observations, is_payroll=True)
+        insert_recharge(user_id, value, payment_method, observations=observations, is_payroll=True)
     flash(f"A solicitação de quitação de dívida no valor de R$ {value} foi realizada com sucesso! O saldo devedor em seu perfil será atualizado caso a solicitação seja aceita.", category="success")
 
 
 @app.route("/afiliados/pagar", methods=["POST", "GET"])
 def pay_payroll():
+    flash(f"Olá {session['user']['name']}, atualmente você tem um saldo devedor de R$ {session['user']['saldo_payroll']} na sua conta no sistema.", category="warning")
     if request.method == 'POST':
         security_pay_payroll()
     return render_template("pay-payroll.html")

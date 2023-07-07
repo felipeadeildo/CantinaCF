@@ -194,14 +194,14 @@ def sales_history():
     for result in results_obj:
         product = dict(get_product(id=result["produto_id"]))
         if product["nome"] in stats:
-            stats[product["nome"]]['ammount'] += product["valor"]
+            stats[product["nome"]]['ammount'] += result['valor']
             stats[product["nome"]]['quantity'] += 1
         else:
             stats[product["nome"]] = {}
             stats[product["nome"]]['id'] = product['id']
             stats[product["nome"]]['quantity'] = 1
-            stats[product["nome"]]['valor'] = product['valor']
-            stats[product["nome"]]['ammount'] = product['valor']
+            stats[product["nome"]]['valor'] = result['valor']
+            stats[product["nome"]]['ammount'] = result['valor']
     cache.set(hashed_query, results_obj)
 
     total = len(results_obj)

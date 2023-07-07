@@ -163,7 +163,7 @@
                                 href="{{ url_for('profile', user_id=result.vendido_para.id ) }}">Perfil</a>)
                         </td>
                         <td>{{ result.produto.nome }}</td>
-                        <td>R$ {{ result.produto.valor }}</td>
+                        <td>R$ {{ result.valor }}</td>
                         <td>{{ result.data_hora }}</td>
                         <td>{{ result.turno }}</td>
                     </tr>

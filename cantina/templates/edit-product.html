@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h3>{% block title %}Editar produto {{ product.id }}{% endblock title %}</h3>
+<h3 class="center-align">{% block title %}Editar produto {{ product.id }}{% endblock title %}</h3>
 
 <form method="post">
     <input type="hidden" name="{{ config['CSRF_COOKIE_NAME'] }}" value="{{ csrf_token() }}">

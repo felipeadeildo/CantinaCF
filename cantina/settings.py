@@ -45,6 +45,7 @@ PERMISSIONS = {
         "affiliates", # rota que permite que um funcionário possa gerenciar seus afiliados (adicionar, remover, visualizar)
         "affiliates_history", # permite que o funcionário veja o histórico de transações de seus afiliados na categoria de folha de pagamento pra que pague
         "filter_today_sales", # aliases para filtrar resultados de vendas somente por HOJE
+        "pay_payroll", # permite fazer o pagamento do que se tem acumulado na folha de pagamento
     ],
     "user": [
         "static", 

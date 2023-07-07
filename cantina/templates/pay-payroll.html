@@ -2,12 +2,11 @@
 
 {% block title %}
 Pagamento de Folha de Pagamento :D
-{% ednblock title %}
+{% endblock title %}
 
 {% block content %}
 <div class="container">
-    <h4 class="center">Pagamento da Folha de Pagamento</h4>
-    <h6>Olá {{ session.user.name }}, no momento você deve R$ {{ session.user.saldo_payroll }}</h6>
+    <h4 class="center-align">Pagamento da Folha de Pagamento</h4>
     <form action="{{ url_for('pay_payroll') }}" method="post" enctype="multipart/form-data">
         <div class="input-field">
             <select name="payment-method" id="payment-method" class="validate">
@@ -68,4 +67,4 @@ document.addEventListener('DOMContentLoaded', function() {
     paymentMethodTag.addEventListener('change', verify_proof);
 });
 </script>
-{% endblock %}
+{% endblock scripts %}

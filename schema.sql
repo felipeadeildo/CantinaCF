@@ -34,6 +34,7 @@ CREATE TABLE venda_produto(
   vendido_por INTEGER,
   vendido_para INTEGER,
   turno TEXT,
+  valor REAL DEFAULT 0,
   FOREIGN KEY(produto_id) REFERENCES produto(id),
   FOREIGN KEY(vendido_por) REFERENCES user(id),
   FOREIGN KEY(vendido_para) REFERENCES user(id)

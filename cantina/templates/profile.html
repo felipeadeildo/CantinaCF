@@ -5,7 +5,7 @@ Meu Perfil - {{ user.name }}
 {% endblock %}
 
 {% block content %}
-<h4 class="center">Meu Perfil</h4>
+<h4 class="center-align">Meu Perfil</h4>
 <div class="card">
     <div class="card-content">
         <div class="row">
@@ -22,6 +22,9 @@ Meu Perfil - {{ user.name }}
                 {% endif %}
                 {% if user.saldo %}
                 <p><strong>Saldo:</strong> <span class="blue-text">R$ {{ user.saldo }}</span></p>
+                {% endif %}
+                {% if user.saldo_payroll %}
+                <p><strong>Folha de Pagamento (devedor):</strong> <span class="red-text">R$ {{ user.saldo_payroll }}</span></p>
                 {% endif %}
                 {% if user.role %}
                 <p><strong>Cargo:</strong> <span class="blue-text">{{ user.role }}</span></p>
@@ -67,17 +70,18 @@ Meu Perfil - {{ user.name }}
     {% if transaction.tipo == 'entrada' and transaction.liberado_por %}
     <div class="card green lighten-4 col s12 m6 l4">
         <div class="card-content">
-            <span class="card-title">{{ transaction.data_hora }} - Recarga</span>
+            <span class="card-title">{{ transaction.data_hora }} - Entrada</span>
             <p>Tipo de pagamento: {{ transaction.tipo_pagamento }}</p>
             <p>Valor: R$ {{ transaction.valor }}</p>
             <p>Liberado por: {{ transaction.liberado_por.name }}</p>
             <p>Turno: {{ transaction.turno }}</p>
+            {% if transaction.is_payroll %}<p>*Referente à pagamento de saldo devedor*</p>{% endif %}
         </div>
     </div>
     {% elif transaction.tipo == 'entrada' and not transaction.liberado_por %}
     <div class="card yellow lighten-4 col s12 m6 l4">
         <div class="card-content">
-            <span class="card-title">{{ transaction.data_hora }} - Recarga Pendente</span>
+            <span class="card-title">{{ transaction.data_hora }} - Entrada Pendente</span>
             <p>Tipo de pagamento: {{ transaction.tipo_pagamento }}</p>
             <p>Valor: R$ {{ transaction.valor }}</p>
             <p>Liberado por: Pendente</p>
@@ -87,7 +91,7 @@ Meu Perfil - {{ user.name }}
     {% else %}
     <div class="card red lighten-4 col s12 m6 l4">
         <div class="card-content">
-            <span class="card-title">{{ transaction.data_hora }} - Venda</span>
+            <span class="card-title">{{ transaction.data_hora }} - Saída</span>
             <p>Produto: {{ transaction.product.nome }}</p>
             <p>Valor: R$ {{ transaction.product.valor }}</p>
             <p>Tipo: {{ transaction.product.tipo }}</p>

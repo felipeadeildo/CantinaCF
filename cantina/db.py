@@ -1,6 +1,6 @@
 from werkzeug.security import generate_password_hash
-from flask import g, abort, url_for, session
-from .settings import DB_PATH, SERIES
+from .settings import DB_PATH, SERIES, PAYMENT_TYPES
+from flask import g, abort, url_for
 from datetime import datetime
 from getpass import getpass
 from . import app
@@ -136,11 +136,11 @@ def insert_product_sales(sold_by: int, sold_to: int, products: list):
     turno = "Manhã" if current_datetime.hour < 12 else "Tarde"
     
     query_values = [
-        (current_datetime_str, product['id'], sold_by, sold_to, turno) for product in products
+        (current_datetime_str, product['id'], sold_by, sold_to, turno, product['valor']) for product in products
     ]
 
     conn = get_conn()
-    conn.executemany("INSERT INTO venda_produto (data_hora, produto_id, vendido_por, vendido_para, turno) VALUES (?, ?, ?, ?, ?)", query_values)
+    conn.executemany("INSERT INTO venda_produto (data_hora, produto_id, vendido_por, vendido_para, turno, valor) VALUES (?, ?, ?, ?, ?, ?)", query_values)
     conn.commit()
 
 def get_users():
@@ -219,6 +219,7 @@ def get_transactions(user_id: int, type: str = "all"):
             transaction["liberado_por"] = get_user(transaction["liberado_por"])
             transaction["tipo"] = "entrada"
             transaction["data_hora"] = normalize_datetime(transaction["data_hora"])
+            transaction["tipo_pagamento"] = PAYMENT_TYPES[transaction["tipo_pagamento"]]
             transactions.append(transaction)
     elif type == "saida":
         result = conn.execute("SELECT * FROM venda_produto WHERE vendido_para = ?", (user_id,)).fetchall()
