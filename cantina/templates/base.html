@@ -59,12 +59,20 @@
                 <li><a href="{{ url_for('products') }}">Produtos da Cantina</a></li>
                 {% endif %}
                 
+                {% if 'history_edits_products' in session['permissions'] %}
+                <li><a href="{{ url_for('history_edits_products') }}">Histórico de Edições de Produtos</a></li>
+                {% endif %}
+
                 {% if 'sales_history' in session['permissions'] %}
                 <li><a href="{{ url_for('sales_history') }}">Histórico de Vendas</a></li>
                 {% endif %}
                 
                 {% if 'users' in session['permissions'] %}
                 <li><a href="{{ url_for('users') }}">Usuários</a></li>
+                {% endif %}
+
+                {% if 'history_edits_users' in session['permissions'] %}
+                <li><a href="{{ url_for('history_edits_users') }}">Histórico de Edições de Usuários</a></li>
                 {% endif %}
 
                 {% if 'refill_requests' in session['permissions'] %}

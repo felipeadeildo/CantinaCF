@@ -1,4 +1,4 @@
-from .db import get_user, get_users, insert_user, update_user_password, get_transactions, insert_recharge, update_user_key, get_refill_requests, get_products, get_product, update_product_quantity, insert_product, record_stock_history, get_conn
+from .db import get_user, get_users, insert_user, update_user_password, get_transactions, insert_recharge, update_user_key, get_refill_requests, get_products, get_product, update_product_quantity, insert_product, record_stock_history, get_conn, insert_edit_user_history
 from flask import abort, request, session, render_template, flash, redirect, url_for
 from .settings import PERMISSIONS, UPLOAD_FOLDER, ALLOWED_EXTENSIONS, SERIES
 from flask_paginate import Pagination, get_page_args
@@ -121,8 +121,10 @@ def edit_profile():
         return redirect(url_for("profile"))
     
     if request.method == "POST":
+        updated_values = []
+        motivo = request.form.get("motivo", "Não informado")
         for key, value in request.form.items():
-            if key in (app.config["CSRF_COOKIE_NAME"], 'action'):
+            if key in (app.config["CSRF_COOKIE_NAME"], 'action', 'motivo'):
                 continue
             if key == "serie":
                 value = SERIES[int(value)]
@@ -130,7 +132,9 @@ def edit_profile():
                 value = value.lower()
             old_value = update_user_key(user["id"], key, value)
             if old_value != value and old_value is not None:
+                updated_values.append((key, old_value, value))
                 flash(f"Alteração de {key} foi feita com sucesso ({old_value} -> {value})!", category="success")
+        insert_edit_user_history(user["id"], updated_values, motivo, session.get("user")["id"])
 
     user = get_user(user["id"])
     context = {
@@ -531,9 +535,161 @@ def audits():
     return render_template("audits.html")
 
 
-@app.route("/historico-edições")
-def history_edits():
+@app.route("/historico-edições-produtos")
+def history_edits_products():
     conn = get_conn()
+    cur  = conn.cursor()
+    editado_por = request.args.get("editado_por", "")
+    start_date = request.args.get("data_inical", "")
+    end_date = request.args.get("data_final", "")
+    order_mode = request.args.get("ordenacao", "ASC")
+    order_by = request.args.get("ordenar_por", "data_hora")
+
+    query = "SELECT * FROM historico_edicao_produto"
+    params = []
+    if editado_por:
+        query += " INNER JOIN user ON user.id = historico_edicao_produto.editado_por WHERE user.username LIKE ?"
+        params.append(f"%{editado_por}%")
+    
+    if start_date or end_date:
+        if start_date:
+            start_date = datetime.strptime(start_date, "%b %d, %Y").strftime("%Y-%m-%d")
+        else:
+            start_date = datetime(year=2000, month=1, day=1).strftime("%Y-%m-%d")
+        
+        if end_date:
+            end_date = datetime.strptime(end_date, "%b %d, %Y").strftime("%Y-%m-%d")
+        else:
+            end_date = datetime.now().strftime("%Y-%m-%d")
+        query += f" {'WHERE' if not query.endswith('LIKE ?') else 'AND' } data_hora BETWEEN ? AND datetime(?, '+1 day', '-1 second')"
+        params.extend([start_date, end_date])
+    
+    if order_by:
+        query += f" ORDER BY {order_by} {order_mode}"
+
     page, per_page, offset = get_page_args(page_parameter='page', per_page_parameter='per_page')
     offset = (page - 1) * per_page
+
+    query += " LIMIT ?, ?"
+    params.extend([offset, per_page])
+
+    results_obj = cur.execute(query, params).fetchall()
+    results_obj = list(map(dict, results_obj))
+
+    results = []
+    for result in results_obj:
+        result = dict(result)
+        result["editado_por"] = dict(get_user(result["editado_por"], safe=True))
+        result["produto"] = dict(get_product(id=result["produto_id"]))
+        result["data_hora"] = datetime.strptime(result["data_hora"], "%Y-%m-%d %H:%M:%S").strftime("%d/%m/%Y às %H:%M:%S")
+        results.append(result)
+    total_query = query.split("LIMIT")[0].split('ORDER BY')[0].strip()
+    total_params = []
+    if total_query.count("?") == 1:
+        total_params.append(editado_por)
+    elif total_query.count('?') == 2:
+        total_params.extend([start_date, end_date])
+    elif total_query.count("?") == 3:
+        total_params.extend([editado_por, start_date, end_date])
+    identificador = f"historico de edição de produtos {', '.join(total_params)}"
+    hashed_query = hashlib.sha256(identificador.encode('utf-8')).hexdigest()
+    results_obj = cur.execute(total_query, total_params).fetchall()
+    results_obj = list(map(dict, results_obj))
+    cache.set(hashed_query, results_obj)
+
+
+    total = len(results_obj)
+    pagination = Pagination(page=page, per_page=per_page, total=total, css_framework='materialize')
+
+    context = {
+        "results": results,
+        "pagination": pagination,
+        "page": page,
+        "per_page": per_page,
+        "result_id": hashed_query
+    }
+
+    return render_template("history-edits-products.html", **context)
+
+@app.route("/historico-edições-usuários")
+def history_edits_users():
+    conn = get_conn()
+    cur  = conn.cursor()
+    editado_por = request.args.get("editado_por", "")
+    start_date = request.args.get("data_inicial", "")
+    end_date = request.args.get("data_final", "")
+    order_mode = request.args.get("ordenacao", "ASC")
+    order_by = request.args.get("ordenar_por", "data_hora")
+    usuario = request.args.get("usuario", "")
+
+    print(editado_por, start_date, end_date, usuario)
+
+    query = "SELECT * FROM historico_edicao_usuario"
+    params = []
+    if editado_por:
+        query += " INNER JOIN user ON user.id = historico_edicao_usuario.editado_por OR user.id = historico_edicao_usuario.user_id WHERE user.username LIKE ? OR user.username LIKE ?"
+        params.extend([f"%{editado_por}%", f"%{usuario}%"])
     
+    if start_date or end_date:
+        if start_date:
+            start_date = datetime.strptime(start_date, "%b %d, %Y").strftime("%Y-%m-%d")
+        else:
+            start_date = datetime(year=2000, month=1, day=1).strftime("%Y-%m-%d")
+        
+        if end_date:
+            end_date = datetime.strptime(end_date, "%b %d, %Y").strftime("%Y-%m-%d")
+        else:
+            end_date = datetime.now().strftime("%Y-%m-%d")
+        query += f" {'WHERE' if not query.endswith('LIKE ?') else 'AND' } data_hora BETWEEN ? AND datetime(?, '+1 day', '-1 second')"
+        params.extend([start_date, end_date])
+    
+    if order_by:
+        query += f" ORDER BY {order_by} {order_mode}"
+
+    page, per_page, offset = get_page_args(page_parameter='page', per_page_parameter='per_page')
+    offset = (page - 1) * per_page
+
+    query += " LIMIT ?, ?"
+    params.extend([offset, per_page])
+
+    print(params)
+
+    results_obj = cur.execute(query, params).fetchall()
+    results_obj = list(map(dict, results_obj))
+
+    results = []
+    for result in results_obj:
+        result = dict(result)
+        result["editado_por"] = dict(get_user(result["editado_por"], safe=True))
+        result["user"] = dict(get_user(result["user_id"]))
+        result["data_hora"] = datetime.strptime(result["data_hora"], "%Y-%m-%d %H:%M:%S").strftime("%d/%m/%Y às %H:%M:%S")
+        results.append(result)
+    total_query = query.split("LIMIT")[0].split('ORDER BY')[0].strip()
+    print(query)
+    total_params = []
+    if total_query.count("?") == 2 and not total_query.endswith("datetime(?, '+1 day', '-1 second')"):
+        total_params.extend([f"%{editado_por}%", f"%{usuario}%"])
+    elif total_query.count('?') == 2:
+        total_params.extend([start_date, end_date])
+    elif total_query.count("?") == 4:
+        total_params.extend([f"%{editado_por}%", f"%{usuario}%", start_date, end_date])
+    identificador = f"historico de edição de produtos {', '.join(total_params)}"
+    hashed_query = hashlib.sha256(identificador.encode('utf-8')).hexdigest()
+    results_obj = cur.execute(total_query, total_params).fetchall()
+    results_obj = list(map(dict, results_obj))
+    cache.set(hashed_query, results_obj)
+
+
+    total = len(results_obj)
+    pagination = Pagination(page=page, per_page=per_page, total=total, css_framework='materialize')
+
+    context = {
+        "results": results,
+        "pagination": pagination,
+        "page": page,
+        "per_page": per_page,
+        "result_id": hashed_query
+    }
+
+    return render_template("history-edits-users.html", **context)
+

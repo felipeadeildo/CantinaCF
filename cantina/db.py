@@ -290,6 +290,25 @@ def insert_product(**kwargs):
     last_id = conn.execute("SELECT id FROM produto ORDER BY id DESC LIMIT 1").fetchone()[0]
     return last_id
 
+def insert_edit_product_history(product_id:int, updated_values:list, motivo:str, edited_by:int):
+    conn = get_conn()
+    for key, old_value, new_value in updated_values:
+        conn.execute(
+            "INSERT INTO historico_edicao_produto (produto_id, chave, valor_antigo, valor_novo, motivo, editado_por) VALUES (?, ?, ?, ?, ?, ?)",
+            (product_id, key, old_value, new_value, motivo, edited_by)
+        )
+        conn.commit()
+
+
+def insert_edit_user_history(user_id:int, updated_values:list, motivo:str, edited_by:int):
+    conn = get_conn()
+    for key, old_value, new_value in updated_values:
+        conn.execute(
+            "INSERT INTO historico_edicao_usuario (user_id, chave, valor_antigo, valor_novo, motivo, editado_por) VALUES (?, ?, ?, ?, ?, ?)",
+            (user_id, key, old_value, new_value, motivo, edited_by)
+        )
+        conn.commit()
+
 
 def record_stock_history(product_id: int, quantity: int, received_by: int, valor_compra: float, valor_venda: float, **kwargs):
     """

@@ -13,8 +13,7 @@ CREATE TABLE user(
   telefone TEXT,
   email TEXT,
   cpf TEXT,
-  added_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
+  added_at DATETIME DEFAULT (datetime(strftime('%s', 'now'), 'unixepoch', 'localtime')),);
 
 -- Create the "produto" table
 CREATE TABLE produto(
@@ -29,7 +28,7 @@ CREATE TABLE produto(
 -- Create the "venda_produto" table
 CREATE TABLE venda_produto(
   id INTEGER PRIMARY KEY,
-  data_hora DATETIME DEFAULT CURRENT_TIMESTAMP,
+  data_hora DATETIME DEFAULT (datetime(strftime('%s', 'now'), 'unixepoch', 'localtime')),
   produto_id INTEGER,
   vendido_por INTEGER,
   vendido_para INTEGER,
@@ -43,7 +42,7 @@ CREATE TABLE venda_produto(
 -- Create the "historico_abastecimento_estoque" table
 CREATE TABLE historico_abastecimento_estoque(
   id INTEGER PRIMARY KEY,
-  data_hora DATETIME DEFAULT CURRENT_TIMESTAMP,
+  data_hora DATETIME DEFAULT (datetime(strftime('%s', 'now'), 'unixepoch', 'localtime')),
   descricao TEXT,
   produto_id INTEGER,
   quantidade INTEGER,
@@ -59,7 +58,7 @@ CREATE TABLE controle_pagamento(
   id INTEGER PRIMARY KEY,
   tipo_pagamento TEXT, -- pix, boleto, cartão debito, cartão crédito
   descricao TEXT, -- referente a pagamento de num sei oq
-  data_hora DATETIME DEFAULT CURRENT_TIMESTAMP,
+  data_hora DATETIME DEFAULT (datetime(strftime('%s', 'now'), 'unixepoch', 'localtime')),
   valor REAL,
   liberado_por INTEGER,
   turno TEXT,
@@ -85,9 +84,36 @@ CREATE TABLE folha_de_pagamento(
   valor REAL,
   entidade_id INTEGER, -- é o funcionário = pessoa que vai pagar no finaol de tudo
   affiliation_id INTEGER,
-  data_hora DATETIME DEFAULT CURRENT_TIMESTAMP,
+  data_hora DATETIME DEFAULT (datetime(strftime('%s', 'now'), 'unixepoch', 'localtime')),
   liberado_por INTEGER,
   FOREIGN KEY(entidade_id) REFERENCES user(id),
   FOREIGN KEY(liberado_por) REFERENCES user(id),
   FOREIGN KEY(affiliation_id) REFERENCES affiliation(id)
 );
+
+CREATE TABLE historico_edicao_produto(
+  id INTEGER PRIMARY KEY,
+  data_hora DATETIME DEFAULT (datetime(strftime('%s', 'now'), 'unixepoch', 'localtime')),
+  produto_id INTEGER,
+  editado_por INTEGER,
+  chave TEXT,
+  valor_antigo TEXT,
+  valor_novo TEXT,
+  motivo TEXT,
+  FOREIGN KEY(produto_id) REFERENCES produto(id),
+  FOREIGN KEY(editado_por) REFERENCES user(id)
+);
+
+CREATE TABLE historico_edicao_usuario(
+  id INTEGER PRIMARY KEY,
+  data_hora DATETIME DEFAULT (datetime(strftime('%s', 'now'), 'unixepoch', 'localtime')),
+  user_id INTEGER,
+  editado_por INTEGER,
+  chave TEXT,
+  valor_antigo TEXT,
+  valor_novo TEXT,
+  motivo TEXT,
+  FOREIGN KEY(user_id) REFERENCES user(id),
+  FOREIGN KEY(editado_por) REFERENCES user(id)
+);
+

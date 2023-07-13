@@ -1,4 +1,4 @@
-from .db import get_products, get_user, update_user_saldo, insert_product_sales, get_product, update_product_key, get_conn, record_stock_history
+from .db import get_products, get_user, update_user_saldo, insert_product_sales, get_product, update_product_key, get_conn, record_stock_history, insert_edit_product_history
 from flask import render_template, request, flash, session, redirect, url_for
 from flask_paginate import Pagination, get_page_args
 from .auth import verify_password
@@ -103,6 +103,7 @@ def edit_product():
         flash("Produto de ID {} não encontrado!".format(product_id), category="error")
         return redirect(url_for('products'))
     
+    updated_values = []
     if request.method == "POST":
         motivo = request.form.get("motivo")
         if motivo is None:
@@ -113,7 +114,9 @@ def edit_product():
                 continue
             old_value = update_product_key(product_id=product_id, key=key, value=value)
             if str(old_value) != str(value) and old_value is not None:
+                updated_values.append((key, old_value, value))
                 flash(f"Alteração de {key} foi feita com sucesso ({old_value} -> {value})!", category="success")
+        insert_edit_product_history(product_id=product_id, updated_values=updated_values, motivo=motivo, edited_by=session["user"]["id"])
         
         
         

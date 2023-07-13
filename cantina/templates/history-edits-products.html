@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block additional_css %}
+<style>
+    /* CSS para tornar as linhas da tabela alternadamente escuras */
+    .striped tbody tr:nth-child(odd) {
+        background-color: #f2f2f2;
+    }
+
+
+    .table-wrapper {
+        border: 1px solid #000;
+        padding: 20px;
+        margin-top: 20px;
+    }
+</style>
+{% endblock additional_css %}
+
+{% block content %}
+<h3 class="center-align">
+    {% block title %}
+    Histórico de Edições de Produtos
+    {% endblock title %}
+</h3>
+
+<div class="row">
+    <div class="col s12">
+        <form method="get">
+            <div class="row">
+                <div class="input-field col s6">
+                    <input type="text" name="editado_por" id="editado_por" value="{{ request.args.get('editado_por', '') }}">
+                    <label for="editado_por">Editado por</label>
+                </div>
+
+                <div class="input-field col s6">
+                    <input type="text" name="produto" id="produto" value="{{ request.args.get('produto', '') }}">
+                    <label for="produto">Produto</label>
+                </div>
+
+                <div class="input-field col s6">
+                    <select name="ordenar_por" id="ordenar_por">
+                        <option value="" disabled {{ request.args.get( 'ordenar_por' ) if request.args.get( 'ordenar_por' )
+                            else 'selected' }}>Ordenar Por</option>
+                        <option value="data_hora" {{ 'selected' if request.args.get( 'ordenar_por' ) == 'data_hora' else '' }}>Data e
+                            Hora</option>
+                        <option value="editado_por" {{ 'selected' if request.args.get( 'ordenar_por' ) == 'editado_por' else '' }}>
+                            Editado por</option>
+                        <option value="produto_id" {{ 'selected' if request.args.get( 'ordenar_por' ) == 'produto_id' else '' }}>
+                            Produto</option>
+                        <option value="motivo" {{ 'selected' if request.args.get( 'ordenar_por' ) == 'motivo' else '' }}>Motivo</option>
+                        <option value="id" {{ 'selected' if request.args.get( 'ordenar_por' ) == 'id' else '' }}>ID</option>
+                        <label for="ordenar_por">Ordenar por</label>
+                    </select>
+                </div>
+
+                <div class="input-field col s6">
+                    <select name="ordenacao" id="ordenacao">
+                        <option value="" disabled {{ request.args.get( 'ordenacao' ) if request.args.get( 'ordenacao' )
+                            else 'selected' }}>Ordenação</option>
+                        <option value="ASC" {{ 'selected' if request.args.get( 'ordenacao' )=='ASC' else '' }}>Crescente
+                        </option>
+                        <option value="DESC" {{ 'selected' if request.args.get( 'ordenacao' )=='DESC' else '' }}>Decrescente
+                        </option>
+                        <label for="ordenacao">Ordenação</label>
+                    </select>
+                </div>
+
+                <div class="input-field col s6">
+                    <input type="text" id="data_final" name="data_final" class="datepicker"
+                        value="{{ request.args.get('data_final', '')}}">
+                    <label for="data_final">Data Final</label>
+                </div>
+
+                <div class="input-field col s6">
+                    <input type="text" id="data_inicial" name="data_inicial" class="datepicker"
+                        value="{{ request.args.get('data_inicial', '')}}">
+                    <label for="data_inicial">Data Inicial</label>
+                </div>
+
+                <button class="btn waves-effect waves-light tooltiped" type="submit" name="action" data-position="bottom"
+                    data-tooltip="Filtrar Resultados">
+                    Pesquisar
+                    <i class="material-icons right">send</i>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="col s12">
+        <h3>
+            Resultados
+            <a class="btn waves-effect waves-light tooltipped" data-position="bottom" data-tooltip="Exportar para Excel"
+                href="{{ url_for('export_to_excel_api', result_id=result_id) }}">
+                Download
+                <i class="material-icons right">get_app</i>
+            </a>
+        </h3>
+
+        <div class="table-wrapper" style="overflow:auto; height: 60vh;">
+            <table class="striped centered">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Editado Por</th>
+                        <th>Produto</th>
+                        <th>Chave</th>
+                        <th>Valor Antigo</th>
+                        <th>Valor Novo</th>
+                        <th>Motivo</th>
+                        <th>Data e Hora</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in results %}
+                    <tr>
+                        <td>{{ result.id }}</td>
+                        <td>
+                            {{ result.editado_por.name }} (<a
+                                href="{{ url_for('profile', user_id=result.editado_por.id ) }}">Perfil</a>)
+                        </td>
+                        <td>{{ result.produto.nome }} ({{ result.produto.id }})</td>
+                        <td>{{ result.chave }}</td>
+                        <td>{{ result.valor_antigo }}</td>
+                        <td>{{ result.valor_novo }}</td>
+                        <td>{{ result.motivo }}</td>
+                        <td>{{ result.data_hora }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7">Nenhum Resultado Encontrado</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="pagination">
+            {{ pagination.info|safe }}
+            {{ pagination.links|safe }}
+        </div>
+    </div>
+</div>
+
+
+{% endblock content %}
