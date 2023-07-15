@@ -13,7 +13,8 @@ CREATE TABLE user(
   telefone TEXT,
   email TEXT,
   cpf TEXT,
-  added_at DATETIME DEFAULT (datetime(strftime('%s', 'now'), 'unixepoch', 'localtime')),);
+  added_at DATETIME DEFAULT (datetime(strftime('%s', 'now'), 'unixepoch', 'localtime'))
+);
 
 -- Create the "produto" table
 CREATE TABLE produto(
@@ -116,4 +117,3 @@ CREATE TABLE historico_edicao_usuario(
   FOREIGN KEY(user_id) REFERENCES user(id),
   FOREIGN KEY(editado_por) REFERENCES user(id)
 );
-
