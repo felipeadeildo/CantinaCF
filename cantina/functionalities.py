@@ -19,13 +19,13 @@ def users():
     if request.method == "POST":
         if session["user"]["role"] != "admin":
             abort(403)
-        username = request.form.get("username")
+        username = request.form.get("username", "-"*15)
         password = request.form.get("password")
         name = request.form.get("name")
         role = request.form.get("role")
         serie = request.form.get("serie")
         turma = request.form.get("turma")
-        matricula = request.form.get("matricula")
+        matricula = request.form.get("matricula", "-"*15)
         if get_user(username, by="username") is None and get_user(matricula, by="matricula") is None:
             insert_user(username, generate_password_hash(password), role, name=name, serie=serie, turma=turma, matricula=matricula)
             flash(f"Usuário {username} foi registrado com sucesso!", category="success")
