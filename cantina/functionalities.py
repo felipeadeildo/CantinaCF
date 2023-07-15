@@ -195,7 +195,7 @@ def security_recharge():
         return
     # new_value = user["saldo"] + value
     observations = request.form.get("observations")
-    if payment_method not in ('cash', 'payroll', 'debit_card', 'credit_card'):
+    if payment_method in ('payroll', 'pix'):
         file = request.files.get("proof")
         if file is None:
             flash("Por favor, insira o comprovante de pagamento!", category="error")
