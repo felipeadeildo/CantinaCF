@@ -136,6 +136,9 @@ def edit_profile():
                 value = SERIES[int(value)]
             if key == "turma":
                 value = value.lower()
+            value = value.strip()
+            if value == '':
+                continue
             old_value = update_user_key(user["id"], key, value)
             if old_value != value and old_value is not None:
                 updated_values.append((key, old_value, value))
@@ -628,7 +631,6 @@ def history_edits_users():
     order_by = request.args.get("ordenar_por", "data_hora")
     usuario = request.args.get("usuario", "")
 
-    print(editado_por, start_date, end_date, usuario)
 
     query = "SELECT * FROM historico_edicao_usuario"
     params = []
@@ -658,7 +660,6 @@ def history_edits_users():
     query += " LIMIT ?, ?"
     params.extend([offset, per_page])
 
-    print(params)
 
     results_obj = cur.execute(query, params).fetchall()
     results_obj = list(map(dict, results_obj))
@@ -671,7 +672,6 @@ def history_edits_users():
         result["data_hora"] = datetime.strptime(result["data_hora"], "%Y-%m-%d %H:%M:%S").strftime("%d/%m/%Y às %H:%M:%S")
         results.append(result)
     total_query = query.split("LIMIT")[0].split('ORDER BY')[0].strip()
-    print(query)
     total_params = []
     if total_query.count("?") == 2 and not total_query.endswith("datetime(?, '+1 day', '-1 second')"):
         total_params.extend([f"%{editado_por}%", f"%{usuario}%"])

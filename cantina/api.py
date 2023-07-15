@@ -199,7 +199,6 @@ def refill_manage_request_api():
             )
             conn.commit()
             financiador = get_user(affiliation["entidade_id"])
-            print(dict(financiador), dict(payment_infos))
             new_payroll_saldo = financiador["saldo_payroll"] + payment_infos["valor"]
             conn.execute("UPDATE user SET saldo_payroll = ? WHERE id = ?", (new_payroll_saldo, financiador['id']))
             conn.commit()
