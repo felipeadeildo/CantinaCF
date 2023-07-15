@@ -58,7 +58,7 @@ Recarga de Crédito
         let proofContainerTag = document.getElementById('proof-container');
 
         verify_proof_visualization = function () {
-            if (paymentMethodTag.value === 'cash' || paymentMethodTag.value == 'payroll' || paymentMethodTag.value === 'debit_card' || paymentMethodTag.value === 'credit_card') {
+            if (paymentMethodTag.value === 'cash' || paymentMethodTag.value === 'debit_card' || paymentMethodTag.value === 'credit_card') {
                 proofContainerTag.style.display = 'none';
             } else {
                 proofContainerTag.style.display = 'block';
