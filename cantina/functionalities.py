@@ -187,15 +187,24 @@ def security_recharge():
         flash("Por favor, insira o valor!", category="error")
         return
     value = float(value)
+    if value < 0:
+        flash(f"Então, espertinho(a), por favor, insira um valor positivo!", category="error")
+        return
+    if value == 0:
+        flash(f"Não vejo como uma recarga de R$ 0 poderia lhe ser útil...", category="error")
+        return
     # new_value = user["saldo"] + value
     observations = request.form.get("observations")
-    if payment_method not in ('cash', 'payroll'):
+    if payment_method not in ('cash', 'payroll', 'debit_card', 'credit_card'):
         file = request.files.get("proof")
         if file is None:
             flash("Por favor, insira o comprovante de pagamento!", category="error")
             return
         current_datetime_str = datetime.now().strftime("%Y-%m-%d %H-%M-%S")
         filename = secure_filename(f"{user_id}.{payment_method}.{current_datetime_str}.{file.filename}")
+        if not allowed_file(filename):
+            flash(f"Por favor, insira um comprovante de pagamento válido! (A extensão do arquivo deve ser algumas dessas: {', '.join(ALLOWED_EXTENSIONS)})", category="error")
+            return
         file.save(os.path.join(UPLOAD_FOLDER, filename))
         insert_recharge(user_id, value, payment_method, filename=filename, observations=observations)
     else:
