@@ -160,7 +160,7 @@ Vendas
                     quantidadeTag.innerText = data.product.quantidade;
 
                 } else {
-                    M.toast({ html: 'Algo deu errado.', classes: 'custom-toast' });
+                    M.toast({ html: `${data.message}`, classes: 'custom-toast' });
                 }
             })
             .catch((error) => {
