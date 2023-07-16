@@ -37,6 +37,12 @@ def add_to_cart_api():
     conn = get_conn()
     try:
         product = get_product(id=product_id)
+        if product["quantidade"] < 1:
+            context = {
+                "message": f"O produto {product['nome']} não possui estoque!",
+                "ok": False
+            }
+            return jsonify(context), 201
         update_product_quantity(id=product_id, quantity=product["quantidade"] - 1)
         conn.commit()
     except Exception as e:
