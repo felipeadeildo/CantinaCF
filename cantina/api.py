@@ -187,8 +187,9 @@ def refill_manage_request_api():
             "error": True
         })
     
-    requester = dict(get_user(payment_infos["aluno_id"]))
-    new_saldo = requester.get("saldo", 0) + payment_infos["valor"]
+    requester = get_user(payment_infos["aluno_id"])
+    new_saldo = requester["saldo"] or 0
+    new_saldo += payment_infos["valor"]
     if accepted:
         if payment_infos['is_payroll']:
             new_saldo = requester["saldo_payroll"] - payment_infos["valor"]
