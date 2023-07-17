@@ -206,6 +206,12 @@ def security_recharge():
             flash(f"Por favor, insira um comprovante de pagamento válido! (A extensão do arquivo deve ser algumas dessas: {', '.join(ALLOWED_EXTENSIONS)})", category="error")
             return
         file.save(os.path.join(UPLOAD_FOLDER, filename))
+        if payment_method == "payroll":
+            conn = get_conn()
+            is_affiliation = conn.execute("SELECT * FROM affiliation WHERE user_id = ?", (user_id,)).fetchone()
+            if is_affiliation is None:
+                flash(f"Então, meu anjo, você não está afiliado a ninguém ainda...", category="error")
+                return
         insert_recharge(user_id, value, payment_method, filename=filename, observations=observations)
     else:
         insert_recharge(user_id, value, payment_method, observations=observations)
