@@ -18,7 +18,7 @@ CREATE TABLE user(
 
 -- Create the "produto" table
 CREATE TABLE produto(
-  id INTEGER PRIMARY KEY,
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
   nome TEXT NOT NULL, -- pipoca bokus
   descricao TEXT, -- pode ser observações
   valor REAL NOT NULL,
@@ -28,7 +28,7 @@ CREATE TABLE produto(
 
 -- Create the "venda_produto" table
 CREATE TABLE venda_produto(
-  id INTEGER PRIMARY KEY,
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
   data_hora DATETIME DEFAULT (datetime(strftime('%s', 'now'), 'unixepoch', 'localtime')),
   produto_id INTEGER,
   vendido_por INTEGER,
@@ -42,7 +42,7 @@ CREATE TABLE venda_produto(
 
 -- Create the "historico_abastecimento_estoque" table
 CREATE TABLE historico_abastecimento_estoque(
-  id INTEGER PRIMARY KEY,
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
   data_hora DATETIME DEFAULT (datetime(strftime('%s', 'now'), 'unixepoch', 'localtime')),
   descricao TEXT,
   produto_id INTEGER,
@@ -56,7 +56,7 @@ CREATE TABLE historico_abastecimento_estoque(
 
 -- Create the "controle_pagamento" table
 CREATE TABLE controle_pagamento(
-  id INTEGER PRIMARY KEY,
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
   tipo_pagamento TEXT, -- pix, boleto, cartão debito, cartão crédito
   descricao TEXT, -- referente a pagamento de num sei oq
   data_hora DATETIME DEFAULT (datetime(strftime('%s', 'now'), 'unixepoch', 'localtime')),
@@ -81,7 +81,7 @@ CREATE TABLE affiliation(
 
 -- Create folha de pagamento
 CREATE TABLE folha_de_pagamento(
-  id INTEGER PRIMARY KEY,
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
   valor REAL,
   entidade_id INTEGER, -- é o funcionário = pessoa que vai pagar no finaol de tudo
   affiliation_id INTEGER,
@@ -93,7 +93,7 @@ CREATE TABLE folha_de_pagamento(
 );
 
 CREATE TABLE historico_edicao_produto(
-  id INTEGER PRIMARY KEY,
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
   data_hora DATETIME DEFAULT (datetime(strftime('%s', 'now'), 'unixepoch', 'localtime')),
   produto_id INTEGER,
   editado_por INTEGER,
@@ -106,7 +106,7 @@ CREATE TABLE historico_edicao_produto(
 );
 
 CREATE TABLE historico_edicao_usuario(
-  id INTEGER PRIMARY KEY,
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
   data_hora DATETIME DEFAULT (datetime(strftime('%s', 'now'), 'unixepoch', 'localtime')),
   user_id INTEGER,
   editado_por INTEGER,
