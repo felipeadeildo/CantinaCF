@@ -120,12 +120,18 @@
                     <tr>
                         <td>{{ result.id }}</td>
                         <td>{{ result.tipo_pagamento }}</td>
-                        <td>{{ result.descricao }}</td>
+                        <td>{{ result.descricao or '-'}}</td>
                         <td>{{ result.data_hora }}</td>
-                        <td>{{ result.valor }}</td>
-                        <td>{{ result.liberado_por }}</td>
+                        <td>R$ {{ result.valor }}</td>
+                        <td>
+                            {% if result.liberado_por %}
+                            {{ result.liberado_por.name }} (<a href="{{ url_for('profile', user_id=result.liberado_por.id) }}">Perfil</a>)
+                            {% else %}
+                            Sem liberador
+                            {% endif %}
+                        </td>
                         <td>{{ result.turno }}</td>
-                        <td>{{ result.aluno_id }}</td>
+                        <td>{{ result.aluno.name }} (<a href="{{ url_for('profile', user_id=result.aluno.id) }}">Perfil</a>)</td>
                         <td>
                             {% if result.comprovante_url %}
                             <a href="{{ result.comprovante_url }}" class="btn" target="_blank">Comprovante</a>

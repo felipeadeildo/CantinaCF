@@ -774,6 +774,8 @@ def recharge_history():
             result["comprovante_url"] = url_for("static", filename=filename)
         else:
             result["comprovante_url"] = None
+        result["liberado_por"] = get_user(result["liberado_por"], safe=True)
+        result["aluno"] = get_user(result["aluno_id"], safe=True)
 
     if start_date or end_date:
         total_params = params[:-2]
@@ -794,7 +796,6 @@ def recharge_history():
         results_final.append(result)
 
     cache.set(hashed_query, results_obj)
-    print(results_obj[0])
 
     total = len(results_obj)
     pagination = Pagination(page=page, per_page=per_page, total=total, css_framework='materialize')
