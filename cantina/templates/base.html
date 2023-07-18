@@ -51,20 +51,32 @@
                 <li><a href="{{ url_for('recharge') }}">Recarga</a></li>
                 {% endif %}
 
+                {% if 'recharge_history' in session['permissions'] %}
+                <li><a href="{{ url_for('recharge_history') }}">Histórico de Recargas</a></li>
+                {% endif %}
+
                 {% if 'index' in session['permissions'] %}
                 <li><a href="{{ url_for('index') }}">Cantina</a></li>
+                {% endif %}
+                
+                {% if 'sales_history' in session['permissions'] %}
+                <li><a href="{{ url_for('sales_history') }}">Histórico de Vendas</a></li>
                 {% endif %}
                 
                 {% if 'products' in session['permissions'] %}
                 <li><a href="{{ url_for('products') }}">Produtos da Cantina</a></li>
                 {% endif %}
                 
-                {% if 'history_edits_products' in session['permissions'] %}
-                <li><a href="{{ url_for('history_edits_products') }}">Histórico de Edições de Produtos</a></li>
+                {% if 'stock_control' in session['permissions'] %}
+                <li><a href="{{ url_for('stock_control') }}">Controle de Estoque</a></li>
+                {% endif %}
+                
+                {% if 'stock_history' in session['permissions'] %}
+                <li><a href="{{ url_for('stock_history') }}">Histórico do Estoque</a></li>
                 {% endif %}
 
-                {% if 'sales_history' in session['permissions'] %}
-                <li><a href="{{ url_for('sales_history') }}">Histórico de Vendas</a></li>
+                {% if 'history_edits_products' in session['permissions'] %}
+                <li><a href="{{ url_for('history_edits_products') }}">Histórico de Edições de Produtos</a></li>
                 {% endif %}
                 
                 {% if 'users' in session['permissions'] %}
@@ -79,14 +91,6 @@
                 <li><a href="{{ url_for('refill_requests') }}">Verificação de Pagamentos</a></li>
                 {% endif %}
                 
-                {% if 'stock_control' in session['permissions'] %}
-                <li><a href="{{ url_for('stock_control') }}">Controle de Estoque</a></li>
-                {% endif %}
-
-                {% if 'stock_history' in session['permissions'] %}
-                <li><a href="{{ url_for('stock_history') }}">Histórico do Estoque</a></li>
-                {% endif %}
-
                 {% if 'affiliates' in session['permissions'] %}
                 <li><a href="{{ url_for('affiliates') }}">Afiliados</a></li>
                 {% endif %}

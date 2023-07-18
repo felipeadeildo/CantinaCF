@@ -47,6 +47,7 @@ PERMISSIONS = {
         "pay_payroll", # permite fazer o pagamento do que se tem acumulado na folha de pagamento
         "history_edits_products", # visualização de histórico de edições de produtos
         "history_edits_users", # visualização de histórico de edições de usuários
+        "recharge_history", # visualização de histórico de recargas
     ],
     "Funcionário": [
         "static", 
@@ -103,7 +104,8 @@ PERMISSIONS = {
         "refill_requests",
         "filter_today_sales",
         "sales_history",
-        "export_to_excel_api"
+        "export_to_excel_api",
+        "recharge_history",
     ],
     "guest": [
         "static", 
@@ -130,6 +132,7 @@ PAYMENT_TYPES = {
     'pix': 'PIX',
     'payroll': 'Folha de Pagamento',
 }
+"""Mapping of payment types. The key is the payment type and the value is the description."""
 
 SERIES = [
     '1º EM', '2º EM', '3º EM',

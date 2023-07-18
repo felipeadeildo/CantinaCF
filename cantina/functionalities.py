@@ -1,6 +1,6 @@
 from .db import get_user, get_users, insert_user, update_user_password, get_transactions, insert_recharge, update_user_key, get_refill_requests, get_products, get_product, update_product_quantity, insert_product, record_stock_history, get_conn, insert_edit_user_history
 from flask import abort, request, session, render_template, flash, redirect, url_for
-from .settings import PERMISSIONS, UPLOAD_FOLDER, ALLOWED_EXTENSIONS, SERIES
+from .settings import PERMISSIONS, UPLOAD_FOLDER, ALLOWED_EXTENSIONS, SERIES, PAYMENT_TYPES
 from flask_paginate import Pagination, get_page_args
 from werkzeug.security import generate_password_hash
 from werkzeug.utils import secure_filename
@@ -714,3 +714,98 @@ def history_edits_users():
 
     return render_template("history-edits-users.html", **context)
 
+@app.route("/histórico-recargas")
+def recharge_history():
+    conn = get_conn()
+    cur = conn.cursor()
+    recharge_type = request.args.get("recharge_type", "")
+    allowed_by = request.args.get("allowed_by", "")
+    sold_for = request.args.get("sold_for", "")
+    start_date = request.args.get("start_date", "")
+    end_date = request.args.get("end_date", "")
+    order_mode = request.args.get("order_mode", "ASC")
+    order_by = request.args.get("order_by", "data_hora")
+
+    query = "SELECT * FROM controle_pagamento cp LEFT JOIN user u_allowed_by ON cp.liberado_por = u_allowed_by.id LEFT JOIN user u_sold_for ON cp.aluno_id = u_sold_for.id WHERE 1=1"
+    params = []
+    
+    if recharge_type:
+        query += " AND cp.tipo_pagamento = ?"
+        params.append(recharge_type)
+    
+    if allowed_by:
+        allowed_by_id = cur.execute("SELECT id FROM user WHERE username like ? or name like ?", (f"%{allowed_by}%", f"%{allowed_by}%")).fetchone()
+        if allowed_by_id is not None:
+            query += " AND cp.liberado_por = ?"
+            params.append(allowed_by_id['id'])
+    
+    if sold_for:
+        sold_for_id = cur.execute("SELECT id FROM user WHERE username like ? or name like ?", (f"%{sold_for}%", f"%{sold_for}%")).fetchone()
+        if sold_for_id is not None:
+            query += " AND cp.aluno_id = ?"
+            params.append(sold_for_id['id'])
+    
+    if start_date or end_date:
+        if start_date:
+            start_date = datetime.strptime(start_date, "%b %d, %Y").strftime("%Y-%m-%d")
+        else:
+            start_date = datetime(year=2000, month=1, day=1).strftime("%Y-%m-%d")
+        
+        if end_date:
+            end_date = datetime.strptime(end_date, "%b %d, %Y").strftime("%Y-%m-%d")
+        else:
+            end_date = datetime.now().strftime("%Y-%m-%d")
+        query += " AND data_hora BETWEEN ? AND datetime(?, '+1 day', '-1 second')"
+        params.extend([start_date, end_date])
+    
+    query += f" ORDER BY cp.{order_by} {order_mode}"
+
+    page, per_page, offset = get_page_args(page_parameter='page', per_page_parameter='per_page')
+    offset = (page - 1) * per_page
+    query += f" LIMIT {offset}, {per_page}"
+
+    results = cur.execute(query, params).fetchall()
+    results = list(map(dict, results))
+    for result in results:
+        result["data_hora"] = datetime.strptime(result["data_hora"], "%Y-%m-%d %H:%M:%S").strftime("%d/%m/%Y às %H:%M:%S")
+        result["tipo_pagamento"] = PAYMENT_TYPES[result["tipo_pagamento"]]
+        if result["comprovante"] is not None:
+            filename = f'uploads/{result["comprovante"]}'
+            result["comprovante_url"] = url_for("static", filename=filename)
+        else:
+            result["comprovante_url"] = None
+
+    if start_date or end_date:
+        total_params = params[:-2]
+    else:
+        total_params = params
+    total_query = query.split("ORDER BY")[0].strip()
+    hashed_query = hashlib.sha256(total_query.encode('utf-8')).hexdigest()
+    results_obj = cur.execute(total_query, total_params).fetchall()
+    results_obj = list(map(dict, results_obj))
+    results_final = []
+    for result in results_obj:
+        result["tipo_pagamento"] = PAYMENT_TYPES[result["tipo_pagamento"]]
+        if result["comprovante"] is not None:
+            filename = f'uploads/{result["comprovante"]}'
+            result["comprovante_url"] = url_for("static", filename=filename)
+        else:
+            result["comprovante_url"] = None
+        results_final.append(result)
+
+    cache.set(hashed_query, results_obj)
+    print(results_obj[0])
+
+    total = len(results_obj)
+    pagination = Pagination(page=page, per_page=per_page, total=total, css_framework='materialize')
+
+    context = {
+        "results": results,
+        "pagination": pagination,
+        "page": page,
+        "per_page": per_page,
+        "result_id": hashed_query,
+        "payment_types": PAYMENT_TYPES
+    }
+
+    return render_template("recharge-history.html", **context)
