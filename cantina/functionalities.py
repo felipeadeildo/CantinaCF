@@ -777,10 +777,7 @@ def recharge_history():
         result["liberado_por"] = get_user(result["liberado_por"], safe=True)
         result["aluno"] = get_user(result["aluno_id"], safe=True)
 
-    if start_date or end_date:
-        total_params = params[:-2]
-    else:
-        total_params = params
+    total_params = params
     total_query = query.split("ORDER BY")[0].strip()
     hashed_query = hashlib.sha256(total_query.encode('utf-8')).hexdigest()
     results_obj = cur.execute(total_query, total_params).fetchall()
