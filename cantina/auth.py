@@ -81,3 +81,9 @@ def role_has_permission(role):
     """Check if user has permission to access current endpoint"""
     permitted_endpoints = PERMISSIONS.get(role, [])
     return request.endpoint in permitted_endpoints
+
+
+@app.handle_http_exception(403)
+def handle_http_exception(e):
+    """Handle HTTP exceptions"""
+    return redirect(url_for("logout"), code=403)
