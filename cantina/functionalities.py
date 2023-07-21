@@ -518,7 +518,7 @@ def security_pay_payroll():
     user = get_user(user_id)
     if user is None:
         flash("Usuário de ID {} não encontrado!".format(user_id), category="error")
-        return redirect(url_for("login"))
+        return redirect(url_for("index"))
     payment_method = request.form.get("payment-method")
     if payment_method is None:
         flash("Por favor, insira o método de pagamento!", category="error")

@@ -20,18 +20,19 @@ PERMISSIONS = {
         "static",  # arquivos static
         "login",  # rota de login
         "logout",  # rota de logout
-        "users", # rota de usários (permite a inclusão de novos usários)
-        "edit_password",  # rota de editar senha (permite a alteração de senha)
-        "index", # rota da cantina (permite venda) 
-        "search_products_api",  # rota de pesquisa de produtos (usado na cantina)
-        "add_to_cart_api",  # rota de adicionar produtos ao carrinho
-        "confirm_purchase",  # rota de confirmar compra
-        "remove_from_cart_api",  # rota de remover produtos do carrinho
-        "profile",  # rota de perfil (mostra informações do perfil)
-        "get_user_api", # rota de obter dados do perfil
-        "generate_random_username_api", # rota de gerar nome de usuário (usado na criação de usuário)
-        "edit_profile",  # rota de editar perfil
-        "recharge",  # rota de recarga
+        "users", # rota de usários (permite a inclusão de novos usários) 
+        "edit_password",  # rota de editar senha (permite a alteração de senha) 
+        "index", # rota da home 
+        "cantina", # rota da cantina (permite venda de produtos)
+        "search_products_api",  # rota de pesquisa de produtos (usado na cantina) 
+        "add_to_cart_api",  # rota de adicionar produtos ao carrinho 
+        "confirm_purchase",  # rota de confirmar compra 
+        "remove_from_cart_api",  # rota de remover produtos do carrinho 
+        "profile", #  rota de perfil (mostra informações do perfil)
+        "get_user_api", # rota de obter dados do perfil 
+        "generate_random_username_api", # rota de gerar nome de usuário (usado na criação de usuário) 
+        "edit_profile",  # rota de editar perfil 
+        "recharge",  # rota de recarga 
         "get_payments_api",  # rota de verificação de pagamentos feitos pelos alunos
         "refill_manage_request_api", # rota de verificação de pagamentos feitos pelos alunos
         "refill_requests", # rota de verificação de pagamentos feitos pelos alunos
@@ -58,7 +59,8 @@ PERMISSIONS = {
         "affiliates",
         "affiliates_history",
         "recharge",
-        "pay_payroll"
+        "pay_payroll",
+        "index"
     ],
     "Aluno": [
         "static",
@@ -67,6 +69,7 @@ PERMISSIONS = {
         "profile",
         "edit_password",
         "recharge",
+        "index"
     ],
     "Vendedor": [
         "static",
@@ -74,6 +77,7 @@ PERMISSIONS = {
         "logout",
         "profile",
         "index",
+        "cantina",
         "add_to_cart_api",
         "search_products_api",
         "confirm_purchase",
@@ -90,6 +94,7 @@ PERMISSIONS = {
         "static",
         "login",
         "logout",
+        "index"
         "profile",
         "recharge",
         "get_payments_api", 
@@ -101,7 +106,6 @@ PERMISSIONS = {
         "stock_history",
         "get_payments_api",
         "refill_manage_request_api", 
-        "refill_requests",
         "filter_today_sales",
         "sales_history",
         "export_to_excel_api",
@@ -113,6 +117,105 @@ PERMISSIONS = {
     ]
 }
 """Mapping of permissions to routes that can be accessed by roles"""
+
+PAGES = [
+    {
+        "title": "Home", 
+        "description": "Onde você está agora :D", 
+        "endpoint": "index", 
+        "allowed_roles": ["admin", "Funcionário", "Aluno", "Vendedor", "Caixa"]
+    },
+    {
+        "title": "Meu Perfil", 
+        "description": "Referente ao seu perfil. Podes visualizar seus dados, visualizar histórico de transações e recargas, etc.", 
+        "endpoint": "profile",
+        "allowed_roles": ["admin", "Funcionário", "Aluno", "Vendedor", "Caixa"]
+    },
+    {
+        "title": "Recarga",
+        "description": "Aqui você pode solicitar recargas especificando o valor e o método de pagamento.",
+        "endpoint": "recharge",
+        "allowed_roles": ["admin", "Funcionário", "Aluno", "Vendedor", "Caixa"]
+    },
+    {
+        "title": "Histórico de Recargas",
+        "description": "Aqui você pode visualizar o histórico de recargas feito pelos usuários em geral, tendo a possibilidade de exportar para excel, filtrar por data, usuário e forma de pagamento.",
+        "endpoint": "recharge_history",
+        "allowed_roles": ["admin", "Caixa"],
+    },
+    {
+        "title": "Cantina",
+        "description": "Página referente à Venda de Produtos da Cantina.",
+        "endpoint": "cantina",
+        "allowed_roles": ["admin", "Vendedor"],
+    }, 
+    {
+        "title": "Histórico de Vendas",
+        "description": "Aqui você pode visualizar o histórico de vendas feito pelos usuários em geral, tendo a possibilidade de exportar para excel, fazer filtro por data e usuário.",
+        "endpoint": "sales_history",
+        "allowed_roles": ["admin", "Caixa", "Vendedor"],
+    },
+    {
+        "title": "Produtos da Cantina",
+        "description": "Aqui você pode pode visualizar uma lista de produtos com possibilidade de os editar.",
+        "endpoint": "products",
+        "allowed_roles": ["admin"],
+    },
+    {
+        "title": "Controle de Estoque",
+        "description": "Aqui você pode cadastrar um determinado produto ao estoque da cantina informando quantidade e valor de compra.",
+        "endpoint": "stock_control",
+        "allowed_roles": ["admin", "Vendedor", "Caixa"],
+    },
+    {
+        "title": "Historico do Estoque",
+        "description": "Aqui você pode visualizar o histórico de cadastro de produtos no estoque com possibilidade de exportar para excel, filtrar por data e usuário.",
+        "endpoint": "stock_history",
+        "allowed_roles": ["admin", "Caixa", "Vendedor"],
+    },
+    {
+        "title": "Histórico de edição de Produtos",
+        "description": "Aqui você pode visualizar o histórico de edição de produtos com possibilidade de exportar para excel, filtrar por data, usuário e produto.",
+        "endpoint": "history_edits_products",
+        "allowed_roles": ["admin"],
+    },
+    {
+        "title": "Usuários",
+        "description": "Referente à pagina de usuários onde se é possível adicionar, visualizar, editar e remover usuários.",
+        "endpoint": "users",
+        "allowed_roles": ["admin"],
+    },
+    {
+        "title": "Histórico de edição de Usuários",
+        "description": "Aqui você pode visualizar o histórico de edição de usuários com possibilidade de exportar para excel, filtrar por data, usuário (tando usuário quanto usuário que editou).",
+        "endpoint": "history_edits_users",
+        "allowed_roles": ["admin"],
+    },
+    {
+        "title":"Verificação de Pagamentos",
+        "description": "Página para verificação de solicitação de recargas feitas pelos usuários em geral com possibilidade de liberar, rejeitar e ver comprovante de recargas.",
+        "endpoint": "refill_requests",
+        "allowed_roles": ["admin", "Caixa"],
+    },
+    {
+        "title": "Afiliados",
+        "description": "Aqui você pode gerenciar seus afiliados.",
+        "endpoint": "affiliates",
+        "allowed_roles": ["admin", "Caixa", "Vendedor", "Funcionário"],
+    },
+    {
+        "title": "Histórico de Recargas dos Afiliados",
+        "description": "Aqui você pode visualizar o histórico de recargas dos afiliados com possibilidade de filtrar por data.",
+        "endpoint": "affiliates_history",
+        "allowed_roles": ["admin", "Caixa", "Vendedor", "Funcionário"],
+    },
+    {
+        "title": "Pagamento da Folha de Pagamento",
+        "description": "Aqui você pode fazer o pagamento da folha de pagamento, ou seja, o que acumulou durante um determinado período.",
+        "endpoint": "pay_payroll",
+        "allowed_roles": ["admin", "Caixa", "Vendedor", "Funcionário"],
+    }
+]
 
 # static/uploads
 UPLOAD_FOLDER = os.path.join(os.getcwd(), "cantina", "static", "uploads")

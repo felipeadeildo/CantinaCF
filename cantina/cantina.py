@@ -3,13 +3,23 @@ from flask import render_template, request, flash, session, redirect, url_for
 from flask_paginate import Pagination, get_page_args
 from .auth import verify_password
 from datetime import datetime
+from .settings import PAGES
 from . import app, cache
 import hashlib
 
 
 @app.route("/")
-@app.route("/venda-produtos")
 def index():
+    """
+    A function that handles the index route.
+    """
+    context = {
+        "pages": [page for page in PAGES if session["user"]["role"] in page["allowed_roles"]],
+    }
+    return render_template("index.html", **context)
+
+@app.route("/venda-produtos")
+def cantina():
     """
     A function that handles the index route and the venda-produtos route.
 
@@ -19,7 +29,7 @@ def index():
     context = {
         "products": get_products()
     }
-    return render_template("index.html", **context)
+    return render_template("cantina.html", **context)
 
 
 @app.route("/venda-produtos/confirmar-compra", methods=["POST", "GET"])

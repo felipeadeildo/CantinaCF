@@ -11,7 +11,7 @@ def login():
     user_id = session["user_id"] if session.get("user_id") != "guest" else None
     if user_id is not None:
         flash(f"Você já está logado como {session['user']['name']}.", category="warning")
-        return redirect(url_for("profile"))
+        return redirect(url_for("index"))
     elif request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")
@@ -23,7 +23,7 @@ def login():
         else:
             login_user(user)
             flash("Você está logado com sucesso!", category="success")
-            return redirect(url_for("profile"))
+            return redirect(url_for("index"))
     return render_template("login.html")
 
 
@@ -82,8 +82,3 @@ def role_has_permission(role):
     permitted_endpoints = PERMISSIONS.get(role, [])
     return request.endpoint in permitted_endpoints
 
-
-@app.handle_http_exception(403)
-def handle_http_exception(e):
-    """Handle HTTP exceptions"""
-    return redirect(url_for("logout"), code=403)
