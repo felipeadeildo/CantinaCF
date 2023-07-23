@@ -1,16 +1,41 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<style>
+    .container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    /* Estilos para dispositivos móveis */
+    @media only screen and (max-width: 600px) {
+        .input-field.col {
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        .btn.tooltiped {
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .pagination {
+            text-align: center;
+        }
+    }
+</style>
+
 <h3 class="center-align">{% block title %}Histórico do Estoque{% endblock %}</h3>
 
 <form method="get">
     <div class="row">
-        <div class="input-field col s5">
+        <div class="input-field col s12 m5">
             <input type="text" name="recebido_por" id="recebido_por" placeholder="Recebido por"
                 value="{{ request.args.get('recebido_por', '') }}">
             <label for="recebido_por">Recebido por</label>
         </div>
-        <div class="input-field col s5">
+        <div class="input-field col s12 m5">
             <select name="order_by" id="order_by">
                 <option value="" disabled {{ request.args.get( 'order_by' ) if request.args.get( 'order_by' )
                     else 'selected' }}>Ordenar Por</option>
@@ -26,7 +51,7 @@
             </select>
             <label for="order_by">Ordenar por</label>
         </div>
-        <div class="input-field col s2">
+        <div class="input-field col s12 m2">
             <select name="order_mode" id="order_mode">
                 <option value="" disabled {{ request.args.get( 'order_mode' ) if request.args.get( 'order_mode' )
                     else 'selected' }}>Ordenação</option>
@@ -39,13 +64,13 @@
         </div>
     </div>
     <div class="row">
-        <div class="input-field col s6">
+        <div class="input-field col s12 m6">
             <input type="text" id="start_date" name="start_date" class="datepicker"
                 value="{{ request.args.get('start_date', '')}}">
             <label for="start_date">Data Inicial</label>
         </div>
 
-        <div class="input-field col s6">
+        <div class="input-field col s12 m6">
             <input type="text" id="end_date" name="end_date" class="datepicker"
                 value="{{ request.args.get('end_date', '')}}">
             <label for="end_date">Data Final</label>
@@ -70,7 +95,7 @@
 </h3>
 <ul class="collection">
     {% for result in results %}
-    <li class="collection-item s6">
+    <li class="collection-item">
         <!-- Add a card here -->
         <strong>ID</strong>: {{ result.id }} <br>
         <strong>Recebido Por</strong>: {{ result.recebido_por.name }} <br>
@@ -85,7 +110,7 @@
     {% endfor %}
 </ul>
 
-<div class="pagination">
+<div class="pagination container">
     {{ pagination.info|safe }}
     {{ pagination.links|safe }}
 </div>

@@ -20,7 +20,8 @@ Pagamento de Folha de Pagamento :D
         </div>
 
         <div class="input-field">
-            <input type="number" class="validate" id="payment-value" name="payment-value" min="0" step="0.01" max="{{ session.user.saldo_payroll }}">
+            <input type="number" class="validate" id="payment-value" name="payment-value" min="0" step="0.01"
+                max="{{ session.user.saldo_payroll }}">
             <label for="payment-value">Valor (R$)</label>
         </div>
 
@@ -52,19 +53,19 @@ Pagamento de Folha de Pagamento :D
 
 {% block scripts %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    let paymentMethodTag = document.getElementById('payment-method');
-    let proofContainerTag = document.getElementById('proof-container');
-    verify_proof = function() {
-        if (paymentMethodTag.value === 'cash') {
-            proofContainerTag.style.display = 'none';
-        } else {
-            proofContainerTag.style.display = 'block';
+    document.addEventListener('DOMContentLoaded', function () {
+        let paymentMethodTag = document.getElementById('payment-method');
+        let proofContainerTag = document.getElementById('proof-container');
+        verify_proof = function () {
+            if (paymentMethodTag.value === 'cash') {
+                proofContainerTag.style.display = 'none';
+            } else {
+                proofContainerTag.style.display = 'block';
+            }
         }
-    }
-    verify_proof();
+        verify_proof();
 
-    paymentMethodTag.addEventListener('change', verify_proof);
-});
+        paymentMethodTag.addEventListener('change', verify_proof);
+    });
 </script>
 {% endblock scripts %}

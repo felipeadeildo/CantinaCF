@@ -5,6 +5,51 @@ Editar Perfil
 {% endblock %}
 
 {% block content %}
+<style>
+    .collection-item .title {
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+
+    .collection-item .description {
+        font-size: 1rem;
+    }
+
+    .container {
+        width: 100%;
+        max-width: 600px;
+        /* Largura máxima para a container */
+        margin: 0 auto;
+        /* Centraliza a container na tela */
+        padding: 20px;
+    }
+
+    /* Estilos para dispositivos móveis */
+    @media only screen and (max-width: 600px) {
+
+        .input-field.col.s6,
+        .input-field.col.s4,
+        .input-field.col.s12 {
+            width: 100%;
+            /* Inputs ocupam a largura total em telas menores */
+            margin: 10px 0;
+            /* Espaçamento entre os inputs em telas menores */
+        }
+
+        .btn {
+            width: 100%;
+            /* Botões ocupam a largura total em telas menores */
+            margin: 10px 0;
+            /* Espaçamento entre os botões em telas menores */
+        }
+
+        .btn.lock {
+            margin-top: 10px;
+            /* Espaçamento entre o botão 'Editar Senha' e o botão 'Editar' */
+        }
+    }
+</style>
+
 <div class="container">
     <h4 class="center-align">Editar Perfil</h4>
 
@@ -88,7 +133,7 @@ Editar Perfil
             <i class="material-icons right">send</i>
         </button>
 
-        <a href="{{ url_for('edit_password', user_id=user.id) }}" class="btn waves-effect waves-light">Editar Senha
+        <a href="{{ url_for('edit_password', user_id=user.id) }}" class="btn waves-effect waves-light lock">Editar Senha
             <i class="material-icons right">lock</i>
         </a>
     </form>

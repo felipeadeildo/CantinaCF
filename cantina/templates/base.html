@@ -6,7 +6,9 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
     <!-- Import Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     <!--Import materialize.css-->
     <link type="text/css" rel="stylesheet" href="{{url_for('static', filename='css/materialize.min.css')}}" />
@@ -27,18 +29,22 @@
         <nav>
             <div class="nav-wrapper cyan darken-4">
                 <a href="#" class="brand-logo center">
-                    <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" class="logo" style="height: 44px; margin: 0px 10px; vertical-align: middle;">
+                    <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" class="logo"
+                        style="height: 44px; margin: 0px 10px; vertical-align: middle;">
                     <span style="vertical-align: middle;" class="logo-text">{{ config['SITE_NAME'] }}</span>
                 </a>
-                <a href="#" data-target="slide-out" class="sidenav-trigger show-on-large"><i class="material-icons">menu</i></a>
+                <a href="#" data-target="slide-out" class="sidenav-trigger show-on-large"><i
+                        class="material-icons">menu</i></a>
                 <ul id="nav-mobile" class="right hide-on-med-and-down">
                     <li>
-                        <span style="font-size: 1.2rem;">Bem-vindo, 
-                            {% if session.user_id == 'guest' %} Visitante :D {% else %} {{ session.user.name }} {% endif %}
+                        <span style="font-size: 1.2rem;">Bem-vindo,
+                            {% if session.user_id == 'guest' %} Visitante :D {% else %} {{ session.user.name }} {% endif
+                            %}
                         </span>
                     </li>
                     <li>
-                        <a class="btn-floating btn-small waves-effect waves-light cyan darken-3 tooltipped" href="{{ url_for('index') }}" data-position="left" data-tooltip="Home">
+                        <a class="btn-floating btn-small waves-effect waves-light cyan darken-3 tooltipped"
+                            href="{{ url_for('index') }}" data-position="left" data-tooltip="Home">
                             <i class="material-icons">home</i>
                         </a>
                     </li>
@@ -49,58 +55,62 @@
             {% if session['user_id'] == 'guest' %}
             <li><a href="{{ url_for('login') }}">Login</a></li>
             {% else %}
-            
-                {% if 'profile' in session['permissions'] %}
-                <li><a href="{{ url_for('profile') }}">Meu Perfil</a></li>
-                {% endif %}
-                    
-                {% if 'recharge' in session['permissions'] %}
-                <li><a href="{{ url_for('recharge') }}">Recarga</a></li>
-                {% endif %}
 
-                {% if 'recharge_history' in session['permissions'] %}
-                <li><a href="{{ url_for('recharge_history') }}">Histórico de Recargas</a></li>
-                {% endif %}
+            {% if 'index' in session['permissions'] %}
+            <li><a href="{{ url_for('index') }}">Home</a></li>
+            {% endif %}
 
-                {% if 'index' in session['permissions'] %}
-                <li><a href="{{ url_for('index') }}">Cantina</a></li>
-                {% endif %}
-                
-                {% if 'sales_history' in session['permissions'] %}
-                <li><a href="{{ url_for('sales_history') }}">Histórico de Vendas</a></li>
-                {% endif %}
-                
-                {% if 'products' in session['permissions'] %}
-                <li><a href="{{ url_for('products') }}">Produtos da Cantina</a></li>
-                {% endif %}
-                
-                {% if 'stock_control' in session['permissions'] %}
-                <li><a href="{{ url_for('stock_control') }}">Controle de Estoque</a></li>
-                {% endif %}
-                
-                {% if 'stock_history' in session['permissions'] %}
-                <li><a href="{{ url_for('stock_history') }}">Histórico do Estoque</a></li>
-                {% endif %}
+            {% if 'profile' in session['permissions'] %}
+            <li><a href="{{ url_for('profile') }}">Meu Perfil</a></li>
+            {% endif %}
 
-                {% if 'history_edits_products' in session['permissions'] %}
-                <li><a href="{{ url_for('history_edits_products') }}">Histórico de Edições de Produtos</a></li>
-                {% endif %}
-                
-                {% if 'users' in session['permissions'] %}
-                <li><a href="{{ url_for('users') }}">Usuários</a></li>
-                {% endif %}
+            {% if 'recharge' in session['permissions'] %}
+            <li><a href="{{ url_for('recharge') }}">Recarga</a></li>
+            {% endif %}
 
-                {% if 'history_edits_users' in session['permissions'] %}
-                <li><a href="{{ url_for('history_edits_users') }}">Histórico de Edições de Usuários</a></li>
-                {% endif %}
+            {% if 'recharge_history' in session['permissions'] %}
+            <li><a href="{{ url_for('recharge_history') }}">Histórico de Recargas</a></li>
+            {% endif %}
 
-                {% if 'refill_requests' in session['permissions'] %}
-                <li><a href="{{ url_for('refill_requests') }}">Verificação de Pagamentos</a></li>
-                {% endif %}
-                
-                {% if 'affiliates' in session['permissions'] %}
-                <li><a href="{{ url_for('affiliates') }}">Afiliados</a></li>
-                {% endif %}
+            {% if 'index' in session['permissions'] %}
+            <li><a href="{{ url_for('index') }}">Cantina</a></li>
+            {% endif %}
+
+            {% if 'sales_history' in session['permissions'] %}
+            <li><a href="{{ url_for('sales_history') }}">Histórico de Vendas</a></li>
+            {% endif %}
+
+            {% if 'products' in session['permissions'] %}
+            <li><a href="{{ url_for('products') }}">Produtos da Cantina</a></li>
+            {% endif %}
+
+            {% if 'stock_control' in session['permissions'] %}
+            <li><a href="{{ url_for('stock_control') }}">Controle de Estoque</a></li>
+            {% endif %}
+
+            {% if 'stock_history' in session['permissions'] %}
+            <li><a href="{{ url_for('stock_history') }}">Histórico do Estoque</a></li>
+            {% endif %}
+
+            {% if 'history_edits_products' in session['permissions'] %}
+            <li><a href="{{ url_for('history_edits_products') }}">Histórico de Edições de Produtos</a></li>
+            {% endif %}
+
+            {% if 'users' in session['permissions'] %}
+            <li><a href="{{ url_for('users') }}">Usuários</a></li>
+            {% endif %}
+
+            {% if 'history_edits_users' in session['permissions'] %}
+            <li><a href="{{ url_for('history_edits_users') }}">Histórico de Edições de Usuários</a></li>
+            {% endif %}
+
+            {% if 'refill_requests' in session['permissions'] %}
+            <li><a href="{{ url_for('refill_requests') }}">Verificação de Pagamentos</a></li>
+            {% endif %}
+
+            {% if 'affiliates' in session['permissions'] %}
+            <li><a href="{{ url_for('affiliates') }}">Afiliados</a></li>
+            {% endif %}
 
 
             <li><a href="{{ url_for('logout') }}">Sair</a></li>
@@ -165,10 +175,18 @@
                 <div class="col l4 offset-l2 s12">
                     <h6 class="white-text">Connect</h6>
                     <ul class="social-links">
-                        <li><a class="grey-text text-lighten-3" href="https://api.whatsapp.com/send?phone={{ config['AUTHOR'].whatsapp }}"><i class="fab fa-whatsapp"></i></a></li>
-                        <li><a class="grey-text text-lighten-3" href="https://instagram.com/{{ config['AUTHOR'].instagram }}"><i class="fab fa-instagram"></i></a></li>
-                        <li><a class="grey-text text-lighten-3" href="https://www.linkedin.com/in/{{ config['AUTHOR'].linkedin }}"><i class="fab fa-linkedin-in"></i></a></li>
-                        <li><a class="grey-text text-lighten-3" href="https://github.com/{{ config['AUTHOR'].github }}"><i class="fab fa-github"></i></a></li>
+                        <li><a class="grey-text text-lighten-3"
+                                href="https://api.whatsapp.com/send?phone={{ config['AUTHOR'].whatsapp }}"><i
+                                    class="fab fa-whatsapp"></i></a></li>
+                        <li><a class="grey-text text-lighten-3"
+                                href="https://instagram.com/{{ config['AUTHOR'].instagram }}"><i
+                                    class="fab fa-instagram"></i></a></li>
+                        <li><a class="grey-text text-lighten-3"
+                                href="https://www.linkedin.com/in/{{ config['AUTHOR'].linkedin }}"><i
+                                    class="fab fa-linkedin-in"></i></a></li>
+                        <li><a class="grey-text text-lighten-3"
+                                href="https://github.com/{{ config['AUTHOR'].github }}"><i
+                                    class="fab fa-github"></i></a></li>
                     </ul>
                 </div>
             </div>

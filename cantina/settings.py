@@ -60,7 +60,8 @@ PERMISSIONS = {
         "affiliates_history",
         "recharge",
         "pay_payroll",
-        "index"
+        "index",
+        "products",
     ],
     "Aluno": [
         "static",
@@ -69,7 +70,8 @@ PERMISSIONS = {
         "profile",
         "edit_password",
         "recharge",
-        "index"
+        "index",
+        "products",
     ],
     "Vendedor": [
         "static",
@@ -88,7 +90,8 @@ PERMISSIONS = {
         "stock_control",
         "stock_history",
         "sales_history",
-        "export_to_excel_api"
+        "export_to_excel_api",
+        "products",
     ],
     "Caixa": [
         "static",
@@ -110,6 +113,7 @@ PERMISSIONS = {
         "sales_history",
         "export_to_excel_api",
         "recharge_history",
+        "products",
     ],
     "guest": [
         "static", 

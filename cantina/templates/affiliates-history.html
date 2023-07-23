@@ -22,8 +22,8 @@
                     <label for="end_date">Data Final</label>
                 </div>
                 <div class="center-align">
-                    <button class="btn waves-effect waves-light tooltiped" type="submit" name="action" data-position="bottom"
-                        data-tooltip="Filtrar Resultados">
+                    <button class="btn waves-effect waves-light tooltiped" type="submit" name="action"
+                        data-position="bottom" data-tooltip="Filtrar Resultados">
                         Filtrar
                         <i class="material-icons right">send</i>
                     </button>
@@ -63,13 +63,15 @@
                         <td>{{ result.id }}</td>
                         <td>
                             {{ result.afiliado.name }}
-                            (<a href="{{ url_for('profile', user_id=result.afiliado.id) }}">{{ result.afiliado.username }}</a>)
+                            (<a href="{{ url_for('profile', user_id=result.afiliado.id) }}">{{ result.afiliado.username
+                                }}</a>)
                         </td>
                         <td>R$ {{ result.valor }}</td>
                         <td>{{ result.data_hora }}</td>
                         <td>
                             {{ result.liberado_por.name }}
-                            (<a href="{{ url_for('profile', user_id=result.liberado_por.id) }}">{{ result.liberado_por.username
+                            (<a href="{{ url_for('profile', user_id=result.liberado_por.id) }}">{{
+                                result.liberado_por.username
                                 }}</a>)
                         </td>
                     </tr>

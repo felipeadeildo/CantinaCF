@@ -24,7 +24,8 @@ Meu Perfil - {{ user.name }}
                 <p><strong>Saldo:</strong> <span class="blue-text">R$ {{ user.saldo|round(2) }}</span></p>
                 {% endif %}
                 {% if user.saldo_payroll %}
-                <p><strong>Folha de Pagamento (devedor):</strong> <span class="red-text">R$ {{ user.saldo_payroll|round(2) }}</span></p>
+                <p><strong>Folha de Pagamento (devedor):</strong> <span class="red-text">R$ {{
+                        user.saldo_payroll|round(2) }}</span></p>
                 {% endif %}
                 {% if user.role %}
                 <p><strong>Cargo:</strong> <span class="blue-text">{{ user.role }}</span></p>

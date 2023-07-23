@@ -28,13 +28,15 @@
                             <td>R$ {{ afiliado.saldo }}</td>
                             <td>
                                 <a href="{{ url_for('profile', user_id=afiliado.id) }}"
-                                    class="btn waves-effect waves-light tooltipped" data-position="left" data-tooltip="Ver perfil de {{ afiliado.username }}">
+                                    class="btn waves-effect waves-light tooltipped" data-position="left"
+                                    data-tooltip="Ver perfil de {{ afiliado.username }}">
                                     <i class="material-icons">person</i>
                                 </a>
                             </td>
                             <td>
                                 <a href="{{ url_for('affiliates', user_id=afiliado.id, action='remove') }}"
-                                    class="btn waves-effect waves-light tooltipped" data-position="right" data-tooltip="Remover filiação de {{ afiliado.username }}">
+                                    class="btn waves-effect waves-light tooltipped" data-position="right"
+                                    data-tooltip="Remover filiação de {{ afiliado.username }}">
                                     <i class="material-icons">delete</i>
                                 </a>
                             </td>
@@ -67,9 +69,8 @@
             <div class="card-content">
                 <span class="card-title center-align">Montante Acumulado</span>
                 <p class="center-align">R$ {{ ammount }}</p>
-                <a href="{{ url_for('affiliates_history') }}" 
-                   class="btn tooltipped waves-effect waves-light" 
-                   data-position="bottom" data-tooltip="Histórico de recargas">
+                <a href="{{ url_for('affiliates_history') }}" class="btn tooltipped waves-effect waves-light"
+                    data-position="bottom" data-tooltip="Histórico de recargas">
                     <i class="material-icons">history</i>
                 </a>
             </div>
