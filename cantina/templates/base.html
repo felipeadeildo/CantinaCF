@@ -72,8 +72,8 @@
             <li><a href="{{ url_for('recharge_history') }}">Histórico de Recargas</a></li>
             {% endif %}
 
-            {% if 'index' in session['permissions'] %}
-            <li><a href="{{ url_for('index') }}">Cantina</a></li>
+            {% if 'cantina' in session['permissions'] %}
+            <li><a href="{{ url_for('cantina') }}">Cantina</a></li>
             {% endif %}
 
             {% if 'sales_history' in session['permissions'] %}
