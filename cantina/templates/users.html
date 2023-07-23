@@ -1,29 +1,36 @@
 {% extends "base.html" %}
 {% block title %}Usuários{% endblock %}
 {% block content %}
+
 <div class="row">
     <div class="col s12 m8 {% if session.user.role == 'admin' %}l8{% else %}l12{% endif %}">
         <div class="card">
             <div class="card-content">
                 <span class="card-title">Gerenciamento de Usuários</span>
-                <table class="responsive-table stripped">
+                <div class="input-field">
+                    <input id="search" type="text" onkeyup="searchUsers()" placeholder="Pesquisar usuários...">
+                    <label for="search">Pesquisar Usuário</label>
+                </div>
+                <table class="responsive-table stripped centered">
                     <thead>
                         <tr>
                             <th>ID</th>
                             <th>Nome</th>
                             <th>Usuário</th>
                             <th>Cargo</th>
+                            <th>Matrícula</th>
                             <th>Perfil</th>
                             <th>Editar</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="userTableBody">
                         {% for user in users %}
                         <tr>
                             <td>{{ user.id }}</td>
                             <td>{{ user.name }}</td>
                             <td>{{ user.username }}</td>
                             <td>{{ user.role }}</td>
+                            <td>{{ user.matricula or "-" }}</td>
                             <td>
                                 <a href="{{ url_for('profile', user_id=user.id) }}"
                                     class="btn waves-effect waves-light">
@@ -108,8 +115,8 @@
     {% endif %}
 </div>
 {% endblock %}
-
 {% block scripts %}
+
 <script>
     function generateRandomPassword() {
         let randomPassword = '';
@@ -165,6 +172,32 @@
                 let usernameLabelTag = document.getElementById('username-label');
                 usernameLabelTag.className = 'active';
             })
+    }
+
+    function searchUsers() {
+        let input, filter, table, tr, td, i, txtValue;
+        input = document.getElementById("search");
+        filter = input.value.toUpperCase();
+        table = document.getElementById("userTableBody");
+        tr = table.getElementsByTagName("tr");
+        for (i = 0; i < tr.length; i++) {
+            td_nome = tr[i].getElementsByTagName("td")[1]; // Índice 1 corresponde ao campo de nome do usuário
+            td_username = tr[i].getElementsByTagName("td")[2]; // Índice 2 corresponde ao campo de usuário do usuário
+            td_id = tr[i].getElementsByTagName("td")[0]; // Índice 0 corresponde ao campo de ID do usuário
+            td_matricula = tr[i].getElementsByTagName("td")[4]; // Índice 3 corresponde ao campo de matrícula do usuário
+            if (td_nome || td_username) {
+                txtValue_nome = td_nome.textContent || td_nome.innerText;
+                txtValue_username = td_username.textContent || td_username.innerText;
+                txtValue_id = td_id.textContent || td_id.innerText;
+                txtValue_matricula = td_matricula.textContent || td_matricula.innerText;
+                let txtValue_combined = txtValue_nome + txtValue_username + txtValue_id + txtValue_matricula; // Concatena ID, MAtrícula, Nome e Usuário
+                if (txtValue_combined.toUpperCase().indexOf(filter) > -1) {
+                    tr[i].style.display = "";
+                } else {
+                    tr[i].style.display = "none";
+                }
+            }
+        }
     }
 </script>
 {% endblock %}
