@@ -163,7 +163,7 @@ PAGES = [
         "title": "Produtos da Cantina",
         "description": "Aqui você pode pode visualizar uma lista de produtos com possibilidade de os editar.",
         "endpoint": "products",
-        "allowed_roles": ["admin"],
+        "allowed_roles": ["admin", "Vendedor", "Caixa", "Aluno", "Funcionário"],
     },
     {
         "title": "Controle de Estoque",
