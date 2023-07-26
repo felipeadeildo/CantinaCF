@@ -97,7 +97,7 @@ PERMISSIONS = {
         "static",
         "login",
         "logout",
-        "index"
+        "index",
         "profile",
         "recharge",
         "get_payments_api", 
