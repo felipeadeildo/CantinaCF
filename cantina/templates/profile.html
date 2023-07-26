@@ -5,102 +5,109 @@ Meu Perfil - {{ user.name }}
 {% endblock %}
 
 {% block content %}
-<h4 class="center-align">Meu Perfil</h4>
-<div class="card">
-    <div class="card-content">
-        <div class="row">
-            <div class="col s12 m9">
-                <span class="card-title">{{ user.name }}</span>
-                {% if user.id %}
-                <p><strong>ID:</strong> <span class="blue-text">{{ user.id }}</span></p>
-                {% endif %}
-                {% if user.matricula %}
-                <p><strong>Matrícula:</strong> <span class="blue-text">{{ user.matricula }}</span></p>
-                {% endif %}
-                {% if user.username %}
-                <p><strong>Nome de usuário:</strong> <span class="blue-text">{{ user.username }}</span></p>
-                {% endif %}
-                {% if user.saldo %}
-                <p><strong>Saldo:</strong> <span class="blue-text">R$ {{ user.saldo|round(2) }}</span></p>
-                {% endif %}
-                {% if user.saldo_payroll %}
-                <p><strong>Folha de Pagamento (devedor):</strong> <span class="red-text">R$ {{
-                        user.saldo_payroll|round(2) }}</span></p>
-                {% endif %}
-                {% if user.role %}
-                <p><strong>Cargo:</strong> <span class="blue-text">{{ user.role }}</span></p>
-                {% endif %}
-                {% if user.serie %}
-                <p><strong>Série:</strong> <span class="blue-text">{{ user.serie }}</span></p>
-                {% endif %}
-                {% if user.turma %}
-                <p><strong>Turma:</strong> <span class="blue-text">{{ user.turma }}</span></p>
-                {% endif %}
-                {% if user.telefone %}
-                <p><strong>Telefone:</strong> <span class="blue-text">{{ user.telefone }}</span></p>
-                {% endif %}
-                {% if user.email %}
-                <p><strong>Email:</strong> <span class="blue-text">{{ user.email }}</span></p>
-                {% endif %}
-                {% if user.cpf %}
-                <p><strong>CPF:</strong> <span class="blue-text">{{ user.cpf }}</span></p>
+<div class="container mt-4">
+    <h4 class="text-center">Meu Perfil</h4>
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-9">
+                    <h5 class="card-title">{{ user.name }}</h5>
+                    {% if user.id %}
+                    <p><strong>ID:</strong> <span class="text-primary">{{ user.id }}</span></p>
+                    {% endif %}
+                    {% if user.matricula %}
+                    <p><strong>Matrícula:</strong> <span class="text-primary">{{ user.matricula }}</span></p>
+                    {% endif %}
+                    {% if user.username %}
+                    <p><strong>Nome de usuário:</strong> <span class="text-primary">{{ user.username }}</span></p>
+                    {% endif %}
+                    {% if user.saldo %}
+                    <p><strong>Saldo:</strong> <span class="text-primary">R$ {{ user.saldo|round(2) }}</span></p>
+                    {% endif %}
+                    {% if user.saldo_payroll %}
+                    <p><strong>Folha de Pagamento (devedor):</strong> <span class="text-danger">R$ {{
+                            user.saldo_payroll|round(2) }}</span></p>
+                    {% endif %}
+                    {% if user.role %}
+                    <p><strong>Cargo:</strong> <span class="text-primary">{{ user.role }}</span></p>
+                    {% endif %}
+                    {% if user.serie %}
+                    <p><strong>Série:</strong> <span class="text-primary">{{ user.serie }}</span></p>
+                    {% endif %}
+                    {% if user.turma %}
+                    <p><strong>Turma:</strong> <span class="text-primary">{{ user.turma }}</span></p>
+                    {% endif %}
+                    {% if user.telefone %}
+                    <p><strong>Telefone:</strong> <span class="text-primary">{{ user.telefone }}</span></p>
+                    {% endif %}
+                    {% if user.email %}
+                    <p><strong>Email:</strong> <span class="text-primary">{{ user.email }}</span></p>
+                    {% endif %}
+                    {% if user.cpf %}
+                    <p><strong>CPF:</strong> <span class="text-primary">{{ user.cpf }}</span></p>
+                    {% endif %}
+                </div>
+                {% if 'edit_profile' in session['permissions'] or 'edit_password' in session['permissions'] %}
+                <div class="col-md-3 d-flex justify-content-end align-items-center">
+                    {% if 'edit_profile' in session['permissions'] %}
+                    <a class="btn btn-primary btn-floating btn-sm tooltipped me-2" data-bs-placement="bottom"
+                        title="Editar Perfil" href="{{ url_for('edit_profile', user_id=user.id) }}"
+                        data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-trigger="hover">
+                        <i class="fas fa-user-edit"></i>
+                    </a>
+                    {% endif %}
+                    {% if 'edit_password' in session['permissions'] %}
+                    <a class="btn btn-primary btn-floating btn-sm tooltipped" data-bs-placement="bottom"
+                        title="Editar Senha" href="{{ url_for('edit_password', user_id=user.id) }}"
+                        data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-trigger="hover">
+                        <i class="fas fa-key"></i>
+                    </a>
+                    {% endif %}
+                </div>
                 {% endif %}
             </div>
-            {% if 'edit_profile' in session['permissions'] %}
-            <div class="col s12 m3 right-align">
-                <a class="btn-floating waves-effect waves-light tooltipped" data-position="bottom"
-                    data-tooltip="Editar Perfil" href="{{ url_for('edit_profile', user_id=user.id) }}">
-                    <i class="material-icons">edit</i>
-                </a>
+        </div>
+    </div>
+
+    <h4 class="text-center mt-4">Transações</h4>
+    <div class="row transactions" style="max-height:400px; overflow-y:auto;">
+        {% for transaction in transactions %}
+        <div class="col-md-4 mb-4">
+            {% if transaction.tipo == 'entrada' and transaction.liberado_por %}
+            <div class="card bg-success">
+                <div class="card-body">
+                    <h5 class="card-title">{{ transaction.data_hora }} - Entrada</h5>
+                    <p>Tipo de pagamento: {{ transaction.tipo_pagamento }}</p>
+                    <p>Valor: R$ {{ transaction.valor }}</p>
+                    <p>Liberado por: {{ transaction.liberado_por.name }}</p>
+                    <p>Turno: {{ transaction.turno }}</p>
+                    {% if transaction.is_payroll %}<p class="text-danger">*Referente ao pagamento de saldo devedor*</p>{% endif %}
+                </div>
             </div>
-            {% elif 'edit_password' in session['permissions'] %}
-            <div class="col s12 m3 right-align">
-                <a class="btn-floating waves-effect waves-light tooltipped" data-position="bottom"
-                    data-tooltip="Editar Senha" href="{{ url_for('edit_password', user_id=user.id) }}">
-                    <i class="material-icons">edit</i>
-                </a>
+            {% elif transaction.tipo == 'entrada' and not transaction.liberado_por %}
+            <div class="card bg-warning">
+                <div class="card-body">
+                    <h5 class="card-title">{{ transaction.data_hora }} - Entrada Pendente</h5>
+                    <p>Tipo de pagamento: {{ transaction.tipo_pagamento }}</p>
+                    <p>Valor: R$ {{ transaction.valor }}</p>
+                    <p>Liberado por: Pendente</p>
+                    <p>Turno: {{ transaction.turno }}</p>
+                </div>
+            </div>
+            {% else %}
+            <div class="card bg-danger">
+                <div class="card-body">
+                    <h5 class="card-title">{{ transaction.data_hora }} - Saída</h5>
+                    <p>Produto: {{ transaction.product.nome }}</p>
+                    <p>Valor: R$ {{ transaction.product.valor }}</p>
+                    <p>Tipo: {{ transaction.product.tipo }}</p>
+                    <p>Vendido por: {{ transaction.vendido_por.name }}</p>
+                    <p>Turno: {{ transaction.turno }}</p>
+                </div>
             </div>
             {% endif %}
         </div>
+        {% endfor %}
     </div>
-</div>
-
-<h4 class="center">Transações</h4>
-<div class="transactions row" style="max-height:400px; overflow-y:auto;">
-    {% for transaction in transactions %}
-    {% if transaction.tipo == 'entrada' and transaction.liberado_por %}
-    <div class="card green lighten-4 col s12 m6 l4">
-        <div class="card-content">
-            <span class="card-title">{{ transaction.data_hora }} - Entrada</span>
-            <p>Tipo de pagamento: {{ transaction.tipo_pagamento }}</p>
-            <p>Valor: R$ {{ transaction.valor }}</p>
-            <p>Liberado por: {{ transaction.liberado_por.name }}</p>
-            <p>Turno: {{ transaction.turno }}</p>
-            {% if transaction.is_payroll %}<p>*Referente à pagamento de saldo devedor*</p>{% endif %}
-        </div>
-    </div>
-    {% elif transaction.tipo == 'entrada' and not transaction.liberado_por %}
-    <div class="card yellow lighten-4 col s12 m6 l4">
-        <div class="card-content">
-            <span class="card-title">{{ transaction.data_hora }} - Entrada Pendente</span>
-            <p>Tipo de pagamento: {{ transaction.tipo_pagamento }}</p>
-            <p>Valor: R$ {{ transaction.valor }}</p>
-            <p>Liberado por: Pendente</p>
-            <p>Turno: {{ transaction.turno }}</p>
-        </div>
-    </div>
-    {% else %}
-    <div class="card red lighten-4 col s12 m6 l4">
-        <div class="card-content">
-            <span class="card-title">{{ transaction.data_hora }} - Saída</span>
-            <p>Produto: {{ transaction.product.nome }}</p>
-            <p>Valor: R$ {{ transaction.product.valor }}</p>
-            <p>Tipo: {{ transaction.product.tipo }}</p>
-            <p>Vendido por: {{ transaction.vendido_por.name }}</p>
-            <p>Turno: {{ transaction.turno }}</p>
-        </div>
-    </div>
-    {% endif %}
-    {% endfor %}
 </div>
 {% endblock content %}

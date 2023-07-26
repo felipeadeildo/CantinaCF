@@ -5,119 +5,85 @@ Vendas
 {% endblock title %}
 
 {% block content %}
-<h4 class="center-align">Carrinho de Compras</h4>
-<style>
-    .product-list {
-        max-height: 64vh;
-        overflow-y: auto;
-    }
-</style>
+<div class="container mt-4">
+    <h4 class="text-center">Carrinho de Compras</h4>
 
-<div class="input-field">
-    <i class="material-icons prefix">search</i>
-    <input type="text" id="product-search" oninput="searchProducts()" />
-    <label for="product-search">Pesquisar produtos...</label>
-</div>
-
-<div class="product-list">
-    <table class="striped">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Nome</th>
-                <th>Valor</th>
-                <th>Tipo</th>
-                <th>Quantidade</th>
-                <th>Adicionar ao Carrinho</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for product in products %}
-            <tr>
-                <td>{{ product.id }}</td>
-                <td>{{ product.nome }}</td>
-                <td>R$ {{ product.valor }}</td>
-                <td>{{ product.tipo }}</td>
-                <td id="product-quantity-{{ product.id }}">{{ product.quantidade }}</td>
-                <td>
-                    <button class="btn btn-floating waves-effect waves-light center"
-                        onclick="addToCart({{ product.id }})">
-                        <i class="material-icons">add</i>
-                    </button>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
-<div class="cart-container">
-    <div class="row">
-        <ul id="cart-list" class="collection with-header">
-            <li class="collection-header">
-                <h4>Carrinho - R$ <span id="cart-total">{{ (session.cart|sum(attribute='valor'))|round(2, 'floor')
-                        }}</span></h4>
-            </li>
-            {% for product in session.cart %}
-            <div class="col s4" id="cart-{{ product.id }}-{{ loop.index }}">
-                <li class="collection-item">
-                    <button class="btn tiny btn-floating waves-effect waves-light"
-                        onclick="removeFromCart({{ product.id }}, 'cart-{{ product.id }}-{{ loop.index }}')">
-                        <i class="material-icons red">remove</i>
-                    </button>
-                    <span style="margin-left: 5px;">{{ product.nome }}</span>
-                </li>
-            </div>
-            {% endfor %}
-        </ul>
+    <div class="input-group mb-3">
+        <span class="input-group-text"><i class="bi bi-search"></i></span>
+        <input type="text" id="product-search" class="form-control" oninput="searchProducts()"
+            placeholder="Pesquisar produtos por nome ou ID...">
     </div>
 
-    <a href="{{ url_for('confirm_purchase') }}" class="btn">Confirmar Compra</a>
+    <div class="product-list">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nome</th>
+                    <th>Valor</th>
+                    <th>Tipo</th>
+                    <th>Quantidade</th>
+                    <th>Adicionar ao Carrinho</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in products %}
+                <tr>
+                    <td>{{ product.id }}</td>
+                    <td>{{ product.nome }}</td>
+                    <td>R$ {{ product.valor }}</td>
+                    <td>{{ product.tipo }}</td>
+                    <td id="product-quantity-{{ product.id }}">{{ product.quantidade }}</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" onclick="addToCart({{ product.id }})">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="cart-container">
+        <div class="row">
+            <ul id="cart-list" class="list-group list-group-flush col-md-6 offset-md-3">
+                <li class="list-group-item">
+                    <h4 class="text-center">Carrinho - R$ <span id="cart-total">{{ (session.cart|sum(attribute='valor'))|round(2, 'floor') }}</span></h4>
+                </li>
+                {% for product in session.cart %}
+                <div class="col s4" id="cart-{{ product.id }}-{{ loop.index }}">
+                    <li class="list-group-item">
+                        <button class="btn btn-danger btn-sm" onclick="removeFromCart({{ product.id }}, 'cart-{{ product.id }}-{{ loop.index }}')">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <span style="margin-left: 5px;">{{ product.nome }}</span>
+                    </li>
+                </div>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <a href="{{ url_for('confirm_purchase') }}" class="btn btn-primary">Confirmar Compra</a>
+    </div>
 </div>
 {% endblock content %}
 
 {% block scripts %}
 <script>
     function searchProducts() {
-        var query = document.getElementById('product-search').value;
-        var urlSearchProducts = "{{ url_for('search_products_api') }}";
+        var query = document.getElementById('product-search').value.toLowerCase();
+        var rows = document.querySelectorAll('.product-list tbody tr');
 
-        fetch(urlSearchProducts, {
-            method: "POST",
-            headers: {
-                'Content-Type': 'application/json',
-                '{{ config["CSRF_HEADER_NAME"] }}': '{{ csrf_token() }}'
-            },
-            body: JSON.stringify({
-                query: query
-            })
-        })
-            .then(response => response.json())
-            .then(data => {
-                var productTableBody = document.querySelector('.product-list tbody');
-                productTableBody.innerHTML = '';
-                // data is a list
-                data.forEach(product => {
-                    var row = document.createElement("tr");
-                    row.innerHTML = `
-                        <tr>
-                            <td>${product.id}</td>
-                            <td>${product.nome}</td>
-                            <td>${product.valor}</td>
-                            <td>${product.tipo}</td>
-                            <td id="product-quantity-${product.id}">${product.quantidade}</td>
-                            <td>
-                                <button class="btn btn-floating waves-effect waves-light center" onclick="addToCart(${product.id})">
-                                    <i class="material-icons">add</i>
-                                </button>
-                            </td>
-                        </tr>
-                    `;
-                    productTableBody.appendChild(row);
-                });
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-            });
+        rows.forEach(row => {
+            var productId = row.querySelector('td:nth-child(1)').innerText;
+            var productName = row.querySelector('td:nth-child(2)').innerText.toLowerCase();
+            if (productName.includes(query) || productId.includes(query)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
     }
 
     function addToCart(id) {
@@ -133,39 +99,38 @@ Vendas
                 id: id,
             })
         })
-            .then(response => response.json())
-            .then(data => {
-                if (data.ok) {
-                    M.toast({ html: `${data.message}`, classes: 'custom-toast' });
-                    var cartList = document.getElementById('cart-list');
-                    var count = cartList.childElementCount;
-                    var divItem = document.createElement('div');
-                    divItem.className = "col s4";
-                    divItem.id = `cart-${data.product.id}-${count}`;
-                    divItem.innerHTML = `
-                    <li class="collection-item">
-                        <button class="btn tiny btn-floating waves-effect waves-light" onclick="removeFromCart(${data.product.id}, 'cart-${data.product.id}-${count}')">
-                            <i class="material-icons red">remove</i>
-                        </button>
-                        <span style="margin-left: 5px;">${data.product.nome}</span>
-                    </li>
-                    `;
-                    cartList.appendChild(divItem);
+        .then(response => response.json())
+        .then(data => {
+            if (data.ok) {
+                var cartList = document.getElementById('cart-list');
+                var count = cartList.childElementCount;
+                var divItem = document.createElement('div');
+                divItem.className = "col s4";
+                divItem.id = `cart-${data.product.id}-${count}`;
+                divItem.innerHTML = `
+                <li class="list-group-item">
+                    <button class="btn btn-danger btn-sm" onclick="removeFromCart(${data.product.id}, 'cart-${data.product.id}-${count}')">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <span style="margin-left: 5px;">${data.product.nome}</span>
+                </li>
+                `;
+                cartList.appendChild(divItem);
 
-                    var totalSpan = document.getElementById('cart-total');
-                    var total = parseFloat(totalSpan.innerText) + data.product.valor;
-                    totalSpan.innerText = total.toFixed(2);
+                var totalSpan = document.getElementById('cart-total');
+                var total = parseFloat(totalSpan.innerText) + data.product.valor;
+                totalSpan.innerText = total.toFixed(2);
 
-                    var quantidadeTag = document.getElementById(`product-quantity-${data.product.id}`);
-                    quantidadeTag.innerText = data.product.quantidade;
+                var quantidadeTag = document.getElementById(`product-quantity-${data.product.id}`);
+                quantidadeTag.innerText = data.product.quantidade;
 
-                } else {
-                    M.toast({ html: `${data.message}`, classes: 'custom-toast' });
-                }
-            })
-            .catch((error) => {
-                console.error(error);
-            });
+            } else {
+                console.error(data.message);
+            }
+        })
+        .catch((error) => {
+            console.error(error);
+        });
     }
 
     function removeFromCart(id, cartId) {
@@ -181,21 +146,23 @@ Vendas
                 id: id,
             })
         })
-            .then(response => response.json())
-            .then(data => {
-                M.toast({ html: `${data.message}`, classes: 'custom-toast' });
-                document.getElementById(cartId).remove();
+        .then(response => response.json())
+        .then(data => {
+            var cartItem = document.getElementById(cartId);
+            if (cartItem) {
+                cartItem.remove();
+            }
 
-                var totalSpan = document.getElementById('cart-total');
-                var total = parseFloat(totalSpan.innerText) - data.product.valor;
-                totalSpan.innerText = total.toFixed(2);
+            var totalSpan = document.getElementById('cart-total');
+            var total = parseFloat(totalSpan.innerText) - data.product.valor;
+            totalSpan.innerText = total.toFixed(2);
 
-                var quantidadeTag = document.getElementById(`product-quantity-${data.product.id}`);
-                quantidadeTag.innerText = data.product.quantidade;
-            })
-            .catch((error) => {
-                console.error(error);
-            });
+            var quantidadeTag = document.getElementById(`product-quantity-${data.product.id}`);
+            quantidadeTag.innerText = data.product.quantidade;
+        })
+        .catch((error) => {
+            console.error(error);
+        });
     }
 
     document.getElementById('product-search').addEventListener('keydown', function (e) {
@@ -206,10 +173,9 @@ Vendas
     });
 
     function selectFirstProduct() {
-        var productTableBody = document.querySelector('.product-list tbody');
-        var firstProductRow = productTableBody.firstChild;
-        if (firstProductRow) {
-            var productId = firstProductRow.cells[0].innerText;
+        var productRow = document.querySelector('.product-list tbody tr:not([style*="display: none"])');
+        if (productRow) {
+            var productId = parseInt(productRow.querySelector('td:nth-child(1)').innerText);
             addToCart(productId);
         }
     }

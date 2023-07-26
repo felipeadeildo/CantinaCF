@@ -23,98 +23,92 @@
 {% endblock additional_css %}
 
 {% block content %}
-<h3 class="center-align">
+<h3 class="text-center">
     {% block title %}
     Histórico de Vendas
     {% endblock title %}
 </h3>
 
 <div class="row">
-    <div class="col s7 form-divider">
+    <div class="col-md-7 form-divider">
         <form method="get">
-            <div class="row">
-                <div class="input-field col s6">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label class="form-label" for="vendido_para">Vendido Para</label>
                     <input type="text" name="vendido_para" id="vendido_para"
-                        value="{{ request.args.get('vendido_para', '') }}">
-                    <label for="vendido_para">Vendido Para</label>
+                        value="{{ request.args.get('vendido_para', '') }}" class="form-control">
                 </div>
 
-                <div class="input-field col s6">
+                <div class="col-md-6">
+                    <label class="form-label" for="vendido_por">Vendido Por</label>
                     <input type="text" name="vendido_por" id="vendido_por"
-                        value="{{ request.args.get('vendido_por', '') }}">
-                    <label for="vendido_para">Vendido Por</label>
+                        value="{{ request.args.get('vendido_por', '') }}" class="form-control">
                 </div>
 
-                <div class="input-field col s6">
-                    <select name="order_by" id="order_by">
-                        <option value="" disabled {{ request.args.get( 'order_by' ) if request.args.get( 'order_by' )
-                            else 'selected' }}>Ordenar Por</option>
-                        <option value="data_hora" {{ 'selected' if request.args.get( 'order_by' )=='data_hora' else ''
-                            }}>Data e
-                            Hora</option>
-                        <option value="vendido_por" {{ 'selected' if request.args.get( 'order_by' )=='vendido_por'
-                            else '' }}>
-                            Pessoa que recebeu</option>
-                        <option value="vendido_para" {{ 'selected' if request.args.get( 'order_by' )=='vendido_para'
-                            else '' }}>
-                            Pessoa que comprou</option>
-                        <option value="turno" {{ 'selected' if request.args.get( 'order_by' )=='turno' else '' }}>Turno
+                <div class="col-md-6">
+                    <label class="form-label" for="order_by">Ordenar por</label>
+                    <select name="order_by" id="order_by" class="form-select">
+                        <option value="" disabled {{ request.args.get('order_by') or 'selected' }}>Escolha uma opção
                         </option>
-                        <option value="id" {{ 'selected' if request.args.get( 'order_by' )=='id' else '' }}>ID</option>
-                        <label for="order_by">Ordenar por</label>
+                        <option value="data_hora" {{ 'selected' if request.args.get('order_by')=='data_hora' else ''
+                            }}>Data e Hora</option>
+                        <option value="vendido_por" {{ 'selected' if request.args.get('order_by')=='vendido_por' else
+                            '' }}>Pessoa que recebeu</option>
+                        <option value="vendido_para" {{ 'selected' if request.args.get('order_by')=='vendido_para' else
+                            '' }}>Pessoa que comprou</option>
+                        <option value="turno" {{ 'selected' if request.args.get('order_by')=='turno' else '' }}>Turno
+                        </option>
+                        <option value="id" {{ 'selected' if request.args.get('order_by')=='id' else '' }}>ID</option>
                     </select>
                 </div>
 
-                <div class="input-field col s6">
-                    <select name="order_mode" id="order_mode">
-                        <option value="" disabled {{ request.args.get( 'order_mode' ) if request.args.get( 'order_mode'
-                            ) else 'selected' }}>Ordenação</option>
-                        <option value="ASC" {{ 'selected' if request.args.get( 'order_mode' )=='ASC' else '' }}>
-                            Crescente
-                        </option>
-                        <option value="DESC" {{ 'selected' if request.args.get( 'order_mode' )=='DESC' else '' }}>
-                            Decrescente
-                        </option>
-                        <label for="order_mode">Ordenação</label>
+                <div class="col-md-6">
+                    <label class="form-label" for="order_mode">Ordem</label>
+                    <select name="order_mode" id="order_mode" class="form-select">
+                        <option value="ASC" {{ 'selected' if request.args.get('order_mode')=='ASC' else '' }}>
+                            Crescente</option>
+                        <option value="DESC" {{ 'selected' if request.args.get('order_mode')=='DESC' else '' }}>
+                            Decrescente</option>
                     </select>
                 </div>
 
-                <div class="input-field col s6">
-                    <input type="text" id="start_date" name="start_date" class="datepicker"
+                <div class="col-md-6">
+                    <label class="form-label" for="start_date">Data Inicial</label>
+                    <input type="text" id="start_date" name="start_date" class="form-control datepicker"
                         value="{{ request.args.get('start_date', '')}}">
-                    <label for="start_date">Data Inicial</label>
                 </div>
 
-                <div class="input-field col s6">
-                    <input type="text" id="end_date" name="end_date" class="datepicker"
+                <div class="col-md-6">
+                    <label class="form-label" for="end_date">Data Final</label>
+                    <input type="text" id="end_date" name="end_date" class="form-control datepicker"
                         value="{{ request.args.get('end_date', '')}}">
-                    <label for="end_date">Data Final</label>
                 </div>
 
-                <button class="btn waves-effect waves-light tooltiped" type="submit" name="action"
-                    data-position="bottom" data-tooltip="Filtrar Resultados">
-                    Pesquisar
-                    <i class="material-icons right">send</i>
-                </button>
+                <div class="col-md-12 mt-3">
+                    <button class="btn btn-primary" type="submit" name="action">
+                        Pesquisar
+                        <i class="fas fa-search"></i>
+                    </button>
 
-                <a href="{{ url_for('filter_today_sales') }}" class="btn waves-effect waves-light"
-                    style="margin-left: 10px;">
-                    Filtrar só por hoje
-                </a>
+                    <a href="{{ url_for('filter_today_sales') }}" class="btn btn-primary ms-2">
+                        Filtrar só por hoje
+                        <i class="fas fa-calendar-day"></i>
+                    </a>
+                </div>
             </div>
         </form>
     </div>
 
-    <div class="col s5">
-        <h5>Estatísticas</h5>
+    <div class="col-md-5">
+        <h5 class="mb-3">Estatísticas</h5>
         <div class="table-wrapper" style="overflow:auto;">
-            <table class="striped centered">
+            <table class="table table-striped table-bordered">
                 <thead>
                     <tr>
                         <th>ID</th>
                         <th>Produto</th>
                         <th>Quantidade Vendida</th>
-                        <th>Preco Unitário</th>
+                        <th>Preço Unitário</th>
                         <th>Total</th>
                     </tr>
                 </thead>
@@ -136,61 +130,61 @@
             </table>
         </div>
     </div>
-    <div class="col s12">
-        <h3>
+
+    <div class="col-md-12">
+        <h3 class="mt-4">
             Resultados
-            <a class="btn waves-effect waves-light tooltipped" data-position="bottom" data-tooltip="Exportar para Excel"
-                href="{{ url_for('export_to_excel_api', result_id=result_id) }}">
+            <a class="btn btn-primary tooltipped" data-bs-placement="bottom" data-bs-toggle="tooltip"
+                data-bs-tooltip="Exportar para Excel" href="{{ url_for('export_to_excel_api', result_id=result_id) }}">
                 Download
-                <i class="material-icons right">get_app</i>
+                <i class="fas fa-file-download"></i>
             </a>
         </h3>
 
-        <div class="table-wrapper" style="overflow:auto; height: 60vh;"">
-            <table class=" striped">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Vendido Por</th>
-                    <th>Vendido Para</th>
-                    <th>Produto</th>
-                    <th>Valor de Compra</th>
-                    <th>Data</th>
-                    <th>Turno</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for result in results %}
-                <tr>
-                    <td>{{ result.id }}</td>
-                    <td>
-                        {{ result.vendido_por.name }} (<a
-                            href="{{ url_for('profile', user_id=result.vendido_por.id ) }}">Perfil</a>)
-                    </td>
-                    <td>
-                        {{ result.vendido_para.name }} (<a
-                            href="{{ url_for('profile', user_id=result.vendido_para.id ) }}">Perfil</a>)
-                    </td>
-                    <td>{{ result.produto.nome }}</td>
-                    <td>R$ {{ result.valor }}</td>
-                    <td>{{ result.data_hora }}</td>
-                    <td>{{ result.turno }}</td>
-                </tr>
-                {% else %}
-                <tr>
-                    <td colspan="7">Nenhum Resultado Encontrado</td>
-                </tr>
-                {% endfor %}
-            </tbody>
+        <div class="table-wrapper" style="overflow:auto; height: 60vh;">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Vendido Por</th>
+                        <th>Vendido Para</th>
+                        <th>Produto</th>
+                        <th>Valor de Compra</th>
+                        <th>Data</th>
+                        <th>Turno</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in results %}
+                    <tr>
+                        <td>{{ result.id }}</td>
+                        <td>
+                            {{ result.vendido_por.name }} (<a
+                                href="{{ url_for('profile', user_id=result.vendido_por.id ) }}">Perfil</a>)
+                        </td>
+                        <td>
+                            {{ result.vendido_para.name }} (<a
+                                href="{{ url_for('profile', user_id=result.vendido_para.id ) }}">Perfil</a>)
+                        </td>
+                        <td>{{ result.produto.nome }}</td>
+                        <td>R$ {{ result.valor }}</td>
+                        <td>{{ result.data_hora }}</td>
+                        <td>{{ result.turno }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7">Nenhum Resultado Encontrado</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
             </table>
         </div>
 
-        <div class="pagination">
+        <div class="pagination mt-3">
             {{ pagination.info|safe }}
             {{ pagination.links|safe }}
         </div>
     </div>
 </div>
-
 
 {% endblock content %}

@@ -2,76 +2,78 @@
 {% block title %}Afiliados{% endblock %}
 {% block content %}
 <div class="row">
-    <div class="col s8">
+    <div class="col-md-8">
         <div class="card">
-            <div class="card-content">
-                <span class="card-title center-align">Gerenciamento de Afiliados</span>
-                <table class="responsive-table stripped">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Nome</th>
-                            <th>Usuário</th>
-                            <th>Cargo</th>
-                            <th>Saldo</th>
-                            <th>Perfil</th>
-                            <th>Remover</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for afiliado in afiliados %}
-                        <tr>
-                            <td>{{ afiliado.id }}</td>
-                            <td>{{ afiliado.name }}</td>
-                            <td>{{ afiliado.username }}</td>
-                            <td>{{ afiliado.role }}</td>
-                            <td>R$ {{ afiliado.saldo }}</td>
-                            <td>
-                                <a href="{{ url_for('profile', user_id=afiliado.id) }}"
-                                    class="btn waves-effect waves-light tooltipped" data-position="left"
-                                    data-tooltip="Ver perfil de {{ afiliado.username }}">
-                                    <i class="material-icons">person</i>
-                                </a>
-                            </td>
-                            <td>
-                                <a href="{{ url_for('affiliates', user_id=afiliado.id, action='remove') }}"
-                                    class="btn waves-effect waves-light tooltipped" data-position="right"
-                                    data-tooltip="Remover filiação de {{ afiliado.username }}">
-                                    <i class="material-icons">delete</i>
-                                </a>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+            <div class="card-body">
+                <h5 class="card-title text-center">Gerenciamento de Afiliados</h5>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nome</th>
+                                <th>Usuário</th>
+                                <th>Cargo</th>
+                                <th>Saldo</th>
+                                <th>Perfil</th>
+                                <th>Remover</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for afiliado in afiliados %}
+                            <tr>
+                                <td>{{ afiliado.id }}</td>
+                                <td>{{ afiliado.name }}</td>
+                                <td>{{ afiliado.username }}</td>
+                                <td>{{ afiliado.role }}</td>
+                                <td>R$ {{ afiliado.saldo }}</td>
+                                <td>
+                                    <a href="{{ url_for('profile', user_id=afiliado.id) }}"
+                                        class="btn btn-primary btn-sm" data-bs-toggle="tooltip" data-bs-placement="left"
+                                        title="Ver perfil de {{ afiliado.username }}">
+                                        <i class="fas fa-user"></i>
+                                    </a>
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('affiliates', user_id=afiliado.id, action='remove') }}"
+                                        class="btn btn-danger btn-sm" data-bs-toggle="tooltip" data-bs-placement="right"
+                                        title="Remover filiação de {{ afiliado.username }}">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
-    <div class="col s4">
+    <div class="col-md-4">
         <div class="card">
-            <div class="card-content">
-                <span class="card-title center-align">Adicionar Afiliado</span>
+            <div class="card-body">
+                <h5 class="card-title text-center">Adicionar Afiliado</h5>
                 <form method="post" action="{{ url_for('affiliates', action='add') }}">
-                    <div class="input-field">
-                        <input id="matricula" type="text" name="matricula">
-                        <label for="matricula">Matrícula</label>
+                    <div class="mb-3">
+                        <label for="matricula" class="form-label">Matrícula</label>
+                        <input type="text" class="form-control" id="matricula" name="matricula">
                     </div>
                     <input type="hidden" name="{{ config['CSRF_COOKIE_NAME'] }}" value="{{ csrf_token() }}">
-                    <button class="btn waves-effect waves-light" type="submit" name="action">
+                    <button class="btn btn-success" type="submit">
                         Adicionar Afiliado
-                        <i class="material-icons right">person_add</i>
+                        <i class="fas fa-user-plus"></i>
                     </button>
                 </form>
             </div>
         </div>
         <!-- Cartão de Montante Acumulado -->
         <div class="card">
-            <div class="card-content">
-                <span class="card-title center-align">Montante Acumulado</span>
-                <p class="center-align">R$ {{ ammount }}</p>
-                <a href="{{ url_for('affiliates_history') }}" class="btn tooltipped waves-effect waves-light"
-                    data-position="bottom" data-tooltip="Histórico de recargas">
-                    <i class="material-icons">history</i>
+            <div class="card-body">
+                <h5 class="card-title text-center">Montante Acumulado</h5>
+                <p class="card-text text-center">R$ {{ ammount }}</p>
+                <a href="{{ url_for('affiliates_history') }}" class="btn btn-info" data-bs-toggle="tooltip"
+                    data-bs-placement="bottom" title="Histórico de recargas">
+                    <i class="fas fa-history"></i>
                 </a>
             </div>
         </div>

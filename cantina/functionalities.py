@@ -334,12 +334,12 @@ def stock_history():
 
     if start_date or end_date: # se start_date ou end_date for diferente de ""
         if start_date: # se a data inicial for diferente de ""
-            start_date = datetime.strptime(start_date, "%b %d, %Y").strftime("%Y-%m-%d") # transforma a data inicial em datetime
+            start_date = datetime.strptime(start_date, "%d/%m/%Y").strftime("%Y-%m-%d") # transforma a data inicial em datetime
         else: # se a data inicial for igual a ""
             start_date = datetime(year=2000, month=1, day=1).strftime("%Y-%m-%d") # transforma a data inicial em datetime com início em 2000
         
         if end_date: # se a data final for diferente de ""
-            end_date = datetime.strptime(end_date, "%b %d, %Y").strftime("%Y-%m-%d") # transforma a data final em datetime
+            end_date = datetime.strptime(end_date, "%d/%m/%Y").strftime("%Y-%m-%d") # transforma a data final em datetime
         else: # se a data final for igual a ""
             end_date = datetime.now().strftime("%Y-%m-%d") # transforma a data final em datetime onde a data atual é a de agora
         query += f" {'WHERE' if not query.endswith('LIKE ?') else 'AND'} data_hora BETWEEN ? AND datetime(?, '+1 day', '-1 second')"
@@ -389,7 +389,7 @@ def stock_history():
 
 
     # define paginação
-    pagination = Pagination(page=page, per_page=per_page, total=total, css_framework='materialize')
+    pagination = Pagination(page=page, per_page=per_page, total=total, css_framework='bootstrap4')
 
     context = {
         "results": results,
@@ -460,12 +460,12 @@ def affiliates_history():
 
     if start_date or end_date:
         if start_date:
-            start_date = datetime.strptime(start_date, "%b %d, %Y").strftime("%Y-%m-%d")
+            start_date = datetime.strptime(start_date, "%d/%m/%Y").strftime("%Y-%m-%d")
         else:
             start_date = datetime(year=2000, month=1, day=1).strftime("%Y-%m-%d")
         
         if end_date:
-            end_date = datetime.strptime(end_date, "%b %d, %Y").strftime("%Y-%m-%d")
+            end_date = datetime.strptime(end_date, "%d/%m/%Y").strftime("%Y-%m-%d")
         else:
             end_date = datetime.now().strftime("%Y-%m-%d")
         query += f" {'WHERE' if not query.endswith('?') else 'AND'} data_hora BETWEEN ? AND datetime(?, '+1 day', '-1 second')"
@@ -503,7 +503,7 @@ def affiliates_history():
     result_obj = conn.execute(total_query, total_params).fetchall()
     total = len(result_obj)
 
-    pagination = Pagination(page=page, per_page=per_page, total=total, css_framework='materialize')
+    pagination = Pagination(page=page, per_page=per_page, total=total, css_framework='bootstrap4')
 
     context = {
         "results": results,
@@ -577,12 +577,12 @@ def history_edits_products():
     
     if start_date or end_date:
         if start_date:
-            start_date = datetime.strptime(start_date, "%b %d, %Y").strftime("%Y-%m-%d")
+            start_date = datetime.strptime(start_date, "%d/%m/%Y").strftime("%Y-%m-%d")
         else:
             start_date = datetime(year=2000, month=1, day=1).strftime("%Y-%m-%d")
         
         if end_date:
-            end_date = datetime.strptime(end_date, "%b %d, %Y").strftime("%Y-%m-%d")
+            end_date = datetime.strptime(end_date, "%d/%m/%Y").strftime("%Y-%m-%d")
         else:
             end_date = datetime.now().strftime("%Y-%m-%d")
         query += f" {'WHERE' if not query.endswith('LIKE ?') else 'AND' } data_hora BETWEEN ? AND datetime(?, '+1 day', '-1 second')"
@@ -623,7 +623,7 @@ def history_edits_products():
 
 
     total = len(results_obj)
-    pagination = Pagination(page=page, per_page=per_page, total=total, css_framework='materialize')
+    pagination = Pagination(page=page, per_page=per_page, total=total, css_framework='bootstrap4')
 
     context = {
         "results": results,
@@ -655,12 +655,12 @@ def history_edits_users():
     
     if start_date or end_date:
         if start_date:
-            start_date = datetime.strptime(start_date, "%b %d, %Y").strftime("%Y-%m-%d")
+            start_date = datetime.strptime(start_date, "%d/%m/%Y").strftime("%Y-%m-%d")
         else:
             start_date = datetime(year=2000, month=1, day=1).strftime("%Y-%m-%d")
         
         if end_date:
-            end_date = datetime.strptime(end_date, "%b %d, %Y").strftime("%Y-%m-%d")
+            end_date = datetime.strptime(end_date, "%d/%m/%Y").strftime("%Y-%m-%d")
         else:
             end_date = datetime.now().strftime("%Y-%m-%d")
         query += f" {'WHERE' if not query.endswith('LIKE ?') else 'AND' } data_hora BETWEEN ? AND datetime(?, '+1 day', '-1 second')"
@@ -702,7 +702,7 @@ def history_edits_users():
 
 
     total = len(results_obj)
-    pagination = Pagination(page=page, per_page=per_page, total=total, css_framework='materialize')
+    pagination = Pagination(page=page, per_page=per_page, total=total, css_framework='bootstrap4')
 
     context = {
         "results": results,
@@ -747,12 +747,12 @@ def recharge_history():
     
     if start_date or end_date:
         if start_date:
-            start_date = datetime.strptime(start_date, "%b %d, %Y").strftime("%Y-%m-%d")
+            start_date = datetime.strptime(start_date, "%d/%m/%Y").strftime("%Y-%m-%d")
         else:
             start_date = datetime(year=2000, month=1, day=1).strftime("%Y-%m-%d")
         
         if end_date:
-            end_date = datetime.strptime(end_date, "%b %d, %Y").strftime("%Y-%m-%d")
+            end_date = datetime.strptime(end_date, "%d/%m/%Y").strftime("%Y-%m-%d")
         else:
             end_date = datetime.now().strftime("%Y-%m-%d")
         query += " AND data_hora BETWEEN ? AND datetime(?, '+1 day', '-1 second')"
@@ -795,7 +795,7 @@ def recharge_history():
     cache.set(hashed_query, results_obj)
 
     total = len(results_obj)
-    pagination = Pagination(page=page, per_page=per_page, total=total, css_framework='materialize')
+    pagination = Pagination(page=page, per_page=per_page, total=total, css_framework='bootstrap4')
 
     context = {
         "results": results,
