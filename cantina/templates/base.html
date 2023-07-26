@@ -2,201 +2,256 @@
 <html>
 
 <head>
-    <!--Import Google Icon Font-->
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css">
 
-    <!-- Import Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-        integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
-        crossorigin="anonymous" referrerpolicy="no-referrer" />
-
-    <!--Import materialize.css-->
-    <link type="text/css" rel="stylesheet" href="{{url_for('static', filename='css/materialize.min.css')}}" />
-    <link type="text/css" rel="stylesheet" href="{{url_for('static', filename='css/styles.css')}}" />
-
-    <!--Let browser know website is optimized for mobile-->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-    <!-- Add icon -->
     <link rel="shortcut icon" href="{{ url_for('static', filename='img/fantastico.ico') }}">
     <title>{% block title %}{% endblock %} - {{ config['SITE_NAME'] }}</title>
+    <style>
+        html {
+            position: relative;
+            min-height: 100%;
+        }
+
+        body {
+            margin-bottom: 60px; /* Altura do footer */
+        }
+
+        footer {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 60px; /* Altura do footer */
+        }
+    </style>
 
     {% block additional_css %}{% endblock %}
 </head>
 
 <body>
     <header>
-        <nav>
-            <div class="nav-wrapper cyan darken-4">
-                <a href="#" class="brand-logo center">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">
                     <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" class="logo"
-                        style="height: 44px; margin: 0px 10px; vertical-align: middle;">
-                    <span style="vertical-align: middle;" class="logo-text">{{ config['SITE_NAME'] }}</span>
+                        style="height: 44px; margin-right: 10px;">
+                    <span class="logo-text">{{ config['SITE_NAME'] }}</span>
                 </a>
-                <a href="#" data-target="slide-out" class="sidenav-trigger show-on-large"><i
-                        class="material-icons">menu</i></a>
-                <ul id="nav-mobile" class="right hide-on-med-and-down">
-                    <li>
-                        <span style="font-size: 1.2rem;">Bem-vindo,
-                            {% if session.user_id == 'guest' %} Visitante :D {% else %} {{ session.user.name }} {% endif
-                            %}
-                        </span>
-                    </li>
-                    <li>
-                        <a class="btn-floating btn-small waves-effect waves-light cyan darken-3 tooltipped"
-                            href="{{ url_for('index') }}" data-position="left" data-tooltip="Home">
-                            <i class="material-icons">home</i>
-                        </a>
-                    </li>
-                </ul>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <span class="nav-link">
+                                Bem-vindo,
+                                {% if session.user_id == 'guest' %} Visitante :D {% else %} {{ session.user.name }} {%
+                                endif %}
+                            </span>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link btn-floating btn-small waves-effect waves-light cyan darken-3 tooltipped"
+                                href="{{ url_for('index') }}" data-bs-placement="left" data-bs-toggle="tooltip"
+                                title="Home">
+                                <i class="fas fa-home"></i>
+                            </a>
+                        </li>
+                        {% if session.user_id != 'guest' %}
+                        {% if 'profile' in session['permissions'] %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('profile') }}">Meu Perfil</a>
+                        </li>
+                        {% endif %}
+
+                        {% if 'recharge' in session['permissions'] %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('recharge') }}">Recarga</a>
+                        </li>
+                        {% endif %}
+
+                        <!-- {% if 'recharge_history' in session['permissions'] %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('recharge_history') }}">Histórico de Recargas</a>
+                        </li>
+                        {% endif %} -->
+
+                        {% if 'cantina' in session['permissions'] %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('cantina') }}">Cantina</a>
+                        </li>
+                        {% endif %}
+
+                        <!-- {% if 'sales_history' in session['permissions'] %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('sales_history') }}">Histórico de Vendas</a>
+                        </li>
+                        {% endif %} -->
+
+                        {% if 'products' in session['permissions'] %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('products') }}">Produtos da Cantina</a>
+                        </li>
+                        {% endif %}
+
+                        <!-- {% if 'stock_control' in session['permissions'] %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('stock_control') }}">Controle de Estoque</a>
+                        </li>
+                        {% endif %} -->
+
+                        <!-- {% if 'stock_history' in session['permissions'] %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('stock_history') }}">Histórico do Estoque</a>
+                        </li>
+                        {% endif %} -->
+
+                        <!-- {% if 'history_edits_products' in session['permissions'] %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('history_edits_products') }}">Histórico de Edições de
+                                Produtos</a>
+                        </li>
+                        {% endif %} -->
+
+                        {% if 'users' in session['permissions'] %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('users') }}">Usuários</a>
+                        </li>
+                        {% endif %}
+
+                        <!-- {% if 'history_edits_users' in session['permissions'] %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('history_edits_users') }}">Histórico de Edições de
+                                Usuários</a>
+                        </li>
+                        {% endif %} -->
+
+                        {% if 'refill_requests' in session['permissions'] %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('refill_requests') }}">Verificação de Pagamentos</a>
+                        </li>
+                        {% endif %}
+
+                        {% if 'affiliates' in session['permissions'] %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('affiliates') }}">Afiliados</a>
+                        </li>
+                        {% endif %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('logout') }}">Sair</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
             </div>
         </nav>
-        <ul id="slide-out" class="sidenav">
-            {% if session['user_id'] == 'guest' %}
-            <li><a href="{{ url_for('login') }}">Login</a></li>
-            {% else %}
-
-            {% if 'index' in session['permissions'] %}
-            <li><a href="{{ url_for('index') }}">Home</a></li>
-            {% endif %}
-
-            {% if 'profile' in session['permissions'] %}
-            <li><a href="{{ url_for('profile') }}">Meu Perfil</a></li>
-            {% endif %}
-
-            {% if 'recharge' in session['permissions'] %}
-            <li><a href="{{ url_for('recharge') }}">Recarga</a></li>
-            {% endif %}
-
-            {% if 'recharge_history' in session['permissions'] %}
-            <li><a href="{{ url_for('recharge_history') }}">Histórico de Recargas</a></li>
-            {% endif %}
-
-            {% if 'cantina' in session['permissions'] %}
-            <li><a href="{{ url_for('cantina') }}">Cantina</a></li>
-            {% endif %}
-
-            {% if 'sales_history' in session['permissions'] %}
-            <li><a href="{{ url_for('sales_history') }}">Histórico de Vendas</a></li>
-            {% endif %}
-
-            {% if 'products' in session['permissions'] %}
-            <li><a href="{{ url_for('products') }}">Produtos da Cantina</a></li>
-            {% endif %}
-
-            {% if 'stock_control' in session['permissions'] %}
-            <li><a href="{{ url_for('stock_control') }}">Controle de Estoque</a></li>
-            {% endif %}
-
-            {% if 'stock_history' in session['permissions'] %}
-            <li><a href="{{ url_for('stock_history') }}">Histórico do Estoque</a></li>
-            {% endif %}
-
-            {% if 'history_edits_products' in session['permissions'] %}
-            <li><a href="{{ url_for('history_edits_products') }}">Histórico de Edições de Produtos</a></li>
-            {% endif %}
-
-            {% if 'users' in session['permissions'] %}
-            <li><a href="{{ url_for('users') }}">Usuários</a></li>
-            {% endif %}
-
-            {% if 'history_edits_users' in session['permissions'] %}
-            <li><a href="{{ url_for('history_edits_users') }}">Histórico de Edições de Usuários</a></li>
-            {% endif %}
-
-            {% if 'refill_requests' in session['permissions'] %}
-            <li><a href="{{ url_for('refill_requests') }}">Verificação de Pagamentos</a></li>
-            {% endif %}
-
-            {% if 'affiliates' in session['permissions'] %}
-            <li><a href="{{ url_for('affiliates') }}">Afiliados</a></li>
-            {% endif %}
-
-
-            <li><a href="{{ url_for('logout') }}">Sair</a></li>
-            {% endif %}
-        </ul>
     </header>
     <main>
         {% with warning_messages = get_flashed_messages(category_filter=["warning"]) %}
         {% if warning_messages %}
-        <div class="card orange lighten-5">
-            <div class="card-content">
-                <span class="card-title orange-text">Aviso</span>
-                {% for message in warning_messages %}
-                <p class="orange-text">{{ message }}</p>
-                {% endfor %}
-            </div>
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <strong>Aviso:</strong>
+            {% for message in warning_messages %}
+            {{ message }}
+            {% endfor %}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
         {% endif %}
         {% endwith %}
 
         {% with success_messages = get_flashed_messages(category_filter=["success"]) %}
         {% if success_messages %}
-        <div class="card green lighten-5">
-            <div class="card-content">
-                <span class="card-title green-text">Sucesso</span>
-                {% for message in success_messages %}
-                <p class="green-text">{{ message }}</p>
-                {% endfor %}
-            </div>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <strong>Sucesso:</strong>
+            {% for message in success_messages %}
+            {{ message }}
+            {% endfor %}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
         {% endif %}
         {% endwith %}
 
         {% with error_messages = get_flashed_messages(category_filter=["error"]) %}
         {% if error_messages %}
-        <div class="card red lighten-5">
-            <div class="card-content">
-                <span class="card-title red-text">Erro</span>
-                {% for message in error_messages %}
-                <p class="red-text">{{ message }}</p>
-                {% endfor %}
-            </div>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <strong>Erro:</strong>
+            {% for message in error_messages %}
+            {{ message }}
+            {% endfor %}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
         {% endif %}
         {% endwith %}
 
         <div class="container">
             <div class="row">
-                <div class="col s12">
+                <div class="col-md-12">
                     <div class="toast-container"></div>
                     {% block content %}{% endblock %}
                 </div>
             </div>
         </div>
     </main>
-    <footer class="page-footer cyan darken-4 smaller-footer">
+    <footer class="page-footer cyan darken-4">
         <div class="container">
             <div class="row">
-                <div class="col l6 s12">
+                <div class="col-12 text-center">
                     <p class="grey-text text-lighten-4">Desenvolvido com ❤️ por {{ config['AUTHOR'].name }}</p>
                 </div>
-                <div class="col l4 offset-l2 s12">
-                    <h6 class="white-text">Connect</h6>
-                    <ul class="social-links">
-                        <li><a class="grey-text text-lighten-3"
+                <div class="col-12 text-center mt-2">
+                    <ul class="social-links list-inline">
+                        <li class="list-inline-item">
+                            <a class="grey-text text-lighten-3"
                                 href="https://api.whatsapp.com/send?phone={{ config['AUTHOR'].whatsapp }}"><i
-                                    class="fab fa-whatsapp"></i></a></li>
-                        <li><a class="grey-text text-lighten-3"
+                                    class="fab fa-whatsapp"></i></a>
+                        </li>
+                        <li class="list-inline-item">
+                            <a class="grey-text text-lighten-3"
                                 href="https://instagram.com/{{ config['AUTHOR'].instagram }}"><i
-                                    class="fab fa-instagram"></i></a></li>
-                        <li><a class="grey-text text-lighten-3"
+                                    class="fab fa-instagram"></i></a>
+                        </li>
+                        <li class="list-inline-item">
+                            <a class="grey-text text-lighten-3"
                                 href="https://www.linkedin.com/in/{{ config['AUTHOR'].linkedin }}"><i
-                                    class="fab fa-linkedin-in"></i></a></li>
-                        <li><a class="grey-text text-lighten-3"
-                                href="https://github.com/{{ config['AUTHOR'].github }}"><i
-                                    class="fab fa-github"></i></a></li>
+                                    class="fab fa-linkedin-in"></i></a>
+                        </li>
+                        <li class="list-inline-item">
+                            <a class="grey-text text-lighten-3"
+                                href="https://github.com/{{ config['AUTHOR'].github }}"><i class="fab fa-github"></i></a>
+                        </li>
                     </ul>
                 </div>
             </div>
         </div>
     </footer>
-
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
-    <script type="text/javascript" src="{{url_for('static', filename='js/jquery.highlight.js')}}"></script>
-    <script type="text/javascript" src="{{url_for('static', filename='js/materialize.min.js')}}"></script>
-    <script type="text/javascript" src="{{url_for('static', filename='js/scripts.js')}}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+    <script>
+        // Inicialização dos tooltips do Bootstrap
+        $(document).ready(function () {
+            $('[data-bs-toggle="tooltip"]').tooltip();
+        });
+
+        // Inicialização dos datepickers para todas as inputs com a classe 'datepicker'
+        $(document).ready(function () {
+            $('.datepicker').datepicker({
+                format: 'dd/mm/yyyy',
+                autoclose: true,
+                todayHighlight: true
+            });
+        });
+    </script>
+
+
     {% block scripts %}{% endblock %}
 </body>
 

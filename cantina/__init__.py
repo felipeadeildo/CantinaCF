@@ -22,7 +22,6 @@ CSRF_COOKIE_TIMEOUT = timedelta(days=30)
 CSRF_COOKIE_NAME = 'csrf-token-topzera'
 
 settings_map = {
-    'SERVER_NAME': False,
     'SECRET_KEY': SECRET_KEY,
     'DEBUG': DEBUG,
     'UPLOAD_FOLDER': UPLOAD_FOLDER,

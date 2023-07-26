@@ -1,101 +1,25 @@
 {% extends "base.html" %}
 
 {% block content %}
-<style>
-    .collection-item .title {
-        font-size: 1.2rem;
-        font-weight: bold;
-    }
+<div class="container mt-4">
+    <h3 class="text-center">
+        {% block title %}
+        Home
+        {% endblock title %}
+    </h3>
 
-    .collection-item .description {
-        font-size: 1rem;
-    }
-
-    .card {
-        width: 300px;
-        /* Largura padrão para os cards */
-        height: 200px;
-        /* Altura padrão para os cards */
-        padding: 10px;
-        background-color: #f9f9f9;
-        border-radius: 5px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        transition: box-shadow 0.3s;
-        overflow: hidden;
-    }
-
-    .card:hover {
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    }
-
-    .card-content {
-        color: #333;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    .card-content p {
-        margin: 0;
-    }
-
-    /* Tooltip */
-    .tooltip {
-        position: relative;
-    }
-
-    .tooltip .tooltiptext {
-        visibility: hidden;
-        width: 200px;
-        background-color: #333;
-        color: #fff;
-        text-align: center;
-        border-radius: 6px;
-        padding: 5px;
-        position: absolute;
-        z-index: 1;
-        bottom: 125%;
-        left: 50%;
-        transform: translateX(-50%);
-        opacity: 0;
-        transition: opacity 0.3s;
-    }
-
-    .tooltip:hover .tooltiptext {
-        visibility: visible;
-        opacity: 1;
-    }
-
-    /* Estilos para dispositivos móveis */
-    @media only screen and (max-width: 600px) {
-        .card {
-            width: 100%;
-            /* Cards ocupam a largura total em telas menores */
-            margin-bottom: 20px;
-        }
-    }
-</style>
-
-<div class="row">
-    <div class="col s12">
-        <h3 class="center-align">
-            {% block title %}
-            Home
-            {% endblock title %}
-        </h3>
-
-        <div class="row">
-            {% for page in pages %}
-            <div class="col s12 m4 m3 valign-wrapper tooltip">
-                <a href="{{ url_for(page.endpoint) }}" class="card hoverable">
-                    <div class="card-content">
-                        <span class="card-title">{{ page.title }}</span>
-                        <p class="description">{{ page.description }}</p>
-                    </div>
-                </a>
-                <span class="tooltiptext">{{ page.description }}</span>
+    <div class="row">
+        {% for page in pages %}
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ page.title }}</h5>
+                    <p class="card-text">{{ page.description }}</p>
+                    <a href="{{ url_for(page.endpoint) }}" class="btn btn-primary">Ver mais</a>
+                </div>
             </div>
-            {% endfor %}
         </div>
+        {% endfor %}
     </div>
 </div>
 {% endblock content %}

@@ -6,73 +6,110 @@ Pedidos de Recargas
 
 {% block content %}
 <style>
-    .modal {
-        height: 80vh;
+    .card {
+        border: 1px solid #ccc;
+        border-radius: 8px;
+    }
+
+    .card-body {
+        padding: 1rem;
+    }
+
+    .card-title {
+        font-size: 1.2rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+
+    .card-footer {
+        padding: 0.5rem;
+        background-color: #f5f5f5;
+        border-top: 1px solid #ccc;
+        border-bottom-left-radius: 8px;
+        border-bottom-right-radius: 8px;
+    }
+
+    .btn-container {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.5rem;
+    }
+
+    /* Styles for the modal */
+    .modal-dialog {
+        max-width: 80%;
     }
 
     .modal-content {
-        height: 75%;
+        height: 80vh;
         overflow-y: auto;
     }
 
-    .modal-footer {
-        height: 5%;
+    .modal-body iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
     }
 </style>
 
 <div class="container">
-    <h4 class="center-align">Pedidos de Recargas</h4>
+    <h4 class="text-center">Pedidos de Recargas</h4>
     {% if refill_requests %}
-    <div class="row">
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
         {% for request in refill_requests %}
-        <div class="col s6 m6 l4" id="request-{{ request.id }}">
-            <div class="card teal darken-3 hoverable">
-                <div class="card-content white-text">
-                    <span class="card-title">{{ request.aluno.name }} ({{ request.aluno.matricula }})</span>
+        <div class="col" id="request-{{ request.id }}">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ request.aluno.name }} ({{ request.aluno.matricula }})</h5>
                     <p><strong>Data e Hora:</strong> {{ request.data_hora }}</p>
                     <p><strong>Turno:</strong> {{ request.turno }}</p>
                     <p><strong>Tipo de Pagamento:</strong> {{ request.tipo_pagamento }}</p>
                     <p><strong>Valor:</strong> R$ {{ request.valor }}</p>
                     <p><strong>Turma:</strong> {{ request.aluno.turma }}</p>
-                    <p><strong>Serie:</strong> {{ request.aluno.serie }}</p>
+                    <p><strong>Série:</strong> {{ request.aluno.serie }}</p>
                     <p><strong>CPF:</strong> {{ request.aluno.cpf }}</p>
                     <p><strong>Username:</strong> {{ request.aluno.username }}</p>
                 </div>
-                <div class="card-action">
-                    <a href="#" onclick="manageRefillRequest('{{ request.id }}', true)"
-                        class="waves-effect waves-light btn-small green">
-                        <i class="material-icons left">check</i>
-                        Liberar Saldo
-                    </a>
-
-                    <a href="#" onclick="manageRefillRequest('{{ request.id }}', false)"
-                        class="waves-effect waves-light btn-small red">
-                        <i class="material-icons left">close</i>
-                        Rejeitar Saldo
-                    </a>
-                    <a href="#" onclick="openModal('{{ request.comprovante_url }}')"
-                        class="waves-effect waves-light btn-small blue">
-                        <i class="material-icons left">visibility</i>
-                        Ver Comprovante
-                    </a>
+                <div class="card-footer">
+                    <div class="btn-container">
+                        <button onclick="manageRefillRequest('{{ request.id }}', true)" class="btn btn-success">
+                            Liberar Saldo
+                            <i class="fas fa-check"></i>
+                        </button>
+                        <button onclick="manageRefillRequest('{{ request.id }}', false)" class="btn btn-danger">
+                            Rejeitar Saldo
+                            <i class="fas fa-times"></i>
+                        </button>
+                        <button onclick="openModal('{{ request.comprovante_url }}')" class="btn btn-info">
+                            Ver Comprovante
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
         {% endfor %}
     </div>
     {% else %}
-    <h6 class="red-text center-align">Sem Pedidos de recargas até o momento</h6>
+    <div class="alert alert-danger text-center mt-4" role="alert">
+        Sem Pedidos de recargas até o momento
+    </div>
     {% endif %}
 
-    <div class="modal" id="modal-comprovante">
-        <div class="modal-content">
-            <iframe id="comprovante-frame" style="width: 100%; height: 100%;"></iframe>
-        </div>
-        <div class="modal-footer">
-            <a href="#" class="modal-action modal-close waves-effect waves-green btn-flat">Fechar</a>
+    <div class="modal fade" id="modal-comprovante" tabindex="-1" role="dialog" aria-labelledby="modal-comprovante-label"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modal-comprovante-label">Comprovante</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <iframe id="comprovante-frame"></iframe>
+                </div>
+            </div>
         </div>
     </div>
-
 </div>
 {% endblock %}
 
@@ -80,39 +117,38 @@ Pedidos de Recargas
 <script>
     function openModal(url) {
         document.getElementById("comprovante-frame").src = url;
-        let instance = M.Modal.getInstance(document.getElementById('modal-comprovante'));
-        instance.open();
+        var modal = new bootstrap.Modal(document.getElementById('modal-comprovante'));
+        modal.show();
     };
-
 
     function manageRefillRequest(id, accept) {
-        let card = document.getElementById('request-' + id);
-        let url = '{{ url_for("refill_manage_request_api") }}';
-        fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                '{{ config["CSRF_HEADER_NAME"] }}': '{{ csrf_token() }}'
-            },
-            body: JSON.stringify({
-                'id': id,
-                'accept': accept
-            })
+    let card = document.getElementById('request-' + id);
+    let url = '{{ url_for("refill_manage_request_api") }}';
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            '{{ config["CSRF_HEADER_NAME"] }}': '{{ csrf_token() }}'
+        },
+        body: JSON.stringify({
+            'id': id,
+            'accept': accept
         })
-            .then(response => response.json())
-            .then(data => {
-                if (data['error']) {
-                    M.toast({ html: data['message'] });
-                    return
-                }
-                if (data['ok']) {
+    })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);
+            if (data['error']) {
+                toastr.error(data['message']);
+            } else {
+                toastr.success(data['message']);
+                // Remover o card após 2 segundos (2000 milissegundos)
+                setTimeout(() => {
                     card.remove();
-                    M.toast({ html: data['message'] });
-                } else {
-                    card.remove();
-                    M.toast({ html: data['message'] });
-                }
-            })
+                }, 2000);
+            }
+        })
     };
+
 </script>
 {% endblock %}

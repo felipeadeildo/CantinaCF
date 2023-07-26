@@ -94,7 +94,7 @@ def products():
     offset = (page - 1) * per_page
     products, total = get_products(offset=offset, per_page=per_page, return_total=True)
 
-    pagination = Pagination(page=page, per_page=per_page, total=total, css_framework="materialize")
+    pagination = Pagination(page=page, per_page=per_page, total=total, css_framework="bootstrap4")
     context = {
         "products": products,
         "pagination": pagination
@@ -166,12 +166,12 @@ def sales_history():
     
     if start_date or end_date: # se start_date ou end_date for diferente de ""
         if start_date: # se a data inicial for diferente de ""
-            start_date = datetime.strptime(start_date, "%b %d, %Y").strftime("%Y-%m-%d") # transforma a data inicial em datetime
+            start_date = datetime.strptime(start_date, "%d/%m/%Y").strftime("%Y-%m-%d") # transforma a data inicial em datetime
         else: # se a data inicial for igual a ""
             start_date = datetime(year=2000, month=1, day=1).strftime("%Y-%m-%d") # transforma a data inicial em datetime com início em 2000
         
         if end_date: # se a data final for diferente de ""
-            end_date = datetime.strptime(end_date, "%b %d, %Y").strftime("%Y-%m-%d") # transforma a data final em datetime
+            end_date = datetime.strptime(end_date, "%d/%m/%Y").strftime("%Y-%m-%d") # transforma a data final em datetime
         else: # se a data final for igual a ""
             end_date = datetime.now().strftime("%Y-%m-%d") # transforma a data final em datetime onde a data atual é a de agora
         query += f" {'AND' if (query.endswith('LIKE ?)') or query.endswith('LIKE ?')) else 'WHERE'} data_hora BETWEEN ? AND datetime(?, '+1 day', '-1 second')"
@@ -219,7 +219,7 @@ def sales_history():
 
     total = len(results_obj)
     
-    pagination = Pagination(page=page, per_page=per_page, total=total, css_framework="materialize")
+    pagination = Pagination(page=page, per_page=per_page, total=total, css_framework="bootstrap4")
     context = {
         "results": results,
         "pagination": pagination,
@@ -232,7 +232,7 @@ def sales_history():
 
 @app.route('/vendas-hoje')
 def filter_today_sales():
-    today_str = datetime.now().strftime(datetime.now().strftime("%b %d, %Y"))
+    today_str = datetime.now().strftime(datetime.now().strftime("%d/%m/%Y"))
     args = request.args.copy()
     args.pop('page', None)
     args['start_date'] = today_str

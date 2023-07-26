@@ -1,141 +1,100 @@
 {% extends "base.html" %}
-
 {% block title %}
 Editar Perfil
 {% endblock %}
 
 {% block content %}
-<style>
-    .collection-item .title {
-        font-size: 1.2rem;
-        font-weight: bold;
-    }
-
-    .collection-item .description {
-        font-size: 1rem;
-    }
-
-    .container {
-        width: 100%;
-        max-width: 600px;
-        /* Largura máxima para a container */
-        margin: 0 auto;
-        /* Centraliza a container na tela */
-        padding: 20px;
-    }
-
-    /* Estilos para dispositivos móveis */
-    @media only screen and (max-width: 600px) {
-
-        .input-field.col.s6,
-        .input-field.col.s4,
-        .input-field.col.s12 {
-            width: 100%;
-            /* Inputs ocupam a largura total em telas menores */
-            margin: 10px 0;
-            /* Espaçamento entre os inputs em telas menores */
-        }
-
-        .btn {
-            width: 100%;
-            /* Botões ocupam a largura total em telas menores */
-            margin: 10px 0;
-            /* Espaçamento entre os botões em telas menores */
-        }
-
-        .btn.lock {
-            margin-top: 10px;
-            /* Espaçamento entre o botão 'Editar Senha' e o botão 'Editar' */
-        }
-    }
-</style>
-
 <div class="container">
-    <h4 class="center-align">Editar Perfil</h4>
+    <h4 class="text-center">Editar Perfil</h4>
 
     <form action="{{ url_for('edit_profile', user_id=user.id ) }}" method="post">
         <input type="hidden" name="{{ config['CSRF_COOKIE_NAME'] }}" value="{{ csrf_token() }}">
-        <div class="row">
-            <div class="input-field col s6">
-                <input id="username" type="text"
-                    class="{{ 'validate valid' if user.username not in (none, '') else 'validate' }}" name="username"
-                    value="{{ user.username if user.username not in (none, '') else '' }}">
-                <label for="username" class="{{ 'active' if user.username not in (none, '') }}">Usuário</label>
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="username" class="form-label">Usuário</label>
+                    <input id="username" type="text" class="form-control" name="username"
+                        value="{{ user.username if user.username else '' }}">
+                </div>
+
+                <div class="mb-3">
+                    <label for="name" class="form-label">Nome</label>
+                    <input id="name" type="text" class="form-control" name="name"
+                        value="{{ user.name if user.name else '' }}">
+                </div>
+
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input id="email" type="email" class="form-control" name="email"
+                        value="{{ user.email if user.email else '' }}">
+                </div>
+
+                <div class="mb-3">
+                    <label for="telefone" class="form-label">Telefone</label>
+                    <input id="telefone" type="text" class="form-control" name="telefone"
+                        value="{{ user.telefone if user.telefone else '' }}">
+                </div>
+
+                <div class="mb-3">
+                    <label for="serie" class="form-label">Série</label>
+                    <select id="serie" name="serie" class="form-select">
+                        <option value="" disabled selected>Série</option>
+                        {% for serie in series %}
+                        <option value="{{ loop.index0 }}" {% if serie == user.serie %}selected{% endif %}>{{ serie }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
             </div>
 
-            <div class="input-field col s6">
-                <input id="name" type="text"
-                    class="{{ 'validate valid' if user.name not in (none, '') else 'validate' }}" name="name"
-                    value="{{ user.name if user.name not in (none, '') else '' }}">
-                <label for="name" class="{{ 'active' if user.name not in (none, '') }}">Nome</label>
-            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="role" class="form-label">Cargo</label>
+                    <select id="role" name="role" class="form-select" required>
+                        <option value="" disabled selected>Cargo</option>
+                        {% for role in roles %}
+                        <option value="{{ role }}" {% if role == user.role %}selected{% endif %}>{{ role }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
 
-            <div class="input-field col s6">
-                <input id="email" type="email"
-                    class="{{ 'validate valid' if user.email not in (none, '') else 'validate' }}" name="email"
-                    value="{{ user.email if user.email not in (none, '') else '' }}">
-                <label for="email" class="{{ 'active' if user.email not in (none, '') }}">Email</label>
-            </div>
+                <div class="mb-3">
+                    <label for="matricula" class="form-label">Matrícula</label>
+                    <input type="text" class="form-control" name="matricula" id="matricula"
+                        value="{{ user.matricula if user.matricula else '' }}">
+                </div>
 
-            <div class="input-field col s6">
-                <input id="telefone" type="text"
-                    class="{{ 'validate valid' if user.telefone not in (none, '') else 'validate' }}" name="telefone"
-                    value="{{ user.telefone if user.telefone not in (none, '') else '' }}">
-                <label for="telefone" class="{{ 'active' if user.telefone not in (none, '') }}">Telefone</label>
-            </div>
+                <div class="mb-3">
+                    <label for="turma" class="form-label">Turma</label>
+                    <input id="turma" type="text" class="form-control" name="turma"
+                        value="{{ user.turma if user.turma else '' }}">
+                </div>
 
-            <div class="input-field col s4" id="serie-input">
-                <select id="serie" name="serie">
-                    <option value="" {{ 'selected' if user.serie in ('', none) else '' }} disabled>Série</option>
-                    {% for serie in series %}
-                    <option value="{{ loop.index0 }}" {{ 'selected' if serie==user.serie else '' }}>{{ serie }}</option>
-                    {% endfor %}
-                </select>
-                <label for="serie">Série</label>
-            </div>
+                <div class="mb-3">
+                    <label for="cpf" class="form-label">CPF</label>
+                    <input id="cpf" type="text" class="form-control" name="cpf"
+                        value="{{ user.cpf if user.cpf else '' }}">
+                </div>
 
-            <div class="input-field col s4">
-                <select id="role" name="role" id="role" required>
-                    <option value="" {{ 'selected' if user.role in ('', none) else '' }} disabled>Cargo</option>
-                    {% for role in roles %}
-                    <option value="{{ role }}" {{ 'selected' if role==user.role else '' }}>{{ role }}</option>
-                    {% endfor %}
-                </select>
-                <label for="role">Cargo</label>
-            </div>
-
-            <div class="input-field col s4">
-                <input type="text" class="{{ 'validate valid' if user.matricula not in (none, '') else 'validate' }}"
-                    name="matricula" id="matricula"
-                    value="{{ user.matricula if user.matricula not in (none, '') else '' }}">
-                <label for="matricula">Matrícula</label>
-            </div>
-
-            <div class="input-field col s6">
-                <input id="turma" type="text"
-                    class="{{ 'validate valid' if user.turma not in (none, '') else 'validate' }}" name="turma"
-                    value="{{ user.turma if user.turma not in (none, '') else '' }}">
-                <label for="turma" class="{{ 'active' if user.turma not in (none, '') }}">Turma</label>
-            </div>
-
-            <div class="input-field col s6">
-                <input id="cpf" type="text" class="{{ 'validate valid' if user.cpf not in (none, '') else 'validate' }}"
-                    name="cpf" value="{{ user.cpf if user.cpf not in (none, '') else '' }}">
-                <label for="cpf" class="{{ 'active' if user.cpf not in (none, '') }}">CPF</label>
-            </div>
-            <div class="input-field col s12">
-                <input type="text" name="motivo" id="motivo" required>
-                <label for="motivo">Motivo da Edição</label>
+                <div class="mb-3">
+                    <label for="motivo" class="form-label">Motivo da Edição</label>
+                    <input type="text" class="form-control" name="motivo" id="motivo" required>
+                </div>
             </div>
         </div>
 
-        <button class="btn waves-effect waves-light" type="submit" name="action">Editar
-            <i class="material-icons right">send</i>
-        </button>
+        <div class="row justify-content-center mt-4">
+            <div class="col-md-6">
+                <button class="btn btn-primary btn-icon" type="submit" name="action">
+                    <i class="fas fa-user-edit"></i> Editar Perfil
+                </button>
+            </div>
 
-        <a href="{{ url_for('edit_password', user_id=user.id) }}" class="btn waves-effect waves-light lock">Editar Senha
-            <i class="material-icons right">lock</i>
-        </a>
+            <div class="col-md-6">
+                <a href="{{ url_for('edit_password', user_id=user.id) }}" class="btn btn-secondary btn-icon">
+                    <i class="fas fa-lock"></i> Editar Senha
+                </a>
+            </div>
+        </div>
     </form>
 </div>
 {% endblock %}

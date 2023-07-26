@@ -1,42 +1,16 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<style>
-    .container {
-        max-width: 600px;
-        margin: 0 auto;
-        padding: 20px;
-    }
+<h3 class="text-center">{% block title %}Histórico do Estoque{% endblock %}</h3>
 
-    /* Estilos para dispositivos móveis */
-    @media only screen and (max-width: 600px) {
-        .input-field.col {
-            width: 100%;
-            margin: 10px 0;
-        }
-
-        .btn.tooltiped {
-            width: 100%;
-            margin-top: 20px;
-        }
-
-        .pagination {
-            text-align: center;
-        }
-    }
-</style>
-
-<h3 class="center-align">{% block title %}Histórico do Estoque{% endblock %}</h3>
-
-<form method="get">
+<form method="get" class="mb-4">
     <div class="row">
-        <div class="input-field col s12 m5">
-            <input type="text" name="recebido_por" id="recebido_por" placeholder="Recebido por"
+        <div class="col-md-5 mb-3">
+            <input type="text" name="recebido_por" id="recebido_por" class="form-control" placeholder="Recebido por"
                 value="{{ request.args.get('recebido_por', '') }}">
-            <label for="recebido_por">Recebido por</label>
         </div>
-        <div class="input-field col s12 m5">
-            <select name="order_by" id="order_by">
+        <div class="col-md-5 mb-3">
+            <select name="order_by" id="order_by" class="form-select">
                 <option value="" disabled {{ request.args.get( 'order_by' ) if request.args.get( 'order_by' )
                     else 'selected' }}>Ordenar Por</option>
                 <option value="data_hora" {{ 'selected' if request.args.get( 'order_by' )=='data_hora' else '' }}>Data e
@@ -49,68 +23,81 @@
                     Valor de Venda</option>
                 <option value="id" {{ 'selected' if request.args.get( 'order_by' )=='id' else '' }}>ID</option>
             </select>
-            <label for="order_by">Ordenar por</label>
         </div>
-        <div class="input-field col s12 m2">
-            <select name="order_mode" id="order_mode">
+        <div class="col-md-2 mb-3">
+            <select name="order_mode" id="order_mode" class="form-select">
                 <option value="" disabled {{ request.args.get( 'order_mode' ) if request.args.get( 'order_mode' )
                     else 'selected' }}>Ordenação</option>
                 <option value="ASC" {{ 'selected' if request.args.get( 'order_mode' )=='ASC' else '' }}>Crescente
                 </option>
                 <option value="DESC" {{ 'selected' if request.args.get( 'order_mode' )=='DESC' else '' }}>Decrescente
                 </option>
-                <label for="order_mode">Ordenação</label>
             </select>
         </div>
     </div>
     <div class="row">
-        <div class="input-field col s12 m6">
-            <input type="text" id="start_date" name="start_date" class="datepicker"
-                value="{{ request.args.get('start_date', '')}}">
-            <label for="start_date">Data Inicial</label>
+        <div class="col-md-6 mb-3">
+            <input type="text" id="start_date" name="start_date" class="form-control datepicker"
+                value="{{ request.args.get('start_date', '')}}" placeholder="Data Inicial">
         </div>
 
-        <div class="input-field col s12 m6">
-            <input type="text" id="end_date" name="end_date" class="datepicker"
-                value="{{ request.args.get('end_date', '')}}">
-            <label for="end_date">Data Final</label>
+        <div class="col-md-6 mb-3">
+            <input type="text" id="end_date" name="end_date" class="form-control datepicker"
+                value="{{ request.args.get('end_date', '')}}" placeholder="Data Final">
         </div>
-        <button class="btn waves-effect waves-light tooltiped" type="submit" name="action" data-position="bottom"
-            data-tooltip="Filtrar Resultados">
-            Pesquisar
-            <i class="material-icons right">send</i>
-        </button>
+        <div class="col-md-12 text-center">
+            <button class="btn btn-primary" type="submit" name="action">
+                Pesquisar
+                <i class="fas fa-search"></i>
+            </button>
+        </div>
     </div>
 </form>
 
 <hr>
 
-<h3>
+<h3 class="text-center mb-3">
     Resultados
-    <a class="btn waves-effect waves-light tooltipped" data-position="bottom" data-tooltip="Exportar para Excel"
+    <a class="btn btn-primary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Exportar para Excel"
         href="{{ url_for('export_to_excel_api', result_id=result_id) }}">
         Download
-        <i class="material-icons right">get_app</i>
+        <i class="fas fa-download"></i>
     </a>
 </h3>
-<ul class="collection">
-    {% for result in results %}
-    <li class="collection-item">
-        <!-- Add a card here -->
-        <strong>ID</strong>: {{ result.id }} <br>
-        <strong>Recebido Por</strong>: {{ result.recebido_por.name }} <br>
-        <strong>Valor de Compra</strong>: R$ {{ result.valor_compra }} <br>
-        <strong>Valor de Venda</strong>: R$ {{ result.valor_venda }} <br>
-        <strong>Quantidade</strong>: {{ result.quantidade }} <br>
-        <strong>Data</strong>: {{ result.data_hora }} <br>
-        <strong>Produto</strong>: {{ result.produto.nome }}
-    </li>
-    {% else %}
-    <li class="collection-item">Nenhum Resultado Encontrado</li>
-    {% endfor %}
-</ul>
+<div class="table-responsive">
+    <table class="table table-striped table-bordered">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Recebido Por</th>
+                <th>Valor de Compra (R$)</th>
+                <th>Valor de Venda (R$)</th>
+                <th>Quantidade</th>
+                <th>Data</th>
+                <th>Produto</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for result in results %}
+            <tr class="{{ 'table-light' if loop.index is even else 'table-dark' }}">
+                <td>{{ result.id }}</td>
+                <td>{{ result.recebido_por.name }}</td>
+                <td>R$ {{ result.valor_compra }}</td>
+                <td>R$ {{ result.valor_venda }}</td>
+                <td>{{ result.quantidade }}</td>
+                <td>{{ result.data_hora }}</td>
+                <td>{{ result.produto.nome }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7" class="text-center">Nenhum Resultado Encontrado</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 
-<div class="pagination container">
+<div class="pagination container text-center mt-3">
     {{ pagination.info|safe }}
     {{ pagination.links|safe }}
 </div>

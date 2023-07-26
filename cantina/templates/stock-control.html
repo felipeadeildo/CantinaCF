@@ -6,41 +6,43 @@ Controle de Estoque
 
 {% block content %}
 <div class="container">
-    <h4 class="center-align">Controle de Estoque</h4>
+    <h4 class="text-center">Controle de Estoque</h4>
 
     <form id="stock-form" action="{{ url_for('stock_control')}}" method="post">
         <input type="hidden" name="{{ config['CSRF_COOKIE_NAME'] }}" value="{{ csrf_token() }}">
         <div class="row" id="form-content">
-            <div class="input-field col s12" id="existing-product">
-                <select name="product" id="product">
+            <div class="col-md-12 mb-3" id="existing-product">
+                <label for="product" class="form-label">Produto</label>
+                <select name="product" id="product" class="form-select" required>
                     <option value="" disabled selected>Selecione um Produto Existente</option>
                     {% for product in products %}
                     <option value="{{ product.id }}">{{ product.nome }}</option>
                     {% endfor %}
                 </select>
-                <label for="product">Produto</label>
             </div>
-            <div class="input-field col s6">
-                <input type="number" name="quantity" id="quantity" class="validate" required>
-                <label for="quantity">Quantidade</label>
+            <div class="col-md-6 mb-3">
+                <label for="quantity" class="form-label">Quantidade</label>
+                <input type="number" name="quantity" id="quantity" class="form-control" required>
             </div>
-            <div class="input-field col s6">
-                <input type="number" name="purchase_price" id="purchase_price" class="validate" min="0" step="0.01"
+            <div class="col-md-6 mb-3">
+                <label for="purchase_price" class="form-label">Valor de Compra (R$)</label>
+                <input type="number" name="purchase_price" id="purchase_price" class="form-control" min="0" step="0.01"
                     required>
-                <label for="purchase_price">Valor de Compra (R$)</label>
             </div>
-            <div class="input-field col s12">
-                <input id="observations" type="text" class="validate" name="observations">
-                <label for="observations">Observações</label>
+            <div class="col-md-12 mb-3">
+                <label for="observations" class="form-label">Observações</label>
+                <input id="observations" type="text" class="form-control" name="observations">
             </div>
-            <button class="btn waves-effect waves-light" type="submit" name="action">
-                Adicionar ao Estoque
-                <i class="material-icons right">send</i>
-            </button>
-            <button class="btn waves-effect waves-light" id="add-new-product">
-                Adicionar Produto Novo
-                <i class="material-icons right">add_circle</i>
-            </button>
+            <div class="col-md-12 text-center">
+                <button class="btn btn-primary" type="submit" name="action">
+                    Adicionar ao Estoque
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+                <button class="btn btn-primary" id="add-new-product">
+                    Adicionar Produto Novo
+                    <i class="fas fa-plus-circle"></i>
+                </button>
+            </div>
         </div>
     </form>
 </div>
@@ -52,53 +54,54 @@ Controle de Estoque
         event.preventDefault(); // não carrega a página
         let formContent = document.querySelector("#form-content");
         formContent.innerHTML = `
-        <input type="hidden" name="{{ config['CSRF_COOKIE_NAME'] }}" value="{{ csrf_token() }}">
-        <div class="input-field col s6">
-            <input id="product-name" type="text" class="validate" name="product_name" required>
-            <label for="product-name">Nome do Produto</label>
-        </div>
-        <div class="input-field col s6">
-            <input id="product-description" type="text" class="validate" name="product_description">
-            <label for="product-description">Descrição do Produto</label>
-        </div>
-        <div class="input-field col s6">
-            <input id="product-value" type="number" step="0.01" min="0" class="validate" name="product_value" required>
-            <label for="product-value">Valor de Venda (R$)</label>
-        </div>
-        <div class="input-field col s6">
-            <input id="purchase_price" type="number" step="0.01" min="0" class="validate" name="purchase_price" required>
-            <label for="purchase_price">Valor de Compra (R$)</label>
-        </div>
-        <div class="input-field col s6">
-            <input id="product-type" type="text" class="validate" name="product_type" required list="product-types">
-            <datalist id="product-types">
-                {% for type in product_types %}
-                <option value="{{ type }}">
-                {% endfor %}
-            </datalist>
-            <label for="product-type">Tipo</label>
-        </div>
-        <div class="input-field col s6">
-            <input id="quantity" type="number" class="validate" name="quantity" required>
-            <label for="quantity">Quantidade</label>
-        </div>
-        <div class="input-field col s12">
-            <input id="observations" type="text" class="validate" name="observations">
-            <label for="observations">Observações</label>
-        </div>
-        <button class="btn waves-effect waves-light" id="add-existing-product">Adicionar Produto Existente
-            <i class="material-icons right">undo</i>
-        </button>        
-        <button class="btn waves-effect waves-light" type="submit" name="action">Adicionar ao Estoque
-            <i class="material-icons right">send</i>
-        </button>
-    `;
+                <input type="hidden" name="{{ config['CSRF_COOKIE_NAME'] }}" value="{{ csrf_token() }}">
+                <div class="col-md-6 mb-3">
+                    <label for="product-name" class="form-label">Nome do Produto</label>
+                    <input id="product-name" type="text" class="form-control" name="product_name" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="product-description" class="form-label">Descrição do Produto</label>
+                    <input id="product-description" type="text" class="form-control" name="product_description">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="product-value" class="form-label">Valor de Venda (R$)</label>
+                    <input id="product-value" type="number" step="0.01" min="0" class="form-control" name="product_value" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="purchase_price" class="form-label">Valor de Compra (R$)</label>
+                    <input id="purchase_price" type="number" step="0.01" min="0" class="form-control" name="purchase_price" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="product-type" class="form-label">Tipo</label>
+                    <input id="product-type" type="text" class="form-control" name="product_type" required list="product-types">
+                    <datalist id="product-types">
+                        {% for type in product_types %}
+                            <option value="{{ type }}">
+                        {% endfor %}
+                    </datalist>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="quantity" class="form-label">Quantidade</label>
+                    <input id="quantity" type="number" class="form-control" name="quantity" required>
+                </div>
+                <div class="col-md-12 mb-3">
+                    <label for="observations" class="form-label">Observações</label>
+                    <input id="observations" type="text" class="form-control" name="observations">
+                </div>
+                <div class="col-md-12 text-center">
+                    <button class="btn btn-primary" id="add-existing-product">
+                        Adicionar Produto Existente
+                        <i class="fas fa-undo"></i>
+                    </button>
+                    <button class="btn btn-primary" type="submit" name="action">Adicionar ao Estoque
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            `;
         document.querySelector('#add-existing-product').addEventListener('click', function (event) {
             event.preventDefault();
             location.reload();
-        })
-    })
-
-
+        });
+    });
 </script>
 {% endblock %}
