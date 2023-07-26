@@ -161,14 +161,18 @@ def get_products(**kwargs):
     :param kwargs: Paramter "return_total" is a boolean indicating whether to return the total number of products. (products, total)
     """
     conn = get_conn()
+    query = "SELECT * FROM produto"
+    if "search" in kwargs:
+        query += f" WHERE nome LIKE '%{kwargs.get('search')}%' or id LIKE '%{kwargs.get('search')}%'"
     if 'offset' in kwargs and 'per_page' in kwargs:
-        products = conn.execute("SELECT * FROM produto LIMIT ? OFFSET ?", (kwargs.get('per_page'), kwargs.get('offset'))).fetchall()
-    else:
-        products = conn.execute("SELECT * FROM produto").fetchall()
-    
+        query += f" LIMIT {kwargs.get('offset')}, {kwargs.get('per_page')}"
+    products = conn.execute(query).fetchall()
     products = list(map(dict, products))
     if 'return_total' in kwargs:
-        total = conn.execute("SELECT COUNT(*) FROM produto").fetchone()
+        if "search" in kwargs:
+            total = conn.execute(f"SELECT COUNT(*) FROM produto WHERE nome LIKE '%{kwargs.get('search')}%' or id LIKE '%{kwargs.get('search')}%'").fetchone()
+        else:
+            total = conn.execute("SELECT COUNT(*) FROM produto").fetchone()
         total = 0 if total is None else total[0]
         return products, total
     return products

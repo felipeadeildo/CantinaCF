@@ -89,10 +89,10 @@ def products():
     """
     A function that renders the 'products.html' template.
     """
-
+    search = request.args.get("q", "")
     page, per_page, offset = get_page_args(page_parameter="page", per_page_parameter="per_page")
     offset = (page - 1) * per_page
-    products, total = get_products(offset=offset, per_page=per_page, return_total=True)
+    products, total = get_products(offset=offset, per_page=per_page, return_total=True, search=search)
 
     pagination = Pagination(page=page, per_page=per_page, total=total, css_framework="bootstrap4")
     context = {
