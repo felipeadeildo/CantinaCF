@@ -73,26 +73,6 @@ PERMISSIONS = {
         "index",
         "products",
     ],
-    "vendedor": [
-        "static",
-        "login",
-        "logout",
-        "profile",
-        "index",
-        "cantina",
-        "add_to_cart_api",
-        "search_products_api",
-        "confirm_purchase",
-        "remove_from_cart_api",
-        "affiliates",
-        "affiliates_history",
-        "recharge",
-        "stock_control",
-        "stock_history",
-        "sales_history",
-        "export_to_excel_api",
-        "products",
-    ],
     "caixa": [
         "static",
         "login",
@@ -114,6 +94,11 @@ PERMISSIONS = {
         "recharge_history",
         "products",
         "pay_payroll",
+        "cantina",
+        "add_to_cart_api",
+        "search_products_api",
+        "confirm_purchase",
+        "remove_from_cart_api",
     ],
     "guest": [
         "static", 
@@ -127,19 +112,19 @@ PAGES = [
         "title": "Home", 
         "description": "Onde você está agora :D", 
         "endpoint": "index", 
-        "allowed_roles": ["admin", "Funcionário", "Aluno", "Vendedor", "Caixa"]
+        "allowed_roles": ["admin", "Funcionário", "Aluno", "Caixa"]
     },
     {
         "title": "Meu Perfil", 
         "description": "Referente ao seu perfil. Podes visualizar seus dados, visualizar histórico de transações e recargas, etc.", 
         "endpoint": "profile",
-        "allowed_roles": ["admin", "Funcionário", "Aluno", "Vendedor", "Caixa"]
+        "allowed_roles": ["admin", "Funcionário", "Aluno", "Caixa"]
     },
     {
         "title": "Recarga",
         "description": "Aqui você pode solicitar recargas especificando o valor e o método de pagamento.",
         "endpoint": "recharge",
-        "allowed_roles": ["admin", "Funcionário", "Aluno", "Vendedor", "Caixa"]
+        "allowed_roles": ["admin", "Funcionário", "Aluno", "Caixa"]
     },
     {
         "title": "Histórico de Recargas",
@@ -163,7 +148,7 @@ PAGES = [
         "title": "Produtos da Cantina",
         "description": "Aqui você pode pode visualizar uma lista de produtos com possibilidade de os editar.",
         "endpoint": "products",
-        "allowed_roles": ["admin", "Vendedor", "Caixa", "Aluno", "Funcionário"],
+        "allowed_roles": ["admin", "Caixa", "Aluno", "Funcionário"],
     },
     {
         "title": "Controle de Estoque",
@@ -205,19 +190,19 @@ PAGES = [
         "title": "Afiliados",
         "description": "Aqui você pode gerenciar seus afiliados.",
         "endpoint": "affiliates",
-        "allowed_roles": ["admin", "Caixa", "Vendedor", "Funcionário"],
+        "allowed_roles": ["admin", "Caixa", "Funcionário"],
     },
     {
         "title": "Histórico de Recargas dos Afiliados",
         "description": "Aqui você pode visualizar o histórico de recargas dos afiliados com possibilidade de filtrar por data.",
         "endpoint": "affiliates_history",
-        "allowed_roles": ["admin", "Caixa", "Vendedor", "Funcionário"],
+        "allowed_roles": ["admin", "Caixa", "Funcionário"],
     },
     {
         "title": "Pagamento da Folha de Pagamento",
         "description": "Aqui você pode fazer o pagamento da folha de pagamento, ou seja, o que acumulou durante um determinado período.",
         "endpoint": "pay_payroll",
-        "allowed_roles": ["admin", "Caixa", "Vendedor", "Funcionário"],
+        "allowed_roles": ["admin", "Caixa", "Funcionário"],
     }
 ]
 
