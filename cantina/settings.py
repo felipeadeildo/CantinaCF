@@ -49,6 +49,9 @@ PERMISSIONS = {
         "history_edits_products", # visualização de histórico de edições de produtos
         "history_edits_users", # visualização de histórico de edições de usuários
         "recharge_history", # visualização de histórico de recargas
+        "products_for_despache", # lista com atualização denamica de produtos que foram vendidos e que precisam ser despachados
+        "list_despaches_api", # lista os produtos de despache no endpoint products_for_despache
+        "confirm_despache_api", 
     ],
     "funcionário": [
         "static", 
@@ -137,7 +140,13 @@ PAGES = [
         "description": "Página referente à Venda de Produtos da Cantina.",
         "endpoint": "cantina",
         "allowed_roles": ["admin", "Caixa"],
-    }, 
+    },
+    {
+        "title": "Produtos para Despache",
+        "description": "Referente ao despache de produtos que foram vendidos",
+        "endpoint": "products_for_despache",
+        "allowed_roles": ["admin"]
+    },
     {
         "title": "Histórico de Vendas",
         "description": "Aqui você pode visualizar o histórico de vendas feito pelos usuários em geral, tendo a possibilidade de exportar para excel, fazer filtro por data e usuário.",

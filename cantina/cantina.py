@@ -72,11 +72,8 @@ def process_purchase(form):
         flash(f"O usuário {user['name']} não tem saldo suficiente para realizar a compra... Seu saldo atual é de R$ {user['saldo']}", "error")
         return
     
-    # TODO: adicionar sugestão de pagamento em espécie
-    
     change_saldo = user["saldo"] - total_compra
     update_user_saldo(user["id"], change_saldo)
-
 
     insert_product_sales(sold_by=session["user"]["id"], sold_to=user["id"], products=session["cart"])
 
@@ -192,6 +189,7 @@ def sales_history():
         result = dict(result)
         result["vendido_por"] = dict(get_user(result["vendido_por"], safe=True))
         result["vendido_para"] = dict(get_user(result["vendido_para"]), safe=True)
+        result["deferido_por"] = dict(get_user(result["deferido_por"]), safe=True)
         result["produto"] = dict(get_product(id=result["produto_id"]))
         result["data_hora"] = datetime.strptime(result["data_hora"], "%Y-%m-%d %H:%M:%S").strftime("%d/%m/%Y às %H:%M:%S")
         results.append(result)
@@ -238,3 +236,7 @@ def filter_today_sales():
     args['start_date'] = today_str
     args['end_date'] = today_str
     return redirect(url_for('sales_history', **args))
+
+@app.route("/produtos-para-despache")
+def products_for_despache():
+    return render_template("products-for-despache.html")

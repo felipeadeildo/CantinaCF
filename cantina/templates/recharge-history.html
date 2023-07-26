@@ -91,6 +91,8 @@
                     <div class="col-md-6">
                         <label class="form-label" for="recharge_type">Tipo de Recarga</label>
                         <select name="recharge_type" id="recharge_type" class="form-select">
+                            <option value="" {{ request.args.get( 'recharge_type' ) if request.args.get( 'recharge_type'
+                                ) else 'selected' }}>Todos</option>
                             {% for name, value in payment_types.items() %}
                             <option value="{{ name }}" {{ 'selected' if request.args.get( 'recharge_type' )==name
                                 else '' }}>{{ value }}</option>

@@ -245,3 +245,38 @@ def export_to_excel_api():
     output.seek(0)
 
     return send_file(output, as_attachment=True, download_name=f"{result_id}.xlsx")
+
+
+@app.route("/api/listar-produtos-para-despache", methods=["GET"])
+def list_despaches_api():
+    """
+    A function to list products for despach
+    """
+    conn = get_conn()
+    products = conn.execute("SELECT * FROM venda_produto WHERE deferido_por is NULL").fetchall()
+    products = [dict(product) for product in products]
+    for product in products:
+        product["user"] = dict(get_user(product["vendido_para"]))
+        product["produto"] = dict(get_product(id=product["produto_id"]))
+    return jsonify(products)
+
+
+@app.route("/api/confirmar-despache", methods=["POST"])
+def confirm_despache_api():
+    """
+    A function to confirm a despach
+    """
+    conn = get_conn()
+    data = request.get_json()
+    venda_id = data.get("id")
+    if venda_id is None:
+        return jsonify({
+            "message": f"ID da venda de ID {venda_id} não encontrado!",
+            "error": True
+        })
+    conn.execute("UPDATE venda_produto SET deferido_por = ? WHERE id = ?", (session["user"]["id"], venda_id))
+    conn.commit()
+    return jsonify({
+        "message": f"Venda de ID {venda_id} confirmada com sucesso!",
+        "error": False
+    })

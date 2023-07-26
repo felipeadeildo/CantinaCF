@@ -148,6 +148,7 @@
                         <th>ID</th>
                         <th>Vendido Por</th>
                         <th>Vendido Para</th>
+                        <th>Despachado Por</th>
                         <th>Produto</th>
                         <th>Valor de Compra</th>
                         <th>Data</th>
@@ -165,6 +166,14 @@
                         <td>
                             {{ result.vendido_para.name }} (<a
                                 href="{{ url_for('profile', user_id=result.vendido_para.id ) }}">Perfil</a>)
+                        </td>
+                        <td>
+                            {% if result.deferido_por %}
+                            {{ result.deferido_por.name }} (<a
+                                href="{{ url_for('profile', user_id=result.deferido_por.id ) }}">Perfil</a>)
+                            {% else %}
+                            Não despachado
+                            {% endif %}
                         </td>
                         <td>{{ result.produto.nome }}</td>
                         <td>R$ {{ result.valor }}</td>

@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block title %}Produtos para Despache{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h3 class="text-center mb-3">Produtos para Despache</h3>
+
+    <div class="row" id="despache-cards">
+        <!-- Os cards dos produtos para despache serão carregados aqui dinamicamente -->
+    </div>
+</div>
+
+<script>
+    // Função para atualizar os cards dos produtos para despache
+    function updateDespacheCards() {
+        // toastr.info("Atualizando lista de produtos para despache...");
+
+        // Endpoint da API de list_despaches_api (substitua pelo endpoint correto)
+        var urlListDespachesApi = "{{ url_for('list_despaches_api') }}";
+
+        fetch(urlListDespachesApi)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Erro ao atualizar os cards: ' + response.statusText);
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Limpar os cards existentes
+                document.getElementById('despache-cards').innerHTML = '';
+
+                if (data.length === 0) {
+                    document.getElementById('despache-cards').innerHTML = `
+                        <div class="col-md-12 text-center">
+                            <p class="text-muted">Nenhum produto disponível para despache.</p>
+                        </div>
+                    `;
+                } else {
+                    // Criar os novos cards com as informações dos produtos para despache
+                    data.forEach(item => {
+                        var card = `
+                            <div class="col-md-4 mb-4">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">${item.produto.nome}</h5>
+                                        <p class="card-text">
+                                            ID da Venda: ${item.id}<br>
+                                            Valor: R$ ${item.produto.valor}<br>
+                                            Destinatário: ${item.user.name} [${item.user.matricula}] (ID: ${item.user.id})
+                                        </p>
+                                        <button class="btn btn-primary" onclick="confirmDespache(${item.id})">
+                                            Despachar
+                                            <i class="fas fa-truck"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        document.getElementById('despache-cards').innerHTML += card;
+                    });
+                }
+            })
+            .catch(error => {
+                toastr.error(error.message);
+            });
+    }
+
+    function confirmDespache(id) {
+        var urlConfirmSaleApi = "{{ url_for('confirm_despache_api') }}";
+
+        fetch(urlConfirmSaleApi, {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json',
+                '{{ config["CSRF_HEADER_NAME"] }}': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({
+                id: id
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.ok) {
+                toastr.success(data.message);
+            } else {
+                toastr.error(data.message);
+            }
+
+            updateDespacheCards();
+        })
+        .catch(error => {
+            toastr.error('Erro ao confirmar despache: ' + error.message);
+        });
+    }
+
+    // Chamar a função de atualização ao carregar a página
+    document.addEventListener('DOMContentLoaded', function () {
+        updateDespacheCards();
+    });
+
+    setInterval(function () {
+        updateDespacheCards();
+    }, 8000);
+</script>
+{% endblock %}

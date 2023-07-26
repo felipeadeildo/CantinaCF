@@ -35,9 +35,12 @@ CREATE TABLE venda_produto(
   vendido_para INTEGER,
   turno TEXT,
   valor REAL DEFAULT 0,
+  deferido_por INTEGER,
+  deferido BOOLEAN DEFAULT 0,
   FOREIGN KEY(produto_id) REFERENCES produto(id),
   FOREIGN KEY(vendido_por) REFERENCES user(id),
-  FOREIGN KEY(vendido_para) REFERENCES user(id)
+  FOREIGN KEY(vendido_para) REFERENCES user(id),
+  FOREIGN KEY(deferido_por) REFERENCES user(id)
 );
 
 -- Create the "historico_abastecimento_estoque" table
