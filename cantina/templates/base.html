@@ -18,16 +18,33 @@
         }
 
         body {
-            margin-bottom: 60px; /* Altura do footer */
+            margin-bottom: 10vh; /* Altura do footer */
         }
 
         footer {
             position: absolute;
             bottom: 0;
             width: 100%;
-            height: 60px; /* Altura do footer */
+            height: 10vh; /* Altura do footer */
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .footer-icon {
+            font-size: 1.5rem;
+            color: #333;
         }
     </style>
+
 
     {% block additional_css %}{% endblock %}
 </head>
