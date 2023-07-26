@@ -105,7 +105,6 @@ PERMISSIONS = {
         "refill_requests",
         "affiliates",
         "affiliates_history",
-        "stock_control",
         "stock_history",
         "get_payments_api",
         "refill_manage_request_api", 
@@ -114,6 +113,7 @@ PERMISSIONS = {
         "export_to_excel_api",
         "recharge_history",
         "products",
+        "pay_payroll",
     ],
     "guest": [
         "static", 
@@ -169,7 +169,7 @@ PAGES = [
         "title": "Controle de Estoque",
         "description": "Aqui você pode cadastrar um determinado produto ao estoque da cantina informando quantidade e valor de compra.",
         "endpoint": "stock_control",
-        "allowed_roles": ["admin", "Vendedor", "Caixa"],
+        "allowed_roles": ["admin", "Vendedor"],
     },
     {
         "title": "Historico do Estoque",
