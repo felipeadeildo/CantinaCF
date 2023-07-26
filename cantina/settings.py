@@ -136,13 +136,13 @@ PAGES = [
         "title": "Cantina",
         "description": "Página referente à Venda de Produtos da Cantina.",
         "endpoint": "cantina",
-        "allowed_roles": ["admin", "Vendedor"],
+        "allowed_roles": ["admin", "Caixa"],
     }, 
     {
         "title": "Histórico de Vendas",
         "description": "Aqui você pode visualizar o histórico de vendas feito pelos usuários em geral, tendo a possibilidade de exportar para excel, fazer filtro por data e usuário.",
         "endpoint": "sales_history",
-        "allowed_roles": ["admin", "Caixa", "Vendedor"],
+        "allowed_roles": ["admin", "Caixa"],
     },
     {
         "title": "Produtos da Cantina",
@@ -154,13 +154,13 @@ PAGES = [
         "title": "Controle de Estoque",
         "description": "Aqui você pode cadastrar um determinado produto ao estoque da cantina informando quantidade e valor de compra.",
         "endpoint": "stock_control",
-        "allowed_roles": ["admin", "Vendedor"],
+        "allowed_roles": ["admin"],
     },
     {
         "title": "Historico do Estoque",
         "description": "Aqui você pode visualizar o histórico de cadastro de produtos no estoque com possibilidade de exportar para excel, filtrar por data e usuário.",
         "endpoint": "stock_history",
-        "allowed_roles": ["admin", "Caixa", "Vendedor"],
+        "allowed_roles": ["admin", "Caixa"],
     },
     {
         "title": "Histórico de edição de Produtos",
