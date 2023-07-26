@@ -50,7 +50,7 @@ PERMISSIONS = {
         "history_edits_users", # visualização de histórico de edições de usuários
         "recharge_history", # visualização de histórico de recargas
     ],
-    "Funcionário": [
+    "funcionário": [
         "static", 
         "login", 
         "logout", 
@@ -63,7 +63,7 @@ PERMISSIONS = {
         "index",
         "products",
     ],
-    "Aluno": [
+    "aluno": [
         "static",
         "login", 
         "logout",
@@ -73,7 +73,7 @@ PERMISSIONS = {
         "index",
         "products",
     ],
-    "Vendedor": [
+    "vendedor": [
         "static",
         "login",
         "logout",
@@ -93,7 +93,7 @@ PERMISSIONS = {
         "export_to_excel_api",
         "products",
     ],
-    "Caixa": [
+    "caixa": [
         "static",
         "login",
         "logout",

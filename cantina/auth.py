@@ -62,7 +62,7 @@ def check_permission():
     if current_user_id != "guest":
         user = get_user(current_user_id, by="id")
         session["user"] = dict(user)
-        session["permissions"] = PERMISSIONS.get(user["role"], [])
+        session["permissions"] = PERMISSIONS.get(user["role"].lower(), [])
         if user is None:
             abort(404) # user not found
         if not role_has_permission(user["role"]):
