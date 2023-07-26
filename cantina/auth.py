@@ -79,6 +79,6 @@ def set_guest_user():
 
 def role_has_permission(role):
     """Check if user has permission to access current endpoint"""
-    permitted_endpoints = PERMISSIONS.get(role, [])
+    permitted_endpoints = PERMISSIONS.get(role.lower(), [])
     return request.endpoint in permitted_endpoints
 
