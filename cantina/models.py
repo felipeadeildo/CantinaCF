@@ -135,6 +135,7 @@ class PaymentMethod(db.Model):
     need_proof = db.Column(db.Boolean, default=False)
     added_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, default=datetime.now)
+    is_payroll = db.Column(db.Boolean, default=False)
 
 setup_updated_at_listener(PaymentMethod)
 
@@ -193,6 +194,10 @@ class Payroll(db.Model):
 
     affiliation = db.relationship('Affiliation', backref='payrolls')
 
+    @property
+    def allowed_by_user(self):
+        return User.query.get(self.allowed_by)
+
 
 class EditHistory(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -208,7 +213,7 @@ class EditHistory(db.Model):
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     role_id = db.Column(db.Integer, db.ForeignKey('role.id'))
-    payment_method = db.Column(db.Integer, db.ForeignKey('payment_method.id'))
+    payment_method_id = db.Column(db.Integer, db.ForeignKey('payment_method.id'))
 
     def __repr__(self):
         return f"<EditHistory {self.object_type} ({self.key}) [{self.old_value} -> {self.new_value}]>"

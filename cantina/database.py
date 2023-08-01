@@ -16,11 +16,11 @@ def init_db():
     # Adiciona métodos de pagameto padrão
     print("Adding default payment methods...")
     payments_method = [
-        PaymentMethod(name="PIX", need_proof=True),
-        PaymentMethod(name="Cartão de Crédito", need_proof=False),
-        PaymentMethod(name="Cartão de Debito", need_proof=False),
-        PaymentMethod(name="Espécie", need_proof=False),
-        PaymentMethod(name="Folha de Pagamento", need_proof=True),
+        PaymentMethod(name="PIX", need_proof=True, is_payroll=False),
+        PaymentMethod(name="Cartão de Crédito", need_proof=False, is_payroll=False),
+        PaymentMethod(name="Cartão de Debito", need_proof=False, is_payroll=False),
+        PaymentMethod(name="Espécie", need_proof=False, is_payroll=False),
+        PaymentMethod(name="Folha de Pagamento", need_proof=True, is_payroll=True),
     ]
     db.session.add_all(payments_method)
     db.session.commit()

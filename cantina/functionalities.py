@@ -270,8 +270,8 @@ def security_recharge():
         new_payment.proof_path = filename
         file.save(os.path.join(UPLOAD_FOLDER, filename))
         
-    if payment_method.name == "payroll":
-        is_affiliation = Affiliation.query.filter_by(user_id=user_id).first() is not None
+    if payment_method.is_payroll:
+        is_affiliation = Affiliation.query.filter_by(affiliated_id=user_id).first() is not None
         if not is_affiliation:
             flash(f"Então, meu anjo, você não está afiliado a ninguém ainda...", category="error")
             return
@@ -530,6 +530,7 @@ def affiliates_history():
     pagination = query.paginate(page=page, per_page=per_page, error_out=False)
     
     results = pagination.items
+    print(results[0].affiliation.affiliated)
     
     context = {
         "results": results,
@@ -541,7 +542,7 @@ def affiliates_history():
 
 def security_pay_payroll():
     user_id = session["user"].id
-    user = User.query.filter(id=user_id).first()
+    user = User.query.filter_by(id=user_id).first()
     if user is None:
         flash("Usuário de ID {} não encontrado!".format(user_id), category="error")
         return redirect(url_for("index"))
@@ -587,7 +588,7 @@ def pay_payroll():
     if request.method == 'POST':
         security_pay_payroll()
     context = {
-        "payment_methods": PaymentMethod.query.filter(PaymentMethod.id != 5).all() # ID = 5 refere-se à folha de pagamento, ou seja, não da pra pagara  folha de pagamento com OUTRA folha da pagmento né kkkk
+        "payment_methods": PaymentMethod.query.filter(~PaymentMethod.is_payroll).all()
     }
     return render_template("pay-payroll.html", **context)
 

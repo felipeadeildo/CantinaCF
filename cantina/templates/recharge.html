@@ -57,10 +57,16 @@
             }
         }
         verify_proof_visualization = function () {
-            if (paymentMethodTag.value in payment_methods_need_proof) {
-                proofContainerTag.style.display = 'block';
-            } else {
+            let in_list = false
+            payment_methods_need_proof.forEach(pay => {
+                if (paymentMethodTag.value === pay) {
+                    in_list = true
+                }
+            });
+            if (!in_list) {
                 proofContainerTag.style.display = 'none';
+            } else {
+                proofContainerTag.style.display = 'block';
             }
         }
         verify_proof_visualization();

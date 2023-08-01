@@ -51,16 +51,16 @@
                     <tr>
                         <td>{{ result.id }}</td>
                         <td>
-                            {{ result.afiliado.name }}
-                            (<a href="{{ url_for('profile', user_id=result.afiliado.id) }}">{{ result.afiliado.username
+                            {{ result.affiliation.affiliated.name }}
+                            (<a href="{{ url_for('profile', user_id=result.affiliation.affiliated.id) }}">{{ result.affiliation.affiliated.username
                                 }}</a>)
                         </td>
-                        <td>R$ {{ result.valor }}</td>
-                        <td>{{ result.data_hora }}</td>
+                        <td>R$ {{ result.value }}</td>
+                        <td>{{ result.added_at }}</td>
                         <td>
-                            {{ result.liberado_por.name }}
-                            (<a href="{{ url_for('profile', user_id=result.liberado_por.id) }}">{{
-                                result.liberado_por.username
+                            {{ result.allowed_by_user.name }}
+                            (<a href="{{ url_for('profile', user_id=result.allowed_by_user.id) }}">{{
+                                result.allowed_by_user.username
                                 }}</a>)
                         </td>
                     </tr>

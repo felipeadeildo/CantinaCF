@@ -149,7 +149,7 @@ def verify_payment_api():
         db.session.commit()
 
         payment_method = PaymentMethod.query.filter_by(id=payment.payment_method_id).first()
-        if payment_method.name == "payroll":
+        if payment_method.is_payroll:
             affiliation = Affiliation.query.filter_by(affiliated_id=requester.id).first()
             new_payroll = Payroll(
                 value=payment.value,

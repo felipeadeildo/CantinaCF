@@ -52,7 +52,13 @@
             }
         }
         verify_proof = function () {
-            if (paymentMethodTag.value in payment_methods_need_proof) {
+            let in_list = false;
+            payment_methods_need_proof.forEach(pay => {
+                if (paymentMethodTag.value === pay) {
+                    in_list = true;
+                }
+            })
+            if (in_list) {
                 proofContainerTag.style.display = 'block';
             } else {
                 proofContainerTag.style.display = 'none';
