@@ -120,13 +120,13 @@ with app.test_request_context():
         payment = Payment(
             payment_method_id = payment_method.id,
             observations = payment["descricao"],
-            paid_at = datetime.strptime(payment["data_hora"], "%Y-%m-%d %H:%M:%S"),
             value = payment["valor"],
             allowed_by = payment["liberado_por"],
             user_id = payment["aluno_id"],
             proof_path = payment["comprovante"],
             is_payroll = payment["is_payroll"],
             status = status,
+            added_at = datetime.strptime(payment["data_hora"], "%Y-%m-%d %H:%M:%S"),
 
             payment_method = payment_method
         )
