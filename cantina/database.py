@@ -39,7 +39,7 @@ def init_db():
         Route(id=9, name="Editar Perfil", endpoint="edit_profile"),
         Route(id=10, name="Editar Senha", endpoint="edit_password"),
         Route(id=11, name="Usuários", endpoint="users"),
-        Route(id=12, name="Recarga", endpoint="recharge"),
+        Route(id=12, name="Recarregar", endpoint="recharge"),
         Route(id=13, name="Histórico de Pagamentos", endpoint="payments_history"),
         Route(id=14, name="Produtos", endpoint="products"),
         Route(id=15, name='Verificação de Pagamentos', endpoint='verify_payments'),
@@ -216,7 +216,7 @@ def init_db():
         Role(
             name="Aluno",
             description="Alunos da Escola",
-            allowed_routes=json.dumps([1, 2, 3, 4, 8, 10, 12, 14]),
+            allowed_routes=json.dumps([1, 2, 3, 4, 8, 10, 12, 14, 27, 28, 5, 6]),
         ),
         Role(
             name="Caixa",

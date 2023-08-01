@@ -127,8 +127,6 @@ class ProductSale(db.Model):
         return User.query.get(self.dispatched_by) if self.dispatched_by else None
 
 
-
-
 class PaymentMethod(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Text, nullable=False)
