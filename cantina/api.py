@@ -1,50 +1,30 @@
-from .db import get_conn, get_product, update_product_quantity, get_user, update_user_saldo, update_user_key
+from .models import Product, User, Payment, PaymentMethod, Affiliation, Payroll, ProductSale
 from flask import request, jsonify, session, send_file
-from . import app, cache
+from datetime import datetime
+from . import app, cache, db
 from io import BytesIO
 import pandas as pd
 
-
-@app.route("/api/pesquisar-produto", methods=["POST"])
-def search_products_api():
-    """
-    Handle API requests for searching products.
-
-    Returns:
-    - A JSON response containing a list of products that match the search query.
-    """
-    data = request.get_json()
-    query = data.get("query")
-    conn = get_conn()
-    products = conn.execute(
-        "SELECT * FROM produto WHERE nome LIKE ? OR id = ?",
-        ("%{}%".format(query), query)
-    ).fetchall()
-    products = [dict(product) for product in products]
-    return jsonify(products)
-
-
 @app.route("/api/adicionar-ao-carrinho", methods=["POST"])
 def add_to_cart_api():
-    """
-    Adds a product to the cart API.
-
-    :return: The JSON response containing the status of the operation.
-    :rtype: dict
-    """
     data = request.get_json()
     product_id = data.get("id")
-    conn = get_conn()
     try:
-        product = get_product(id=product_id)
-        if product["quantidade"] < 1:
+        product = Product.query.filter_by(id=product_id).first()
+        if product is None:
             context = {
-                "message": f"O produto {product['nome']} não possui estoque!",
+                "message": f"Produto de ID {product_id} não encontrado!",
                 "ok": False
             }
             return jsonify(context), 201
-        update_product_quantity(id=product_id, quantity=product["quantidade"] - 1)
-        conn.commit()
+        if product.quantity < 1:
+            context = {
+                "message": f"O produto {product.name} não possui estoque!",
+                "ok": False
+            }
+            return jsonify(context), 201
+        product.quantity -= 1
+        db.session.commit()
     except Exception as e:
         context = {
             "message": "Alguma coisa deu errado...",
@@ -53,56 +33,44 @@ def add_to_cart_api():
         return jsonify(context), 201
     else:
         context = {
-            "message": f"Produto {product['nome']} adicionado com sucesso!",
-            "product": dict(product),
+            "message": f"Produto {product.name} adicionado com sucesso!",
+            "product": product.as_dict(),
             "ok": True
         }
-        context["product"]["quantidade"] -= 1
-        session["cart"].append(context["product"])
+        session["cart"].append(product)
         return jsonify(context)
 
 
 @app.route("/api/remover-do-carrinho", methods=["POST"])
 def remove_from_cart_api():
-    """
-    Removes a product from the shopping cart.
-
-    This API endpoint is used to remove a product from the shopping cart. It expects a POST request
-    with a JSON payload containing the product ID. The function retrieves the product ID from the
-    request payload and iterates through the session's cart to find the corresponding product. If
-    found, it removes the product from the cart and updates the quantity of the product in the
-    database. Finally, it returns a JSON response with a success message and the updated product
-    information.
-
-    Returns:
-        A JSON response containing a success message and the updated product information.
-    """
     data = request.get_json()
     product_id = data.get("id")
+    found = False
     for product in session["cart"]:
-        if product["id"] == product_id:
+        if product.id == product_id:
             session["cart"].remove(product)
+            found = True
             break
-    product = dict(get_product(id=product_id))
-    product["quantidade"] += 1
-    update_product_quantity(id=product_id, quantity=product["quantidade"])
+    if not found:
+        context = {
+            "message": f"Produto de ID {product_id} não está em sua sessão!",
+            "ok": False
+        }
+        return jsonify(context), 201
+    product = Product.query.filter_by(id=product_id).first()
+    product.quantity += 1
+    db.session.commit()
     return jsonify({
-        "message": f"Produto {product['nome']} removido com sucesso!",
-        "product": product,
+        "message": f"Produto {product.name} removido com sucesso!",
+        "product": product.as_dict(),
     })
 
 
 @app.route("/api/obter-usuario", methods=["POST"])
 def get_user_api():
-    """
-    Retrieves a user from the API based on the provided user ID.
-    
-    Returns a JSON response containing either an error message and a boolean value indicating if the user was found or not,
-    or a success message and a dictionary representing the user.
-    """
     data = request.get_json()
     user_id = data.get("id")
-    user = get_user(user_id)
+    user = User.query.filter_by(id=user_id).first()
     if user is None:
         context = {
             "message": f"Usuário de ID {user_id} não encontrado!",
@@ -110,27 +78,13 @@ def get_user_api():
         }
     else:
         context = {
-            "message": f"Comprimente bem o usuário {user['name']}! :D",
-            "user": dict(user)
+            "message": f"Comprimente bem o usuário {user.name}! :D",
+            "user": user.as_dict()
         }
     return jsonify(context)
 
 @app.route("/api/gerar-usuario-aleatorio", methods=["POST"])
 def generate_random_username_api():
-    """
-    Generate a random username for the API.
-    
-    This function receives a POST request to the endpoint '/api/gerar-usuario-aleatorio' and generates a random username based on the provided name parameter. If the name parameter is not provided, it defaults to 'aluno usuario'. The generated username is then checked against existing usernames in the database and if it already exists, a number is appended to the username. Finally, the generated username is returned as a response in JSON format.
-    
-    Parameters:
-        None
-        
-    Returns:
-        A JSON response containing the generated username. The response has the following format:
-        {
-            "username": "The generated username"
-        }
-    """
     data = request.get_json()
     name = data.get("name", "aluno usuario").lower().split()
     if len(name) >= 2:
@@ -139,83 +93,82 @@ def generate_random_username_api():
         username = name[0]
     else:
         username = "aluno"
-    conn = get_conn()
-    # get usersnames that startswith the username
-    usernames = conn.execute("SELECT username FROM user WHERE username LIKE ?", ("%{}%".format(username),)).fetchall()
-    if len(usernames) > 0:
-        username = f"{username}{len(usernames)}"
-    return jsonify({
-        "username": username
-    })
+
+    existing_usernames = User.query.filter(User.username.ilike(f"{username}%")).all()
+    if existing_usernames:
+        username = f"{username}{len(existing_usernames)}"
+    return jsonify({"username": username})
 
 @app.route("/api/obter-pagamentos", methods=["POST"])
 def get_payments_api():
-    """
-    Retrieves payments based on a query string and returns them as a JSON response.
-
-    Returns:
-        A JSON response containing a list of payments.
-    """
     data = request.get_json()
     query = data.get("query")
-    conn = get_conn()
-    payments = conn.execute("SELECT * FROM controle_pagamento WHERE (liberado_por IS NULL AND id LIKE ?) ORDER BY id ASC", ("%{}%".format(query),)).fetchall()
-    payments = [dict(payment) for payment in payments]
+    payments = Payment.join(
+        User, User.id == Payment.user_id
+        ).filter(
+        Payment.allowed_by.is_(None),
+        Payment.id.ilike(f"%{query}%"),
+        Payment.order_by(Payment.id.asc())
+        ).all()
+    result = []
     for payment in payments:
-        payment["user"] = dict(get_user(payment["aluno_id"]))
-        payment["is_approved"] = payment["liberado_por"] is not None
-        # TODO: Adicionar url para visualização do comprovante
-    return jsonify(payments)
+        payment = payment.as_dict()
+        payment["user"] = payment["user"].as_dict()
+        result.append(payment)
+    return jsonify(result)
 
 
 @app.route("/api/editar-pagamento", methods=["POST"])
-def refill_manage_request_api():
-    """
-    A function to handle API requests for editing payments.
-    
-    Returns:
-        A JSON response containing a message and a boolean indicating success or failure.
-    """
+def verify_payment_api():
     data = request.get_json()
     payment_id = data.get("id")
     accepted = data.get("accept")
-    conn = get_conn()
-    payment_infos = conn.execute("SELECT * FROM controle_pagamento WHERE id = ?", (payment_id,)).fetchone()
-    if payment_infos is None:
+    payment = Payment.query.filter_by(id=payment_id).first()
+    if payment is None:
         return jsonify({
             "message": f"Pagamento de ID {payment_id} não encontrado!",
             "error": True
         })
     
-    requester = get_user(payment_infos["aluno_id"])
-    new_saldo = requester["saldo"] or 0
-    new_saldo += payment_infos["valor"]
+    if payment.status != 'to allow':
+        return jsonify({
+            "message": f"Muito engraçadinho, mas o pagamento de ID {payment_id} já possui status definido ({payment.status})!",
+            "error": True
+        })
+    
+    requester = User.query.filter_by(id=payment.user_id).first()
     if accepted:
-        if payment_infos['is_payroll']:
-            new_saldo = requester["saldo_payroll"] - payment_infos["valor"]
-            update_user_key(user_id=payment_infos["aluno_id"], key="saldo_payroll", value=new_saldo)
+        if payment.is_payroll:
+            requester.balance_payroll -= payment.value
+            db.session.commit()
         else:
-            update_user_saldo(user_id=payment_infos["aluno_id"], new_saldo=new_saldo)
-        conn.execute("UPDATE controle_pagamento SET liberado_por = ? WHERE id = ?", (session["user"]["id"], payment_id))
-        conn.commit()
-        if payment_infos["tipo_pagamento"] == "payroll": # isso nunca vai acontecer se payment_infos.is_payroll for verdade.
-            affiliation = conn.execute("SELECT * FROM affiliation WHERE user_id = ?", (payment_infos["aluno_id"],)).fetchone()
-            conn.execute(
-                "INSERT INTO folha_de_pagamento (valor, entidade_id, affiliation_id, liberado_por) VALUES (?, ?, ?, ?)", 
-                (payment_infos["valor"], affiliation["entidade_id"], affiliation["id"], session["user"]["id"])
+            requester.balance += payment.value
+        payment.allowed_by = session["user"].id
+        db.session.commit()
+        payment.status = 'accepted'
+        db.session.commit()
+
+        payment_method = PaymentMethod.query.filter_by(id=payment.payment_method_id).first()
+        if payment_method.name == "payroll":
+            affiliation = Affiliation.query.filter_by(affiliated_id=requester.id).first()
+            new_payroll = Payroll(
+                value=payment.value,
+                affiliation_id=affiliation.id,
+                allowed_by=session["user"].id,
+                status='accepted'
             )
-            conn.commit()
-            financiador = get_user(affiliation["entidade_id"])
-            new_payroll_saldo = financiador["saldo_payroll"] + payment_infos["valor"]
-            conn.execute("UPDATE user SET saldo_payroll = ? WHERE id = ?", (new_payroll_saldo, financiador['id']))
-            conn.commit()
-        message = f"Pagamento de ID {payment_id} liberado com sucesso! Saldo do usuário {requester['name']} foi alterado de R$ {requester['saldo']} para R$ {new_saldo}"
+            db.session.add(new_payroll)
+            db.session.commit()
+            financiador = User.query.filter_by(id=affiliation.affiliator_id).first()
+            financiador.balance_payroll += payment.value
+            db.session.commit()
+        message = f"Pagamento de ID {payment.id} liberado com sucesso! Saldo do usuário {requester.name} foi alterado para R$ {requester.balance}."
         ok = True
     else:
-        conn.execute("DELETE FROM controle_pagamento WHERE id = ?", (payment_id,))
-        # TODO: apagar comprovante do static/uploads
-        conn.commit()
-        message = f"Pagamento de ID {payment_id} cancelado!"
+        payment.status = 'rejected'
+        payment.allowed_by = session["user"].id # se status = 'rejected' então allowed_by é disallowed_by
+        db.session.commit()
+        message = f"Pagamento de ID {payment_id} rejeitado com sucesso!"
         ok = False
     
     return jsonify({
@@ -226,57 +179,66 @@ def refill_manage_request_api():
 
 @app.route("/api/exportar-para-excel", methods=["GET"])
 def export_to_excel_api():
-    """
-    A function to export a cached result to an Excel file.
-
-    Returns:
-        A response containing the Excel file.
-    """
     result_id = request.args.get("result_id")
-    data = cache.get(result_id)
-    if data is None:
+
+    query = cache.get(result_id)
+
+    if query is None:
         return jsonify({
-            "message": f"Resultado de ID {result_id} não encontrado ou expirado...!",
+            "message": f"Resultado de ID {result_id} não encontrado ou expirado...",
         })
+
+    data = query.all()
+
+    if not data:
+        return jsonify({
+            "message": "Nenhum dado encontrado para exportar.",
+        })
+
     df = pd.DataFrame(data)
     output = BytesIO()
-    with pd.ExcelWriter(output, engine="xlsxwriter") as writter:
-        df.to_excel(writter, index=False, sheet_name='Sheet1')
-    output.seek(0)
 
+    with pd.ExcelWriter(output, engine="xlsxwriter") as writer:
+        df.to_excel(writer, index=False, sheet_name="Sheet1")
+
+    output.seek(0)
     return send_file(output, as_attachment=True, download_name=f"{result_id}.xlsx")
 
 
 @app.route("/api/listar-produtos-para-despache", methods=["GET"])
 def list_despaches_api():
-    """
-    A function to list products for despach
-    """
-    conn = get_conn()
-    products = conn.execute("SELECT * FROM venda_produto WHERE deferido_por is NULL").fetchall()
-    products = [dict(product) for product in products]
+    products = ProductSale.query.filter_by(status='to dispatch').all()
+    result = []
     for product in products:
-        product["user"] = dict(get_user(product["vendido_para"]))
-        product["produto"] = dict(get_product(id=product["produto_id"]))
-    return jsonify(products)
+        sale_data = product.as_dict()
+        sale_data["user"] = User.query.filter_by(id=product.sold_to).first().as_dict()
+        sale_data["product"] = Product.query.filter_by(id=product.product_id).first().as_dict()
+        result.append(sale_data)
+    return jsonify(result)
 
 
 @app.route("/api/confirmar-despache", methods=["POST"])
 def confirm_despache_api():
-    """
-    A function to confirm a despach
-    """
-    conn = get_conn()
     data = request.get_json()
     venda_id = data.get("id")
     if venda_id is None:
         return jsonify({
-            "message": f"ID da venda de ID {venda_id} não encontrado!",
+            "message": f"ID da venda deve ser especificado...",
             "error": True
         })
-    conn.execute("UPDATE venda_produto SET deferido_por = ? WHERE id = ?", (session["user"]["id"], venda_id))
-    conn.commit()
+    product_sale = ProductSale.query.filter_by(id=venda_id).first()
+    if product_sale is None or product_sale.status != 'to dispatch':
+        return jsonify({
+            "message": f"Venda de ID {venda_id} não encontrada!",
+            "error": True
+        })
+    product_sale.status = 'dispatched'
+    db.session.commit()
+    product_sale.dispatched_by = session["user"].id
+    db.session.commit()
+    product_sale.dispatched_at = datetime.now()
+    db.session.commit()
     return jsonify({
-        "message": f"Venda de ID {venda_id} confirmada com sucesso!",
+        "message": f"Confirmado o despacho da venda de ID {venda_id} com sucesso!",
         "error": False
     })

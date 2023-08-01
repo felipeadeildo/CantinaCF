@@ -1,24 +1,23 @@
-from flask import flash, redirect, render_template, request, session, url_for, abort
+from flask import flash, redirect, render_template, request, session, url_for, abort, g
+from .models import User, Route, Role, Route, Page
 from werkzeug.security import check_password_hash
-from .settings import PERMISSIONS
-from .db import get_user
 from . import app
 
 
 @app.route("/login", methods=("GET", "POST"))
 def login():
     """Login page"""
-    user_id = session["user_id"] if session.get("user_id") != "guest" else None
+    user_id = session["user_id"] if session.get("user_id") != "Guest" else None
     if user_id is not None:
-        flash(f"Você já está logado como {session['user']['name']}.", category="warning")
+        flash(f"Você já está logado como {session['user'].name}.", category="warning")
         return redirect(url_for("index"))
     elif request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")
-        user = get_user(username, by="username") or get_user(username, by="matricula")
+        user = User.query.filter((User.username == username) | (User.matricula == username)).first()
         if user is None:
             flash("Usuário e/ou Senha incorretos.", category="error")
-        elif not verify_password(password, user["password"]):
+        elif not verify_password(password, user.password):
             flash("Usuário e/ou Senha incorretos.", category="error")
         else:
             login_user(user)
@@ -41,44 +40,49 @@ def verify_password(password, hashed_password):
 
 def login_user(user):
     """Login user"""
-    session["user_id"] = user["id"]
-    session["user"] = dict(user)
+    session["user_id"] = user.id
+    session["user"] = user
+
+
+def set_guest_user():
+    """Set user_id to 'Guest' in session"""
+    session["user_id"] = "Guest"
 
 
 @app.before_request
 def check_permission():
     """Check user permission before each request"""
-    session["permissions"] = PERMISSIONS["guest"].copy()
     current_user_id = session.get("user_id")
     if current_user_id is None: # the first request to the app
         set_guest_user() # set user_id to 'guest' in session
         flash("Você não está logado", category="warning")
         return redirect(url_for("login")) # redirect to login page
     
-    if current_user_id == "guest" and not role_has_permission("guest"):
+    if current_user_id == "Guest" and not role_has_permission("Guest"):
         flash("Você não está logado", category="warning")
         return redirect(url_for("login"))
     
-    if current_user_id != "guest":
-        user = get_user(current_user_id, by="id")
-        session["user"] = dict(user)
-        session["permissions"] = PERMISSIONS.get(user["role"].lower(), [])
+    if current_user_id != "Guest":
+        user = User.query.filter_by(id=current_user_id).first()
+        session["user"] = user
         if user is None:
             abort(404) # user not found
-        if not role_has_permission(user["role"]):
+        if not role_has_permission(user.role.name):
             abort(403) # user does not have permission
 
     if "cart" not in session:
         session["cart"] = []
-    
+    g.current_endpoint = Route.query.filter_by(endpoint=request.endpoint).first()
 
-def set_guest_user():
-    """Set user_id to 'guest' in session"""
-    session["user_id"] = "guest"
-
-
-def role_has_permission(role):
+def role_has_permission(role_name:str):
     """Check if user has permission to access current endpoint"""
-    permitted_endpoints = PERMISSIONS.get(role.lower(), [])
-    return request.endpoint in permitted_endpoints
-
+    role = Role.query.filter_by(name=role_name).first()
+    if role is None:
+        raise Exception(f"Role {role_name} not found!")
+    import json
+    allowed_routes_ids = json.loads(role.allowed_routes)
+    session["allowed_routes"] = Route.query.filter(Route.id.in_(allowed_routes_ids)).all()
+    session["permissions"] = list(map(lambda route: route.endpoint, session["allowed_routes"]))
+    session["navbar_pages"] = Page.query.filter_by(appear_navbar=True).all()
+    session["navbar_pages"] = [p for p in session["navbar_pages"] if p.route.id in allowed_routes_ids]
+    return request.endpoint in session["permissions"]

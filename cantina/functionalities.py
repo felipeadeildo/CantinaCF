@@ -1,12 +1,13 @@
-from .db import get_user, get_users, insert_user, update_user_password, get_transactions, insert_recharge, update_user_key, get_refill_requests, get_products, get_product, update_product_quantity, insert_product, record_stock_history, get_conn, insert_edit_user_history
+from .models import User, EditHistory, Payment, ProductSale, Product, Affiliation, PaymentMethod, StockHistory, Payroll, Role
 from flask import abort, request, session, render_template, flash, redirect, url_for
-from .settings import PERMISSIONS, UPLOAD_FOLDER, ALLOWED_EXTENSIONS, SERIES, PAYMENT_TYPES
-from flask_paginate import Pagination, get_page_args
+from .settings import UPLOAD_FOLDER, ALLOWED_EXTENSIONS, SERIES
 from werkzeug.security import generate_password_hash
 from werkzeug.utils import secure_filename
-from datetime import datetime
+from datetime import datetime, timedelta
+from sqlalchemy.orm import aliased
 from .auth import verify_password
-from . import app, cache
+from sqlalchemy import func, or_
+from . import app, cache, db
 import hashlib
 import os
 
@@ -17,31 +18,46 @@ def users():
     A function that handles requests related to users. 
     """
     if request.method == "POST":
-        if session["user"]["role"] != "admin":
+        if session["user"].role.name != "Admin":
             abort(403)
+        name = request.form.get("name")
         username = request.form.get("username")
         password = request.form.get("password")
         name = request.form.get("name")
-        role = request.form.get("role")
+        role_id = request.form.get("role_id")
         serie = request.form.get("serie")
         turma = request.form.get("turma")
         matricula = request.form.get("matricula")
         has_username = False
         has_matricula = False
         if username:
-            has_username = get_user(username, by="username") is not None
+            has_username = User.query.filter(User.username == username).first() is not None
         if matricula:
-            has_matricula = get_user(matricula, by="matricula") is not None
-        if not (has_username or has_matricula):
-            insert_user(username, generate_password_hash(password), role, name=name, serie=serie, turma=turma, matricula=matricula)
+            has_matricula = User.query.filter(User.matricula == matricula).first() is not None
+        if not (has_username and has_matricula):
+            # TODO: verificar role, serie e turma antes de adicionar, por exemplo, verificar se a pessoa está tentando colocar um role com mais perm que ela, ou se está colocando serie ou turma que não existe no escopo do sistema
+            role = Role.query.filter(Role.id == role_id).first()
+            new_user = User(
+                name=name,
+                username=username,
+                password=generate_password_hash(password),
+                role_id=role_id,
+                serie=serie,
+                turm=turma,
+                role=role,
+                matricula=matricula
+            )
+            db.session.add(new_user)
+            db.session.commit()
             flash(f"Usuário {username} foi registrado com sucesso!", category="success")
         else:
             flash(f"Usuário {username}{f' ou matrícula {matricula} ' if matricula else ' '}já existe!", category="warning")
     
     context = {
-        "users": get_users(),
-        "roles": list(PERMISSIONS.keys()),
-        "series": SERIES
+        "users": User.query.all(),
+        "roles": Role.query.all(),
+        "series": SERIES,
+        "aluno_role_id": Role.query.filter(Role.name == "Aluno").first().id
     }
     return render_template("users.html", **context)
 
@@ -50,8 +66,8 @@ def security_edit_password(to_change_user, changer_user, old_password, new_passw
     A function that allows a user with the role of "admin" to edit the password of another user.
     
     Args:
-        to_change_user (dict): A dictionary representing the user whose password will be changed.
-        changer_user (dict): A dictionary representing the user who is changing the password.
+        to_change_user (models.User): A dictionary representing the user whose password will be changed.
+        changer_user (models.User): A dictionary representing the user who is changing the password.
         old_password (str): The old password of the user being changed. Required if the changer_user is not an admin.
         new_password (str): The new password that will replace the old password.
     
@@ -62,17 +78,28 @@ def security_edit_password(to_change_user, changer_user, old_password, new_passw
         flash("Por favor, insira a nova senha!", category="error") # no new password
         return
     
-    if changer_user["role"] != "admin" and old_password is None:
+    if changer_user.role.name != "Admin" and old_password is None:
         flash("Por favor, insira a senha antiga!", category="error") # no old password when is not admin
         return
     
-    if changer_user["role"] != "admin" and not verify_password(old_password, changer_user["password"]):
+    if changer_user.role.name != "Admin" and not verify_password(old_password, changer_user.password):
         flash("Senha antiga incorreta!", category="error") # old password is incorrect
         return
     
     motivo = request.form.get("motivo", "Não informado")
-    
-    update_user_password(to_change_user["id"], new_password) # if old_password is corrrect and got here, update password
+    setattr(to_change_user, "password", generate_password_hash(new_password))
+    setattr(to_change_user, "updated_at", datetime.now())
+    db.session.commit()
+    edit_history = EditHistory(
+        edited_by=changer_user.id,
+        key="password",
+        old_value=old_password,
+        new_value=generate_password_hash(new_password),
+        reason=motivo,
+        user_id=to_change_user.id
+    )
+    db.session.add(edit_history)
+    db.session.commit()
     flash("Senha alterada com sucesso!", category="success")
 
 @app.route("/editar-senha", methods=("POST", "GET"))
@@ -80,11 +107,11 @@ def edit_password():
     """
     Edit the password of a user.
     """
-    to_change_user_id = request.args.get("user_id") or session.get("user")["id"]
-    to_change_user = get_user(to_change_user_id, by="id")
-    changer_user = session.get("user")
+    to_change_user_id = request.args.get("user_id") or session["user"].id
+    to_change_user = User.query.filter_by(id=to_change_user_id).first()
+    changer_user = session['user']
     # verify if user is non-admin and id that it wants to change
-    if changer_user["role"] != "admin" and int(to_change_user_id) != changer_user["id"]:
+    if changer_user.role.name != "Admin" and int(to_change_user_id) != changer_user.id:
         abort(403)
     if request.method == "POST":
         old_password = request.form.get("old_password")
@@ -100,14 +127,31 @@ def profile():
     """
     user_id = request.args.get("user_id")
     if user_id is None:
-        user_id = session.get("user")["id"]
-    user = get_user(user_id)
+        user_id = session["user"].id
+    user = User.query.filter_by(id=user_id).first()
     if user is None:
         flash("Usuário de ID {} não encontrado!".format(user_id), category="error")
         abort(404)
+    transactions = []
+    inputs = Payment.query.filter_by(user_id=user_id).all()
+    outputs = ProductSale.query.filter_by(sold_to=user_id).all()
+    for input in inputs:
+        input = input.as_dict()
+        input["allowed_by"] = User.query.filter_by(id=input["allowed_by"]).first()
+        input["payment_type"] = PaymentMethod.query.filter_by(id=input["payment_method_id"]).first().name
+        input["transaction_type"] = 'input'
+        transactions.append(input)
+    for output in outputs:
+        output = output.as_dict()
+        output["product"] = Product.query.filter_by(id=output["product_id"]).first()
+        output["sold_by"] = User.query.filter_by(id=output["sold_by"]).first()
+        output["transaction_type"] = 'output'
+        transactions.append(output)
+    transactions.sort(key=lambda x: x['added_at'], reverse=True)
+    
     context = {
-        "user": user,
-        "transactions": get_transactions(user["id"])
+        "user": user.as_friendly_dict(),
+        "transactions": transactions
     }
     return render_template("profile.html", **context)
 
@@ -117,38 +161,48 @@ def edit_profile():
     """
     Edit the user's profile.
     """
-    user = request.args.get("user_id")
-    if user is None:
+    user_id = request.args.get("user_id")
+    if user_id is None:
         flash("Por favor, insira o ID do usuário!", category="error")
         return redirect(url_for("profile"))
-    user = get_user(user)
+    user = User.query.filter_by(id=user_id).first()
     if user is None:
-        flash("Usuário de ID {} não encontrado!".format(user), category="error")
+        flash("Usuário de ID {} não encontrado!".format(user_id), category="error")
         return redirect(url_for("profile"))
     
     if request.method == "POST":
-        updated_values = []
         motivo = request.form.get("motivo", "Não informado")
+        # TODO: Perguntar se o motivo é obrigatório, se sim, tem que fazer tratamento aqui
         for key, value in request.form.items():
             if key in (app.config["CSRF_COOKIE_NAME"], 'action', 'motivo'):
                 continue
             if key == "serie":
-                value = SERIES[int(value)]
+                value = SERIES[int(value)] # TODO: Verificar se isso daqui está certo mesmo....
             if key == "turma":
                 value = value.lower()
             value = value.strip()
             if value == '':
                 continue
-            old_value = update_user_key(user["id"], key, value)
+            old_value = str(getattr(user, key))
             if old_value != value and old_value is not None:
-                updated_values.append((key, old_value, value))
+                setattr(user, key, value)
+                setattr(user, "updated_at", datetime.now())
+                db.session.commit()
+                new_history = EditHistory(
+                    edited_by=session["user"].id,
+                    key=key,
+                    old_value=old_value,
+                    new_value=value,
+                    reason=motivo,
+                    object_type='user',
+                    user_id=user.id
+                )
+                db.session.add(new_history)
+                db.session.commit()
                 flash(f"Alteração de {key} foi feita com sucesso ({old_value} -> {value})!", category="success")
-        insert_edit_user_history(user["id"], updated_values, motivo, session.get("user")["id"])
-
-    user = get_user(user["id"])
     context = {
         "user": user,
-        "roles": list(PERMISSIONS.keys()),
+        "roles": Role.query.all(),
         "series": SERIES
     }
     
@@ -173,8 +227,8 @@ def security_recharge():
     """
     Recharges the user's account balance with a specified value.
     """
-    user_id = session["user"]["id"]
-    user = get_user(user_id)
+    user_id = session["user"].id
+    user = User.query.filter_by(id=user_id).first()
     if user is None:
         flash("Usuário de ID {} não encontrado!".format(user_id), category="error")
         return
@@ -193,9 +247,17 @@ def security_recharge():
     if value == 0:
         flash(f"Não vejo como uma recarga de R$ 0 poderia lhe ser útil...", category="error")
         return
-    # new_value = user["saldo"] + value
+    payment_method = PaymentMethod.query.filter_by(id=payment_method).first()
     observations = request.form.get("observations")
-    if payment_method in ('payroll', 'pix'):
+    new_payment = Payment(
+        payment_method_id=payment_method.id,
+        observations=observations,
+        value=value,
+        user_id=user_id,
+        status="to allow",
+        payment_method=payment_method
+    )
+    if payment_method.need_proof:
         file = request.files.get("proof")
         if file is None:
             flash("Por favor, insira o comprovante de pagamento!", category="error")
@@ -205,16 +267,19 @@ def security_recharge():
         if not allowed_file(filename):
             flash(f"Por favor, insira um comprovante de pagamento válido! (A extensão do arquivo deve ser algumas dessas: {', '.join(ALLOWED_EXTENSIONS)})", category="error")
             return
+        new_payment.proof_path = filename
         file.save(os.path.join(UPLOAD_FOLDER, filename))
-        if payment_method == "payroll":
-            conn = get_conn()
-            is_affiliation = conn.execute("SELECT * FROM affiliation WHERE user_id = ?", (user_id,)).fetchone()
-            if is_affiliation is None:
-                flash(f"Então, meu anjo, você não está afiliado a ninguém ainda...", category="error")
-                return
-        insert_recharge(user_id, value, payment_method, filename=filename, observations=observations)
-    else:
-        insert_recharge(user_id, value, payment_method, observations=observations)
+        
+    if payment_method.name == "payroll":
+        is_affiliation = Affiliation.query.filter_by(user_id=user_id).first() is not None
+        if not is_affiliation:
+            flash(f"Então, meu anjo, você não está afiliado a ninguém ainda...", category="error")
+            return
+        new_payment.is_payroll = True
+    
+    db.session.add(new_payment)
+    db.session.commit()
+    
     flash(f"A solicitação de recarga de R$ {value} foi registrada com sucesso! Aguarde verificação!", category="success")
 
 
@@ -225,48 +290,59 @@ def recharge():
     """
     if request.method == "POST":
         security_recharge()
-    return render_template('recharge.html')
+    context = {
+        "payment_methods": PaymentMethod.query.all()
+    }
+    return render_template('recharge.html', **context)
 
 
 @app.route("/pedidos-recargas")
-def refill_requests():
+def verify_payments():
     """
     A function that handles requests to refill orders.
 
     Returns:
         The rendered template for the refill requests page.
     """
+    recharge_requests = Payment.query.filter_by(status="to allow").all()
+    requests = []
+    for request in recharge_requests:
+        request = request.as_dict()
+        request["payment_method"] = PaymentMethod.query.filter_by(id=request["payment_method_id"]).first()
+        request["user"] = User.query.filter_by(id=request["user_id"]).first()
+        request["proof_url"] = url_for("static", filename=f"uploads/{request['proof_path']}")
+        requests.append(request)
     context = {
-        "refill_requests": get_refill_requests()
+        "verify_payments": requests
     }
-    return render_template('refill-requests.html', **context)
+    return render_template('verify_payments.html', **context)
 
 
 def add_to_stock():
     """
     Adds the specified product to the stock.
-
-    Parameters:
-        None
-
-    Returns:
-        None
     """
     product_id = request.form.get("product")
-    product_quantity = int(request.form.get("quantity"))
-    product_purchase_price = request.form.get("purchase_price")
-    observations = request.form.get("observations")
-    if product_quantity is None:
-        flash("Por favor, insira a quantidade!", category="error")
+    try:
+        product_quantity = int(request.form.get("quantity"))
+    except:
+        flash("Por favor, insira uma quantidade válida, safado!", category="error")
         return
-
+    try:
+        product_purchase_price = float(request.form.get("purchase_price"))
+    except:
+        flash("Por favor, insira um preço de compra válido, safado!", category="error")
+        return
+    
+    observations = request.form.get("observations")
     if product_id is not None:
-        product = get_product(id=product_id)
+        product = Product.query.filter_by(id=product_id).first()
         if product is None:
             flash("Produto de ID {} não encontrado!".format(product_id), category="error")
             return
-        new_quantity = product_quantity + product["quantidade"]
-        update_product_quantity(id=product_id, quantity=new_quantity)
+        product.quantity += product_quantity
+        product.updated_at = datetime.now()
+        db.session.commit()
     else:
         product_name = request.form.get("product_name")
         product_description = request.form.get("product_description")
@@ -275,18 +351,34 @@ def add_to_stock():
         if None in (product_name, product_value, product_type):
             flash("Por favor, insira todos os campos!", category="error")
             return
-        product_id = insert_product(name=product_name, description=product_description, value=product_value, type=product_type, quantity=product_quantity)
-        product = get_product(id=product_id)
-    
-    record_stock_history(
-        product_id = product_id, 
-        quantity = product_quantity, 
-        received_by = session["user"]["id"],
-        valor_compra = product_purchase_price,
-        valor_venda = product["valor"],
-        description = observations
+        added_at = datetime.now()
+        new_product = Product(
+            name=product_name,
+            description=product_description,
+            value=product_value,
+            type=product_type,
+            quantity=product_quantity,
+            added_at=added_at
+        )
+        db.session.add(new_product)
+        db.session.commit()
+        product_id = new_product.id
+    product = Product.query.filter_by(id=product_id).first()
+    received_by = User.query.filter_by(id=session["user"].id).first()
+        
+    new_history = StockHistory(
+        observations=observations,
+        product_id=product_id,
+        received_by=received_by.id,
+        purchase_price=product_purchase_price,
+        sale_value=product.value,
+        product=product,
+        received_by_user=received_by,
+        quantity=product_quantity
     )
-    flash(f"Produto {product['nome']} ({product_quantity} unidades) adicionado com sucesso!", category="success")
+    db.session.add(new_history)
+    db.session.commit()
+    flash(f"Produto {product.name} ({product_quantity} unidades) adicionado com sucesso!", category="success")
 
 
 @app.route("/controle-estoque", methods=["POST", "GET"])
@@ -294,102 +386,61 @@ def stock_control():
     """
     Perform stock control operations based on the HTTP request method.
     If the method is POST, add products to the stock.
-    
-    Parameters:
-        None
-        
-    Returns:
-        The rendered stock-control.html template with the updated context.
     """
     if request.method == "POST":
         add_to_stock()
 
     context = {
-        "products": get_products()
+        "products": Product.query.all(),
+        "types": [x[0] for x in Product.query.with_entities(Product.type).distinct().all()]
     }
-    context["types"] = set(map(lambda x: x['tipo'], context["products"]))
+    # context["types"] = set(map(lambda x: x['tipo'], context["products"]))
+    # unique_types = db.session.query(Product.type).distinct().all()
     return render_template('stock-control.html', **context)
 
 
 @app.route("/historico-estoque")
 def stock_history():
-    # Obtém conexão com banco de dados
-    conn = get_conn()
-    cur  = conn.cursor()
-
-    # Obtém dados para filtro
     recebido_por = request.args.get("recebido_por", "")
     order_by = request.args.get("order_by", "")
     start_date = request.args.get("start_date", "")
     end_date = request.args.get("end_date", "")
     order_mode = request.args.get("order_mode", "ASC")
 
-    # Define a query inicial e os parametros iniciais
-    query = "SELECT * FROM historico_abastecimento_estoque"
-    params = []
+    query = StockHistory.query
 
-    if recebido_por: # se recebido_por for diferente de ""
-        query += ' INNER JOIN user ON historico_abastecimento_estoque.recebido_por = user.id WHERE user.username LIKE ?'
-        params.extend([f"%{recebido_por}%"])
+    if recebido_por:
+        query = query.join(User, StockHistory.received_by == User.id).filter(User.username.contains(recebido_por))
 
-    if start_date or end_date: # se start_date ou end_date for diferente de ""
-        if start_date: # se a data inicial for diferente de ""
-            start_date = datetime.strptime(start_date, "%d/%m/%Y").strftime("%Y-%m-%d") # transforma a data inicial em datetime
-        else: # se a data inicial for igual a ""
-            start_date = datetime(year=2000, month=1, day=1).strftime("%Y-%m-%d") # transforma a data inicial em datetime com início em 2000
-        
-        if end_date: # se a data final for diferente de ""
-            end_date = datetime.strptime(end_date, "%d/%m/%Y").strftime("%Y-%m-%d") # transforma a data final em datetime
-        else: # se a data final for igual a ""
-            end_date = datetime.now().strftime("%Y-%m-%d") # transforma a data final em datetime onde a data atual é a de agora
-        query += f" {'WHERE' if not query.endswith('LIKE ?') else 'AND'} data_hora BETWEEN ? AND datetime(?, '+1 day', '-1 second')"
-        params.extend([start_date, end_date])
-    
-    if order_by: # se é pra ordernar
-        query += f" ORDER BY {order_by} {order_mode}" # adiciona a ordenação
-    
-    page, per_page, offset = get_page_args(page_parameter='page', per_page_parameter='per_page') # obtém a página e o número de páginas
-    offset = (page - 1) * per_page
+    if start_date or end_date:
+        if start_date:
+            start_date = datetime.strptime(start_date, "%d/%m/%Y")
+        else:
+            start_date = db.session.query(func.min(StockHistory.added_at)).scalar() + timedelta(seconds=1)
 
-    query += " LIMIT ?, ?" # adiciona os limites
-    params.extend([offset, per_page])
+        if end_date:
+            end_date = datetime.strptime(end_date, "%d/%m/%Y") + timedelta(hours=23, minutes=59, seconds=59)
+        else:
+            end_date = db.session.query(func.max(StockHistory.added_at)).scalar() + timedelta(seconds=1)
 
+        query = query.filter(StockHistory.added_at.between(start_date, end_date))
 
-    results_obj = cur.execute(query, params).fetchall()
-    results_obj = list(map(dict, results_obj))
+    if order_by:
+        column = getattr(StockHistory, order_by)
+        if order_mode.lower() == "asc":
+            query = query.order_by(column.asc())
+        else:
+            query = query.order_by(column.desc())
 
-    results = []
-    # define e trata os resultados
-    for result in results_obj:
-        result = dict(result)
-        result["recebido_por"] = dict(get_user(result["recebido_por"], safe=True))
-        result["produto"] = dict(get_product(id=result["produto_id"]))
-        result["data_hora"] = datetime.strptime(result["data_hora"], "%Y-%m-%d %H:%M:%S").strftime("%d/%m/%Y às %H:%M:%S")
-        results.append(result)
+    page = request.args.get("page", 1, type=int)
+    per_page = request.args.get("per_page", 10, type=int)
+    pagination = query.paginate(page=page, per_page=per_page, error_out=False)
 
-    total_query = query.split("LIMIT")[0].split('ORDER BY')[0].strip() # obtém o total
-    total_params = []
-    if total_query.count("?") == 1:
-        total_params.append(recebido_por)
-    elif total_query.count("?") == 2:
-        total_params.append(start_date)
-        total_params.append(end_date)
-    elif total_query.count("?") == 3:
-        total_params.append(recebido_por)
-        total_params.append(start_date)
-        total_params.append(end_date)
-    
-    identificador = f"historico-estoque-{recebido_por}-{start_date}-{end_date}-{session['user']['id']}"
-    hashed_query = hashlib.sha256(identificador.encode('utf-8')).hexdigest()
-    results_obj = cur.execute(total_query, total_params).fetchall()
-    results_obj = list(map(dict, results_obj))
-    cache.set(hashed_query, results_obj)
+    results = pagination.items
 
-    total = len(results_obj)
-
-
-    # define paginação
-    pagination = Pagination(page=page, per_page=per_page, total=total, css_framework='bootstrap4')
+    identifier = f"historico-estoque-{recebido_por}-{start_date}-{end_date}-{session['user'].id}"
+    hashed_query = hashlib.sha256(identifier.encode("utf-8")).hexdigest()
+    cache.set(hashed_query, results)
 
     context = {
         "results": results,
@@ -398,53 +449,56 @@ def stock_history():
         "per_page": per_page,
         "result_id": hashed_query
     }
+
     return render_template("stock-history.html", **context)
 
 
 @app.route("/afiliados", methods=["POST", "GET"])
 def affiliates():
-    # normalmente eu deixaria o trabalho da db com o DB, porém tem umas verificações de segurança aqui que devem ser feitas antes de qlqr coisa
-    conn = get_conn()
+    # TODO: Refazer isso daqui, e fazer melhorias de segurança
     action = request.args.get("action", "")
     if action == "remove":
         user_id = request.args.get("user_id")
         if user_id is None:
             flash("Por favor, insira o ID do usuário!", category="error")
             return redirect(url_for("affiliates"))
-        user = get_user(user_id)
+        user = User.query.filter_by(id=user_id).first()
         if user is None:
             flash("Usuário de ID {} não encontrado!".format(user_id), category="error")
             return redirect(url_for("affiliates"))
-        is_affiliate = conn.execute("SELECT * FROM affiliation WHERE user_id = ? AND entidade_id = ?", (user_id, session["user"]["id"])).fetchone() is not None
-        if not is_affiliate:
+        affiliation = Affiliation.query.filter_by(affiliated_id=user_id, affiliator_id=session["user"].id).first()
+        if affiliation is None:
             flash("Usuário não é seu afiliado!", category="error")
             return redirect(url_for("affiliates"))
-        conn.execute("DELETE FROM affiliation WHERE user_id = ? AND entidade_id = ?", (user_id, session["user"]["id"]))
-        conn.commit()
+        
+        db.session.delete(affiliation)
+        db.session.commit()
         flash("Usuário removido com sucesso!", category="success")
     if request.method == 'POST':
         if action != 'add':
             flash("O que estás tentando fazer..?!", category="error")
             return redirect(url_for("affiliates"))
         matricula = request.form.get("matricula")
-        user = get_user(matricula, by="matricula")
+        user = User.query.filter_by(matricula=matricula).first()
         if user is None:
             flash("Matrícula {} não encontrada!".format(matricula), category="error")
             return redirect(url_for("affiliates"))
-        is_affiliate = conn.execute("SELECT * FROM affiliation WHERE user_id = ?", (user['id'],)).fetchone()
-        if is_affiliate is not None:
-            flash("Usuário já é afiliado do usuário de ID {}!".format(is_affiliate['entidade_id']), category="error")
+        has_affiliation = Affiliation.query.filter_by(affiliated_id=user.id).first() 
+        if has_affiliation:
+            flash("Usuário já é afiliado do usuário de ID {}!".format(has_affiliation.affiliator_id), category="error")
             return redirect(url_for("affiliates"))
-        conn.execute("INSERT INTO affiliation (user_id, entidade_id) VALUES (?, ?)", (user['id'], session["user"]["id"]))
-        conn.commit()
+        new_affiliation = Affiliation(
+            affiliated_id=user.id,
+            affiliator_id=session["user"].id
+        )
+        db.session.add(new_affiliation)
+        db.session.commit()
         flash("Usuário adicionado com sucesso!", category="success")
     
-    afiliados = conn.execute("SELECT * FROM affiliation WHERE entidade_id = ?", (session["user"]["id"],)).fetchall()
-    afiliados = [get_user(affiliate['user_id']) for affiliate in afiliados]
-    ammount = conn.execute("SELECT valor FROM folha_de_pagamento WHERE entidade_id = ?", (session["user"]["id"],)).fetchall()
-    ammount = sum(v['valor'] for v in ammount)
+    affiliates = User.query.join(Affiliation, Affiliation.affiliated_id == User.id).filter(Affiliation.affiliator_id == session["user"].id).all()
+    ammount = db.session.query(db.func.sum(Payroll.value)).join(Affiliation, Payroll.affiliation_id == Affiliation.id).filter(Affiliation.affiliator_id == session["user"].id).scalar() or 0.0
     context = {
-        "afiliados": afiliados,
+        "afiliados": affiliates,
         "ammount": ammount
     } 
     return render_template("affiliates.html", **context)
@@ -454,57 +508,29 @@ def affiliates():
 def affiliates_history():
     start_date = request.args.get("start_date", "")
     end_date = request.args.get("end_date", "")
-    conn = get_conn()
-    query = "SELECT * FROM folha_de_pagamento WHERE entidade_id = ?"
-    params = [session["user"]["id"]]
+    entity_id = session["user"].id
+    query = db.session.query(Payroll).join(Affiliation, Payroll.affiliation_id == Affiliation.id).filter(Affiliation.affiliator_id == entity_id).order_by(Payroll.added_at.desc())
 
     if start_date or end_date:
         if start_date:
-            start_date = datetime.strptime(start_date, "%d/%m/%Y").strftime("%Y-%m-%d")
+            start_date = datetime.strptime(start_date, "%d/%m/%Y")
         else:
-            start_date = datetime(year=2000, month=1, day=1).strftime("%Y-%m-%d")
-        
+            start_date = db.session.query(func.min(ProductSale.added_at)).scalar()
         if end_date:
-            end_date = datetime.strptime(end_date, "%d/%m/%Y").strftime("%Y-%m-%d")
+            end_date = datetime.strptime(end_date, "%d/%m/%Y")
         else:
-            end_date = datetime.now().strftime("%Y-%m-%d")
-        query += f" {'WHERE' if not query.endswith('?') else 'AND'} data_hora BETWEEN ? AND datetime(?, '+1 day', '-1 second')"
-        params.extend([start_date, end_date])
+            end_date = db.session.query(func.max(ProductSale.added_at)).scalar()
+        query = query.filter(Payroll.added_at.between(start_date, end_date))
+
+
+    page = request.args.get("page", 1)
+    per_page = request.args.get("per_page", 10)
+    # offset = (page - 1) * per_page:
+
+    pagination = query.paginate(page=page, per_page=per_page, error_out=False)
     
-    query += " ORDER BY data_hora DESC"
-
-    page, per_page, offset = get_page_args(page_parameter='page', per_page_parameter='per_page')
-    offset = (page - 1) * per_page
-
-    query += " LIMIT ?, ?"
-    params.extend([offset, per_page])
+    results = pagination.items
     
-    result_obj = conn.execute(query, params).fetchall()
-    result_obj = list(map(dict, result_obj))
-    results = []
-    for item in result_obj:
-        item["data_hora"] = datetime.strptime(item["data_hora"], "%Y-%m-%d %H:%M:%S").strftime("%d/%m/%Y às %H:%M:%S")
-        affiliation_id = conn.execute("SELECT user_id FROM affiliation WHERE id = ?", (item["affiliation_id"],)).fetchone()
-        if affiliation_id is not None:
-            affiliation_id = affiliation_id['user_id']
-            item["afiliado"] = get_user(affiliation_id)
-        else:
-            item["afiliado"] = None
-        item["liberado_por"] = get_user(item["liberado_por"])
-        results.append(item)
-    
-    total_query = query.split("LIMIT")[0].split('ORDER BY')[0].strip()
-    total_params = []
-    if total_query.count("?") == 1:
-        total_params.append(session["user"]["id"])
-    elif total_query.count("?") == 3:
-        total_params.extend([session["user"]["id"], start_date, end_date])
-
-    result_obj = conn.execute(total_query, total_params).fetchall()
-    total = len(result_obj)
-
-    pagination = Pagination(page=page, per_page=per_page, total=total, css_framework='bootstrap4')
-
     context = {
         "results": results,
         "pagination": pagination,
@@ -514,8 +540,8 @@ def affiliates_history():
 
 
 def security_pay_payroll():
-    user_id = session["user"]["id"]
-    user = get_user(user_id)
+    user_id = session["user"].id
+    user = User.query.filter(id=user_id).first()
     if user is None:
         flash("Usuário de ID {} não encontrado!".format(user_id), category="error")
         return redirect(url_for("index"))
@@ -523,13 +549,22 @@ def security_pay_payroll():
     if payment_method is None:
         flash("Por favor, insira o método de pagamento!", category="error")
         return
+    payment_method = PaymentMethod.query.filter_by(id=payment_method).first()
     payment_value = request.form.get("payment-value")
     if payment_value is None:
         flash("Por favor, insira o valor do pagamento!", category="error")
         return
     value = float(payment_value)
     observations = request.form.get("obs")
-    if payment_method not in ('cash', ):
+    new_payment = Payment(
+        payment_method_id=payment_method.id,
+        observations=observations,
+        value=value,
+        user_id=user_id,
+        status="to allow",
+        is_payroll=True
+    )
+    if payment_method.need_proof:
         file = request.files.get('proof')
         if file is None:
             flash("Por favor, insira o documento de pagamento!", category="error")
@@ -540,169 +575,122 @@ def security_pay_payroll():
         current_datetime_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         filename = secure_filename(f"{user_id}-{payment_method}-{value}-{current_datetime_str}.{file.filename}")
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        insert_recharge(user_id, value, payment_method, filename=filename, observations=observations, is_payroll=True)
-    else:
-        insert_recharge(user_id, value, payment_method, observations=observations, is_payroll=True)
+        new_payment.proof_path = filename
+    db.session.add(new_payment)
+    db.session.commit()
     flash(f"A solicitação de quitação de dívida no valor de R$ {value} foi realizada com sucesso! O saldo devedor em seu perfil será atualizado caso a solicitação seja aceita.", category="success")
 
 
 @app.route("/afiliados/pagar", methods=["POST", "GET"])
 def pay_payroll():
-    flash(f"Olá {session['user']['name']}, atualmente você tem um saldo devedor de R$ {session['user']['saldo_payroll']} na sua conta no sistema.", category="warning")
+    flash(f"Olá {session['user'].name}, atualmente você tem um saldo devedor de R$ {session['user'].balance_payroll} na sua conta no sistema.", category="warning")
     if request.method == 'POST':
         security_pay_payroll()
-    return render_template("pay-payroll.html")
+    context = {
+        "payment_methods": PaymentMethod.query.filter(PaymentMethod.id != 5).all() # ID = 5 refere-se à folha de pagamento, ou seja, não da pra pagara  folha de pagamento com OUTRA folha da pagmento né kkkk
+    }
+    return render_template("pay-payroll.html", **context)
 
 
-@app.route("/auditorias")
-def audits():
-    return render_template("audits.html")
-
-
-@app.route("/historico-edições-produtos")
+@app.route("/historico-edicoes-produtos")
 def history_edits_products():
-    conn = get_conn()
-    cur  = conn.cursor()
     editado_por = request.args.get("editado_por", "")
-    start_date = request.args.get("data_inical", "")
+    produto = request.args.get("produto", "")
+    start_date = request.args.get("data_inicial", "")
     end_date = request.args.get("data_final", "")
-    order_mode = request.args.get("ordenacao", "ASC")
-    order_by = request.args.get("ordenar_por", "data_hora")
+    order_by = request.args.get("order_by", "added_at")
+    order_mode = request.args.get("order_mode", "ASC")
 
-    query = "SELECT * FROM historico_edicao_produto"
-    params = []
+    query = db.session.query(EditHistory).join(User, EditHistory.edited_by == User.id).join(Product, EditHistory.product_id == Product.id).filter(EditHistory.object_type == "product")
+
     if editado_por:
-        query += " INNER JOIN user ON user.id = historico_edicao_produto.editado_por WHERE user.username LIKE ?"
-        params.append(f"%{editado_por}%")
+        query = query.filter(or_(User.username.contains(editado_por), User.matricula.contains(editado_por)))
     
+    if produto:
+        query = query.filter(or_(Product.name.contains(produto), Product.id == produto))
+
     if start_date or end_date:
         if start_date:
-            start_date = datetime.strptime(start_date, "%d/%m/%Y").strftime("%Y-%m-%d")
+            start_date = datetime.strptime(start_date, "%d/%m/%Y")
         else:
-            start_date = datetime(year=2000, month=1, day=1).strftime("%Y-%m-%d")
-        
+            start_date = db.session.query(func.min(EditHistory.added_at)).scalar() + timedelta(seconds=1)
+
         if end_date:
-            end_date = datetime.strptime(end_date, "%d/%m/%Y").strftime("%Y-%m-%d")
+            end_date = datetime.strptime(end_date, "%d/%m/%Y") + timedelta(hours=23, minutes=59, seconds=59)
         else:
-            end_date = datetime.now().strftime("%Y-%m-%d")
-        query += f" {'WHERE' if not query.endswith('LIKE ?') else 'AND' } data_hora BETWEEN ? AND datetime(?, '+1 day', '-1 second')"
-        params.extend([start_date, end_date])
-    
-    if order_by:
-        query += f" ORDER BY {order_by} {order_mode}"
+            end_date = db.session.query(func.max(EditHistory.added_at)).scalar() + timedelta(seconds=1)
+        print(start_date, end_date)
 
-    page, per_page, offset = get_page_args(page_parameter='page', per_page_parameter='per_page')
-    offset = (page - 1) * per_page
+        query = query.filter(EditHistory.added_at.between(start_date, end_date))
 
-    query += " LIMIT ?, ?"
-    params.extend([offset, per_page])
+    query = query.order_by(getattr(EditHistory, order_by).asc() if order_mode == "ASC" else getattr(EditHistory, order_by).desc())
 
-    results_obj = cur.execute(query, params).fetchall()
-    results_obj = list(map(dict, results_obj))
+    page = request.args.get("page", 1, type=int)
+    per_page = request.args.get("per_page", 10, type=int)
 
-    results = []
-    for result in results_obj:
-        result = dict(result)
-        result["editado_por"] = dict(get_user(result["editado_por"], safe=True))
-        result["produto"] = dict(get_product(id=result["produto_id"]))
-        result["data_hora"] = datetime.strptime(result["data_hora"], "%Y-%m-%d %H:%M:%S").strftime("%d/%m/%Y às %H:%M:%S")
-        results.append(result)
-    total_query = query.split("LIMIT")[0].split('ORDER BY')[0].strip()
-    total_params = []
-    if total_query.count("?") == 1:
-        total_params.append(editado_por)
-    elif total_query.count('?') == 2:
-        total_params.extend([start_date, end_date])
-    elif total_query.count("?") == 3:
-        total_params.extend([editado_por, start_date, end_date])
-    identificador = f"historico de edição de produtos {', '.join(total_params)}"
-    hashed_query = hashlib.sha256(identificador.encode('utf-8')).hexdigest()
-    results_obj = cur.execute(total_query, total_params).fetchall()
-    results_obj = list(map(dict, results_obj))
-    cache.set(hashed_query, results_obj)
+    pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+    results = pagination.items
 
 
-    total = len(results_obj)
-    pagination = Pagination(page=page, per_page=per_page, total=total, css_framework='bootstrap4')
+    identificador = f"historico-edicoes-produtos-{editado_por}-{start_date}-{end_date}-{session['user'].id}"
+    hashed_query = hashlib.sha256(identificador.encode("utf-8")).hexdigest()
+    cache.set(hashed_query, results)
 
     context = {
         "results": results,
         "pagination": pagination,
         "page": page,
         "per_page": per_page,
-        "result_id": hashed_query
+        "result_id": hashed_query,
     }
 
     return render_template("history-edits-products.html", **context)
 
-@app.route("/historico-edições-usuários")
+
+@app.route("/historico-edicoes-usuarios")
 def history_edits_users():
-    conn = get_conn()
-    cur  = conn.cursor()
     editado_por = request.args.get("editado_por", "")
     start_date = request.args.get("data_inicial", "")
     end_date = request.args.get("data_final", "")
     order_mode = request.args.get("ordenacao", "ASC")
-    order_by = request.args.get("ordenar_por", "data_hora")
+    order_by = request.args.get("ordenar_por", "added_at")
     usuario = request.args.get("usuario", "")
 
+    edited_by_user = aliased(User)
+    user_user = aliased(User)
 
-    query = "SELECT * FROM historico_edicao_usuario"
-    params = []
+    query = db.session.query(EditHistory).join(edited_by_user, EditHistory.edited_by == edited_by_user.id).join(user_user, EditHistory.user_id == user_user.id).filter(EditHistory.object_type == "user")
+
     if editado_por:
-        query += " INNER JOIN user ON user.id = historico_edicao_usuario.editado_por OR user.id = historico_edicao_usuario.user_id WHERE user.username LIKE ? OR user.username LIKE ?"
-        params.extend([f"%{editado_por}%", f"%{usuario}%"])
-    
+        query = query.filter((edited_by_user.username.contains(editado_por)) | (user_user.username.contains(editado_por)))
+
+    if usuario:
+        query = query.filter(user_user.username.contains(usuario))
+
     if start_date or end_date:
         if start_date:
-            start_date = datetime.strptime(start_date, "%d/%m/%Y").strftime("%Y-%m-%d")
+            start_date = datetime.strptime(start_date, "%d/%m/%Y")
         else:
-            start_date = datetime(year=2000, month=1, day=1).strftime("%Y-%m-%d")
-        
+            start_date = db.session.query(func.min(EditHistory.added_at)).scalar()
+
         if end_date:
-            end_date = datetime.strptime(end_date, "%d/%m/%Y").strftime("%Y-%m-%d")
+            end_date = datetime.strptime(end_date, "%d/%m/%Y") + timedelta(hours=23, minutes=59, seconds=59)
         else:
-            end_date = datetime.now().strftime("%Y-%m-%d")
-        query += f" {'WHERE' if not query.endswith('LIKE ?') else 'AND' } data_hora BETWEEN ? AND datetime(?, '+1 day', '-1 second')"
-        params.extend([start_date, end_date])
-    
-    if order_by:
-        query += f" ORDER BY {order_by} {order_mode}"
+            end_date = datetime.now() + timedelta(days=1)
 
-    page, per_page, offset = get_page_args(page_parameter='page', per_page_parameter='per_page')
-    offset = (page - 1) * per_page
+        query = query.filter(EditHistory.added_at.between(start_date, end_date))
 
-    query += " LIMIT ?, ?"
-    params.extend([offset, per_page])
+    query = query.order_by(getattr(EditHistory, order_by).asc() if order_mode == "ASC" else getattr(EditHistory, order_by).desc())
 
+    page = request.args.get("page", 1, type=int)
+    per_page = request.args.get("per_page", 10, type=int)
 
-    results_obj = cur.execute(query, params).fetchall()
-    results_obj = list(map(dict, results_obj))
+    pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+    results = pagination.items
 
-    results = []
-    for result in results_obj:
-        result = dict(result)
-        result["editado_por"] = dict(get_user(result["editado_por"], safe=True))
-        result["user"] = dict(get_user(result["user_id"]))
-        result["data_hora"] = datetime.strptime(result["data_hora"], "%Y-%m-%d %H:%M:%S").strftime("%d/%m/%Y às %H:%M:%S")
-        results.append(result)
-    total_query = query.split("LIMIT")[0].split('ORDER BY')[0].strip()
-    total_params = []
-    if total_query.count("?") == 2 and not total_query.endswith("datetime(?, '+1 day', '-1 second')"):
-        total_params.extend([f"%{editado_por}%", f"%{usuario}%"])
-    elif total_query.count('?') == 2:
-        total_params.extend([start_date, end_date])
-    elif total_query.count("?") == 4:
-        total_params.extend([f"%{editado_por}%", f"%{usuario}%", start_date, end_date])
-    identificador = f"historico de edição de produtos {', '.join(total_params)}"
-    hashed_query = hashlib.sha256(identificador.encode('utf-8')).hexdigest()
-    results_obj = cur.execute(total_query, total_params).fetchall()
-    results_obj = list(map(dict, results_obj))
-    cache.set(hashed_query, results_obj)
-
-
-    total = len(results_obj)
-    pagination = Pagination(page=page, per_page=per_page, total=total, css_framework='bootstrap4')
+    identificador = f"historico-edicoes-usuarios-{editado_por}-{usuario}-{start_date}-{end_date}"
+    hashed_query = hashlib.sha256(identificador.encode("utf-8")).hexdigest()
+    cache.set(hashed_query, results)
 
     context = {
         "results": results,
@@ -714,96 +702,69 @@ def history_edits_users():
 
     return render_template("history-edits-users.html", **context)
 
-@app.route("/histórico-recargas")
-def recharge_history():
-    conn = get_conn()
-    cur = conn.cursor()
+
+@app.route("/historico-recargas")
+def payments_history():
     recharge_type = request.args.get("recharge_type", "")
     allowed_by = request.args.get("allowed_by", "")
-    sold_for = request.args.get("sold_for", "")
+    allowed_for = request.args.get("sold_for", "")
     start_date = request.args.get("start_date", "")
     end_date = request.args.get("end_date", "")
     order_mode = request.args.get("order_mode", "ASC")
-    order_by = request.args.get("order_by", "data_hora")
+    order_by = request.args.get("order_by", "paid_at")
 
-    query = "SELECT * FROM controle_pagamento cp LEFT JOIN user u_allowed_by ON cp.liberado_por = u_allowed_by.id LEFT JOIN user u_sold_for ON cp.aluno_id = u_sold_for.id WHERE 1=1"
-    params = []
-    
+    allowed_by_user = aliased(User)
+    allowed_for_user = aliased(User)
+
+    query = db.session.query(Payment, allowed_by_user, allowed_for_user).join(allowed_by_user, Payment.allowed_by == allowed_by_user.id).join(allowed_for_user, Payment.user_id == allowed_for_user.id)
+
     if recharge_type:
-        query += " AND cp.tipo_pagamento = ?"
-        params.append(recharge_type)
-    
+        query = query.filter(Payment.payment_method_id == recharge_type)
+
     if allowed_by:
-        allowed_by_id = cur.execute("SELECT id FROM user WHERE username like ? or name like ?", (f"%{allowed_by}%", f"%{allowed_by}%")).fetchone()
-        if allowed_by_id is not None:
-            query += " AND cp.liberado_por = ?"
-            params.append(allowed_by_id['id'])
-    
-    if sold_for:
-        sold_for_id = cur.execute("SELECT id FROM user WHERE username like ? or name like ?", (f"%{sold_for}%", f"%{sold_for}%")).fetchone()
-        if sold_for_id is not None:
-            query += " AND cp.aluno_id = ?"
-            params.append(sold_for_id['id'])
-    
-    if start_date or end_date:
-        if start_date:
-            start_date = datetime.strptime(start_date, "%d/%m/%Y").strftime("%Y-%m-%d")
-        else:
-            start_date = datetime(year=2000, month=1, day=1).strftime("%Y-%m-%d")
-        
-        if end_date:
-            end_date = datetime.strptime(end_date, "%d/%m/%Y").strftime("%Y-%m-%d")
-        else:
-            end_date = datetime.now().strftime("%Y-%m-%d")
-        query += " AND data_hora BETWEEN ? AND datetime(?, '+1 day', '-1 second')"
-        params.extend([start_date, end_date])
-    
-    query += f" ORDER BY cp.{order_by} {order_mode}"
+        query = query.filter(or_(
+            allowed_by_user.username.like(f"%{allowed_by}%"),
+            allowed_by_user.name.like(f"%{allowed_by}%")
+        ))
 
-    page, per_page, offset = get_page_args(page_parameter='page', per_page_parameter='per_page')
-    offset = (page - 1) * per_page
-    query += f" LIMIT {offset}, {per_page}"
+    if allowed_for:
+        query = query.filter(or_(
+            allowed_for_user.username.like(f"%{allowed_for}%"),
+            allowed_for_user.name.like(f"%{allowed_for}%")
+        ))
 
-    results = cur.execute(query, params).fetchall()
-    results = list(map(dict, results))
-    for result in results:
-        result["data_hora"] = datetime.strptime(result["data_hora"], "%Y-%m-%d %H:%M:%S").strftime("%d/%m/%Y às %H:%M:%S")
-        result["tipo_pagamento"] = PAYMENT_TYPES[result["tipo_pagamento"]]
-        if result["comprovante"] is not None:
-            filename = f'uploads/{result["comprovante"]}'
-            result["comprovante_url"] = url_for("static", filename=filename)
-        else:
-            result["comprovante_url"] = None
-        result["liberado_por"] = get_user(result["liberado_por"], safe=True)
-        result["aluno"] = get_user(result["aluno_id"], safe=True)
+    if start_date:
+        start_date = datetime.strptime(start_date, "%d/%m/%Y")
+    else:
+        start_date = datetime(year=2000, month=1, day=1)
 
-    total_params = params
-    total_query = query.split("ORDER BY")[0].strip()
-    hashed_query = hashlib.sha256(total_query.encode('utf-8')).hexdigest()
-    results_obj = cur.execute(total_query, total_params).fetchall()
-    results_obj = list(map(dict, results_obj))
-    results_final = []
-    for result in results_obj:
-        result["tipo_pagamento"] = PAYMENT_TYPES[result["tipo_pagamento"]]
-        if result["comprovante"] is not None:
-            filename = f'uploads/{result["comprovante"]}'
-            result["comprovante_url"] = url_for("static", filename=filename)
-        else:
-            result["comprovante_url"] = None
-        results_final.append(result)
+    if end_date:
+        end_date = datetime.strptime(end_date, "%d/%m/%Y")
+    else:
+        end_date = datetime.now()
 
-    cache.set(hashed_query, results_obj)
+    query = query.filter(Payment.added_at.between(start_date, end_date))
 
-    total = len(results_obj)
-    pagination = Pagination(page=page, per_page=per_page, total=total, css_framework='bootstrap4')
+    query = query.order_by(getattr(Payment, order_by).asc() if order_mode == "ASC" else getattr(Payment, order_by).desc())
+
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+    results = pagination.items
+
+    payment_types = {str(id_): value_ for id_, value_ in PaymentMethod.query.with_entities(PaymentMethod.id, PaymentMethod.name).all()}
+
+    identificador = f"historico-recargas-{recharge_type}-{allowed_by}-{allowed_for}-{start_date}-{end_date}"
+    hashed_query = hashlib.sha256(identificador.encode("utf-8")).hexdigest()
+    cache.set(hashed_query, query.all())
 
     context = {
         "results": results,
         "pagination": pagination,
         "page": page,
         "per_page": per_page,
-        "result_id": hashed_query,
-        "payment_types": PAYMENT_TYPES
+        "payment_types": payment_types,
+        "result_id": hashed_query
     }
 
-    return render_template("recharge-history.html", **context)
+    return render_template("payments-history.html", **context)

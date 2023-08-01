@@ -1,6 +1,8 @@
-from .settings import SECRET_KEY, DEBUG, UPLOAD_FOLDER, CSRF_HEADER_NAME
+from .settings import SECRET_KEY, DEBUG, UPLOAD_FOLDER, CSRF_HEADER_NAME, DB_PATH
+from flask_sqlalchemy import SQLAlchemy
 from flask_session import Session
 from flask_seasurf import SeaSurf
+from flask_migrate import Migrate
 from flask_caching import Cache
 from datetime import timedelta
 from flask import Flask
@@ -22,6 +24,8 @@ CSRF_COOKIE_TIMEOUT = timedelta(days=30)
 CSRF_COOKIE_NAME = 'csrf-token-topzera'
 
 settings_map = {
+    'SQLALCHEMY_DATABASE_URI': DB_PATH,
+    'SQLALCHEMY_TRACK_MODIFICATIONS': False,
     'SECRET_KEY': SECRET_KEY,
     'DEBUG': DEBUG,
     'UPLOAD_FOLDER': UPLOAD_FOLDER,
@@ -54,9 +58,11 @@ app.config.from_mapping(settings_map)
 Session(app)
 SeaSurf(app)
 cache = Cache(app)
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
 from . import functionalities
 from . import cantina
 from . import auth
 from . import api
-from . import db
+from . import database
