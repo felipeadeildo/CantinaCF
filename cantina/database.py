@@ -102,7 +102,7 @@ def init_db():
         Page(
             title="Histórico de Pagamentos",
             description="Aqui você pode visualizar o histórico de pagamentos feito pelos usuários em geral, tendo a possibilidade de exportar para excel, filtrar por data, usuário e forma de pagamento.",
-            route=routes[16],
+            route=routes[13],
             category_page=categories[2],
         ),
         Page(
