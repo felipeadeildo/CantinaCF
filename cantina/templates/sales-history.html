@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% import "_macros.html" as macros %}
 
 {% block additional_css %}
 <style>
@@ -23,11 +24,8 @@
 {% endblock additional_css %}
 
 {% block content %}
-<h3 class="text-center">
-    {% block title %}
-    Histórico de Vendas
-    {% endblock title %}
-</h3>
+<h3 class="text-center">{% block title %}{{ g.current_endpoint.name }}{% endblock title %}</h3>
+
 
 <div class="row">
     <div class="col-md-7 form-divider">
@@ -50,14 +48,12 @@
                     <select name="order_by" id="order_by" class="form-select">
                         <option value="" disabled {{ request.args.get('order_by') or 'selected' }}>Escolha uma opção
                         </option>
-                        <option value="data_hora" {{ 'selected' if request.args.get('order_by')=='data_hora' else ''
+                        <option value="added_at" {{ 'selected' if request.args.get('order_by')=='data_hora' else ''
                             }}>Data e Hora</option>
-                        <option value="vendido_por" {{ 'selected' if request.args.get('order_by')=='vendido_por' else
+                        <option value="sold_by" {{ 'selected' if request.args.get('order_by')=='vendido_por' else
                             '' }}>Pessoa que recebeu</option>
-                        <option value="vendido_para" {{ 'selected' if request.args.get('order_by')=='vendido_para' else
+                        <option value="sold_to" {{ 'selected' if request.args.get('order_by')=='vendido_para' else
                             '' }}>Pessoa que comprou</option>
-                        <option value="turno" {{ 'selected' if request.args.get('order_by')=='turno' else '' }}>Turno
-                        </option>
                         <option value="id" {{ 'selected' if request.args.get('order_by')=='id' else '' }}>ID</option>
                     </select>
                 </div>
@@ -113,13 +109,13 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for product_name in stats %}
+                    {% for product_name, product_stats in stats.items() %}
                     <tr>
-                        <td>{{ stats[product_name].id }}</td>
+                        <td>{{ product_stats.id }}</td>
                         <td>{{ product_name }}</td>
-                        <td>{{ stats[product_name].quantity }}</td>
-                        <td>R$ {{ stats[product_name].valor }}</td>
-                        <td>R$ {{ stats[product_name].ammount }}</td>
+                        <td>{{ product_stats.quantity }}</td>
+                        <td>R$ {{ product_stats.valor }}</td>
+                        <td>R$ {{ product_stats.ammount }}</td>
                     </tr>
                     {% else %}
                     <tr>
@@ -152,7 +148,6 @@
                         <th>Produto</th>
                         <th>Valor de Compra</th>
                         <th>Data</th>
-                        <th>Turno</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -160,29 +155,25 @@
                     <tr>
                         <td>{{ result.id }}</td>
                         <td>
-                            {{ result.vendido_por.name }} (<a
-                                href="{{ url_for('profile', user_id=result.vendido_por.id ) }}">Perfil</a>)
+                            {{ result.sold_by_user.name }} (<a href="{{ url_for('profile', user_id=result.sold_by ) }}">Perfil</a>)
                         </td>
                         <td>
-                            {{ result.vendido_para.name }} (<a
-                                href="{{ url_for('profile', user_id=result.vendido_para.id ) }}">Perfil</a>)
+                            {{ result.sold_to_user.name }} (<a href="{{ url_for('profile', user_id=result.sold_to ) }}">Perfil</a>)
                         </td>
                         <td>
-                            {% if result.deferido_por %}
-                            {{ result.deferido_por.name }} (<a
-                                href="{{ url_for('profile', user_id=result.deferido_por.id ) }}">Perfil</a>)
+                            {% if result.dispatched_by %}
+                            {{ result.dispatched_by_user.name }} (<a href="{{ url_for('profile', user_id=result.dispatched_by ) }}">Perfil</a>)
                             {% else %}
                             Não despachado
                             {% endif %}
                         </td>
-                        <td>{{ result.produto.nome }}</td>
-                        <td>R$ {{ result.valor }}</td>
-                        <td>{{ result.data_hora }}</td>
-                        <td>{{ result.turno }}</td>
+                        <td>{{ result.product.name }}</td>
+                        <td>R$ {{ result.value }}</td>
+                        <td>{{ result.added_at }}</td>
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="7">Nenhum Resultado Encontrado</td>
+                        <td colspan="8">Nenhum Resultado Encontrado</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -190,10 +181,8 @@
         </div>
 
         <div class="pagination mt-3">
-            {{ pagination.info|safe }}
-            {{ pagination.links|safe }}
+            {{ macros.render_pagination(pagination, request.endpoint) }}
         </div>
     </div>
 </div>
-
 {% endblock content %}

@@ -1,11 +1,8 @@
 {% extends "base.html" %}
-{% block title %}
-Editar Perfil
-{% endblock %}
 
 {% block content %}
 <div class="container">
-    <h4 class="text-center">Editar Perfil</h4>
+    <h3 class="text-center">{% block title %}{{ g.current_endpoint.name }}{% endblock title %}</h3>
 
     <form action="{{ url_for('edit_profile', user_id=user.id ) }}" method="post">
         <input type="hidden" name="{{ config['CSRF_COOKIE_NAME'] }}" value="{{ csrf_token() }}">
@@ -30,9 +27,9 @@ Editar Perfil
                 </div>
 
                 <div class="mb-3">
-                    <label for="telefone" class="form-label">Telefone</label>
-                    <input id="telefone" type="text" class="form-control" name="telefone"
-                        value="{{ user.telefone if user.telefone else '' }}">
+                    <label for="telephone" class="form-label">Telefone</label>
+                    <input id="telephone" type="text" class="form-control" name="telephone"
+                        value="{{ user.telephone if user.telephone else '' }}">
                 </div>
 
                 <div class="mb-3">
@@ -49,10 +46,10 @@ Editar Perfil
             <div class="col-md-6">
                 <div class="mb-3">
                     <label for="role" class="form-label">Cargo</label>
-                    <select id="role" name="role" class="form-select" required>
+                    <select id="role" name="role_id" class="form-select" required>
                         <option value="" disabled selected>Cargo</option>
                         {% for role in roles %}
-                        <option value="{{ role }}" {% if role == user.role %}selected{% endif %}>{{ role }}</option>
+                        <option value="{{ role.id }}" {% if role.name == user.role.name %}selected{% endif %}>{{ role.name }}</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -64,9 +61,9 @@ Editar Perfil
                 </div>
 
                 <div class="mb-3">
-                    <label for="turma" class="form-label">Turma</label>
-                    <input id="turma" type="text" class="form-control" name="turma"
-                        value="{{ user.turma if user.turma else '' }}">
+                    <label for="turm" class="form-label">Turma</label>
+                    <input id="turm" type="text" class="form-control" name="turm"
+                        value="{{ user.turm if user.turm else '' }}">
                 </div>
 
                 <div class="mb-3">

@@ -1,12 +1,8 @@
 {% extends 'base.html' %}
 
-{% block title %}
-Controle de Estoque
-{% endblock %}
-
 {% block content %}
 <div class="container">
-    <h4 class="text-center">Controle de Estoque</h4>
+    <h3 class="text-center">{% block title %}{{ g.current_endpoint.name }}{% endblock title %}</h3>
 
     <form id="stock-form" action="{{ url_for('stock_control')}}" method="post">
         <input type="hidden" name="{{ config['CSRF_COOKIE_NAME'] }}" value="{{ csrf_token() }}">
@@ -16,7 +12,7 @@ Controle de Estoque
                 <select name="product" id="product" class="form-select" required>
                     <option value="" disabled selected>Selecione um Produto Existente</option>
                     {% for product in products %}
-                    <option value="{{ product.id }}">{{ product.nome }}</option>
+                    <option value="{{ product.id }}">{{ product.name }}</option>
                     {% endfor %}
                 </select>
             </div>

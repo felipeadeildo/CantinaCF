@@ -1,28 +1,23 @@
 {% extends 'base.html' %}
 
-{% block title %}
-Pagamento de Folha de Pagamento :D
-{% endblock title %}
-
 {% block content %}
 <div class="container">
-    <h4 class="text-center">Pagamento da Folha de Pagamento</h4>
+    <h3 class="text-center">{% block title %}{{ g.current_endpoint.name }}{% endblock title %}</h3>
     <form action="{{ url_for('pay_payroll') }}" method="post" enctype="multipart/form-data">
         <div class="mb-3">
             <label for="payment-method" class="form-label">Forma de Pagamento</label>
             <select name="payment-method" id="payment-method" class="form-select">
                 <option value="" disabled selected>Escolha forma de Pagamento</option>
-                <option value="pix">PIX</option>
-                <option value="debit_card">Cartão de Débito</option>
-                <option value="credit_card">Cartão de Crédito</option>
-                <option value="cash">Espécie</option>
+                {% for payment_method in payment_methods %}
+                <option value="{{ payment_method.id }}" data-need-proof="{{ payment_method.need_proof }}">{{ payment_method.name }}</option>
+                {% endfor %}
             </select>
         </div>
 
         <div class="mb-3">
             <label for="payment-value" class="form-label">Valor (R$)</label>
             <input type="number" class="form-control" id="payment-value" name="payment-value" min="0" step="0.01"
-                max="{{ session.user.saldo_payroll }}">
+                max="{{ session.user.balance_payroll }}">
         </div>
 
         <div class="mb-3">
@@ -50,11 +45,17 @@ Pagamento de Folha de Pagamento :D
     document.addEventListener('DOMContentLoaded', function () {
         let paymentMethodTag = document.getElementById('payment-method');
         let proofContainerTag = document.getElementById('proof-container');
+        let payment_methods_need_proof = [];
+        for (let i = 0; i < paymentMethodTag.options.length; i++) {
+            if (paymentMethodTag.options[i].getAttribute('data-need-proof') === 'True') {
+                payment_methods_need_proof.push(paymentMethodTag.options[i].value);
+            }
+        }
         verify_proof = function () {
-            if (paymentMethodTag.value === 'cash') {
-                proofContainerTag.style.display = 'none';
-            } else {
+            if (paymentMethodTag.value in payment_methods_need_proof) {
                 proofContainerTag.style.display = 'block';
+            } else {
+                proofContainerTag.style.display = 'none';
             }
         }
         verify_proof();

@@ -1,23 +1,18 @@
 {% extends 'base.html' %}
 
-{% block title %}
-Recarga de Crédito
-{% endblock %}
-
 {% block content %}
 <div class="container mt-4 d-flex justify-content-center">
     <div class="col-md-6">
-        <h4 class="text-center">Recarga de Crédito</h4>
+        <h3 class="text-center">{% block title %}{{ g.current_endpoint.name }}{% endblock title %}</h3>
+
         <form action="{{ url_for('recharge') }}" method="post" enctype="multipart/form-data">
             <div class="mb-3">
                 <label for="payment-method" class="form-label">Forma de Pagamento</label>
                 <select name="payment-method" id="payment-method" class="form-select" required>
                     <option value="" disabled selected>Escolha uma opção</option>
-                    <option value="pix">PIX</option>
-                    <option value="debit_card">Cartão de Débito</option>
-                    <option value="credit_card">Cartão de Crédito</option>
-                    <option value="cash">Espécie</option>
-                    <option value="payroll">Folha de Pagamento</option>
+                    {% for payment_method in payment_methods %}
+                    <option value="{{ payment_method.id }}" need-proof="{{ payment_method.need_proof }}">{{ payment_method.name }}</option>
+                    {% endfor %}
                 </select>
             </div>
 
@@ -55,12 +50,17 @@ Recarga de Crédito
     document.addEventListener("DOMContentLoaded", function () {
         let paymentMethodTag = document.getElementById('payment-method');
         let proofContainerTag = document.getElementById('proof-container');
-
+        let payment_methods_need_proof = [];
+        for (let i = 0; i < paymentMethodTag.options.length; i++) {
+            if (paymentMethodTag.options[i].getAttribute('need-proof') === 'True') {
+                payment_methods_need_proof.push(paymentMethodTag.options[i].value);
+            }
+        }
         verify_proof_visualization = function () {
-            if (paymentMethodTag.value === 'cash' || paymentMethodTag.value === 'debit_card' || paymentMethodTag.value === 'credit_card') {
-                proofContainerTag.style.display = 'none';
-            } else {
+            if (paymentMethodTag.value in payment_methods_need_proof) {
                 proofContainerTag.style.display = 'block';
+            } else {
+                proofContainerTag.style.display = 'none';
             }
         }
         verify_proof_visualization();

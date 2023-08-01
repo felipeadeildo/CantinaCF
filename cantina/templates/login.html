@@ -1,12 +1,12 @@
 {% extends "base.html" %}
-{% block title %}Login{% endblock %}
 {% block content %}
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-6">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">Login</h5>
+                    <h5 class="card-title">{% block title %}{{ g.current_endpoint.name }}{% endblock title %}</h3>
+
                     <form method="POST" action="{{ url_for('login') }}">
                         <div class="mb-3">
                             <label for="username" class="form-label">Usuário</label>

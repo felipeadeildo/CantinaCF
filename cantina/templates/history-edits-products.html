@@ -1,11 +1,9 @@
 {% extends "base.html" %}
+{% import "_macros.html" as macros %}
 
 {% block content %}
-<h3 class="text-center">
-    {% block title %}
-    Histórico de Edições de Produtos
-    {% endblock title %}
-</h3>
+<h3 class="text-center">{% block title %}{{ g.current_endpoint.name }}{% endblock title %}</h3>
+
 
 <div class="container">
     <form method="get" class="mb-4">
@@ -27,15 +25,15 @@
                 <select name="ordenar_por" id="ordenar_por" class="form-select">
                     <option value="" disabled {{ request.args.get( 'ordenar_por' ) if
                         request.args.get( 'ordenar_por' ) else 'selected' }}>Ordenar Por</option>
-                    <option value="data_hora" {{ 'selected' if request.args.get( 'ordenar_por' )=='data_hora' else ''
+                    <option value="added_at" {{ 'selected' if request.args.get( 'ordenar_por' )=='added_at' else ''
                         }}>Data e Hora</option>
-                    <option value="editado_por" {{ 'selected' if request.args.get( 'ordenar_por' )=='editado_por' else
+                    <option value="edited_by" {{ 'selected' if request.args.get( 'ordenar_por' )=='edited_by' else
                         '' }}>
                         Editado por</option>
-                    <option value="produto_id" {{ 'selected' if request.args.get( 'ordenar_por' )=='produto_id' else ''
+                    <option value="product_id" {{ 'selected' if request.args.get( 'ordenar_por' )=='product_id' else ''
                         }}>
                         Produto</option>
-                    <option value="motivo" {{ 'selected' if request.args.get( 'ordenar_por' )=='motivo' else '' }}>Motivo
+                    <option value="reason" {{ 'selected' if request.args.get( 'ordenar_por' )=='reason' else '' }}>Motivo
                     </option>
                     <option value="id" {{ 'selected' if request.args.get( 'ordenar_por' )=='id' else '' }}>ID</option>
                 </select>
@@ -93,15 +91,15 @@
                 <tr>
                     <td>{{ result.id }}</td>
                     <td>
-                        {{ result.editado_por.name }} (<a
-                            href="{{ url_for('profile', user_id=result.editado_por.id ) }}">Perfil</a>)
+                        {{ result.edited_by_user.name }} (<a
+                            href="{{ url_for('profile', user_id=result.edited_by ) }}">Perfil</a>)
                     </td>
-                    <td>{{ result.produto.nome }} ({{ result.produto.id }})</td>
-                    <td>{{ result.chave }}</td>
-                    <td>{{ result.valor_antigo }}</td>
-                    <td>{{ result.valor_novo }}</td>
-                    <td>{{ result.motivo }}</td>
-                    <td>{{ result.data_hora }}</td>
+                    <td>{{ result.product.name }} ({{ result.product.id }})</td>
+                    <td>{{ result.key }}</td>
+                    <td>{{ result.old_value }}</td>
+                    <td>{{ result.new_value }}</td>
+                    <td>{{ result.reason }}</td>
+                    <td>{{ result.formatted_added_at }}</td>
                 </tr>
                 {% else %}
                 <tr>
@@ -113,8 +111,7 @@
     </div>
 
     <div class="pagination container text-center mt-3">
-        {{ pagination.info|safe }}
-        {{ pagination.links|safe }}
+        {{ macros.render_pagination(pagination, request.endpoint) }}
     </div>
 </div>
 {% endblock content %}

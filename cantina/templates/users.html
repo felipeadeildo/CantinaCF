@@ -1,9 +1,9 @@
 {% extends "base.html" %}
-{% block title %}Usuários{% endblock %}
-{% block content %}
 
+{% block content %}
 <div class="row">
-    <div class="col-md-8 {% if session.user.role == 'admin' %}col-lg-8{% else %}col-lg-12{% endif %}">
+    <h3 class="text-center">{% block title %}{{ g.current_endpoint.name }}{% endblock title %}</h3>
+    <div class="col-md-8 {% if session.user.role.name == 'Admin' %}col-lg-8{% else %}col-lg-12{% endif %}">
         <div class="card">
             <div class="card-body">
                 <h5 class="card-title">Gerenciamento de Usuários</h5>
@@ -30,7 +30,7 @@
                                 <td>{{ user.id }}</td>
                                 <td>{{ user.name }}</td>
                                 <td>{{ user.username }}</td>
-                                <td>{{ user.role }}</td>
+                                <td>{{ user.role.name }}</td>
                                 <td>{{ user.matricula or "-" }}</td>
                                 <td>
                                     <a href="{{ url_for('profile', user_id=user.id) }}" class="btn btn-primary btn-sm">
@@ -50,7 +50,7 @@
             </div>
         </div>
     </div>
-    {% if session.user.role == 'admin' %}
+    {% if session.user.role.name == 'Admin' %}
     <div class="col-md-4 col-lg-4">
         <div class="card">
             <div class="card-body">
@@ -78,11 +78,11 @@
                         </button>
                     </div>
                     <div class="mb-3">
-                        <label for="role" class="form-label">Cargo</label>
-                        <select id="role" name="role" required class="form-select">
+                        <label for="role_id" class="form-label">Cargo</label>
+                        <select id="role_id" name="role_id" required class="form-select">
                             <option value="" disabled selected>Selecione Cargo</option>
                             {% for role in roles %}
-                            <option value="{{ role }}">{{ role }}</option>
+                            <option value="{{ role.id }}">{{ role.name }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -138,9 +138,9 @@
         password_tag.type === 'password' ? password_tag.type = 'text' : password_tag.type = 'password';
     }
 
-    let roleTag = document.getElementById("role");
+    let roleTag = document.getElementById("role_id");
     roleTag.addEventListener("change", function () {
-        if (roleTag.value === "Aluno") {
+        if (roleTag.value === '{{ aluno_role_id }}') {
             document.getElementById("serie-input").style.display = 'block';
             document.getElementById("turma-input").style.display = 'block';
             document.getElementById("matricula-input").style.display = 'block';

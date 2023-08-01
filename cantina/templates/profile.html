@@ -1,51 +1,18 @@
 {% extends "base.html" %}
 
-{% block title %}
-Meu Perfil - {{ user.name }}
-{% endblock %}
-
 {% block content %}
 <div class="container mt-4">
-    <h4 class="text-center">Meu Perfil</h4>
+    <h4 class="text-center">{% block title %}{{ g.current_endpoint.name }}{% endblock %}</h4>
     <div class="card">
         <div class="card-body">
             <div class="row">
                 <div class="col-md-9">
                     <h5 class="card-title">{{ user.name }}</h5>
-                    {% if user.id %}
-                    <p><strong>ID:</strong> <span class="text-primary">{{ user.id }}</span></p>
+                    {% for key, value in user.items() %}
+                    {% if value != None %}
+                    <p><strong>{{ key }}:</strong> <span class="text-primary">{{ value }}</span></p>
                     {% endif %}
-                    {% if user.matricula %}
-                    <p><strong>Matrícula:</strong> <span class="text-primary">{{ user.matricula }}</span></p>
-                    {% endif %}
-                    {% if user.username %}
-                    <p><strong>Nome de usuário:</strong> <span class="text-primary">{{ user.username }}</span></p>
-                    {% endif %}
-                    {% if user.saldo %}
-                    <p><strong>Saldo:</strong> <span class="text-primary">R$ {{ user.saldo|round(2) }}</span></p>
-                    {% endif %}
-                    {% if user.saldo_payroll %}
-                    <p><strong>Folha de Pagamento (devedor):</strong> <span class="text-danger">R$ {{
-                            user.saldo_payroll|round(2) }}</span></p>
-                    {% endif %}
-                    {% if user.role %}
-                    <p><strong>Cargo:</strong> <span class="text-primary">{{ user.role }}</span></p>
-                    {% endif %}
-                    {% if user.serie %}
-                    <p><strong>Série:</strong> <span class="text-primary">{{ user.serie }}</span></p>
-                    {% endif %}
-                    {% if user.turma %}
-                    <p><strong>Turma:</strong> <span class="text-primary">{{ user.turma }}</span></p>
-                    {% endif %}
-                    {% if user.telefone %}
-                    <p><strong>Telefone:</strong> <span class="text-primary">{{ user.telefone }}</span></p>
-                    {% endif %}
-                    {% if user.email %}
-                    <p><strong>Email:</strong> <span class="text-primary">{{ user.email }}</span></p>
-                    {% endif %}
-                    {% if user.cpf %}
-                    <p><strong>CPF:</strong> <span class="text-primary">{{ user.cpf }}</span></p>
-                    {% endif %}
+                    {% endfor %}
                 </div>
                 {% if 'edit_profile' in session['permissions'] or 'edit_password' in session['permissions'] %}
                 <div class="col-md-3 d-flex justify-content-end align-items-center">
@@ -73,36 +40,42 @@ Meu Perfil - {{ user.name }}
     <div class="row transactions" style="max-height:400px; overflow-y:auto;">
         {% for transaction in transactions %}
         <div class="col-md-4 mb-4">
-            {% if transaction.tipo == 'entrada' and transaction.liberado_por %}
-            <div class="card bg-success">
+            {% if transaction.transaction_type == 'input' and transaction.status == 'accepted' %}
+            <div class="card bg-light text-success">
                 <div class="card-body">
-                    <h5 class="card-title">{{ transaction.data_hora }} - Entrada</h5>
-                    <p>Tipo de pagamento: {{ transaction.tipo_pagamento }}</p>
-                    <p>Valor: R$ {{ transaction.valor }}</p>
-                    <p>Liberado por: {{ transaction.liberado_por.name }}</p>
-                    <p>Turno: {{ transaction.turno }}</p>
-                    {% if transaction.is_payroll %}<p class="text-danger">*Referente ao pagamento de saldo devedor*</p>{% endif %}
+                    <h5 class="card-title">{{ transaction.paid_at }} - Entrada</h5>
+                    <p>Tipo de pagamento: {{ transaction.payment_type }}</p>
+                    <p>Valor: R$ {{ transaction.value }}</p>
+                    <p>Liberado por: {{ transaction.allowed_by.name }}</p>
+                    {% if transaction.is_payroll %}<p class="text-muted">*Referente ao pagamento de saldo devedor*</p>{% endif %}
                 </div>
             </div>
-            {% elif transaction.tipo == 'entrada' and not transaction.liberado_por %}
-            <div class="card bg-warning">
+            {% elif transaction.transaction_type == 'input' and transaction.status == 'to allow' %}
+            <div class="card bg-light text-warning">
                 <div class="card-body">
-                    <h5 class="card-title">{{ transaction.data_hora }} - Entrada Pendente</h5>
-                    <p>Tipo de pagamento: {{ transaction.tipo_pagamento }}</p>
-                    <p>Valor: R$ {{ transaction.valor }}</p>
+                    <h5 class="card-title">{{ transaction.added_at }} - Entrada Pendente</h5>
+                    <p>Tipo de pagamento: {{ transaction.payment_type }}</p>
+                    <p>Valor: R$ {{ transaction.value }}</p>
                     <p>Liberado por: Pendente</p>
-                    <p>Turno: {{ transaction.turno }}</p>
                 </div>
             </div>
-            {% else %}
-            <div class="card bg-danger">
+            {% elif transaction.transaction_type == 'input' and transaction.status == 'rejected' %}
+            <div class="card bg-light text-danger">
                 <div class="card-body">
-                    <h5 class="card-title">{{ transaction.data_hora }} - Saída</h5>
-                    <p>Produto: {{ transaction.product.nome }}</p>
-                    <p>Valor: R$ {{ transaction.product.valor }}</p>
-                    <p>Tipo: {{ transaction.product.tipo }}</p>
-                    <p>Vendido por: {{ transaction.vendido_por.name }}</p>
-                    <p>Turno: {{ transaction.turno }}</p>
+                    <h5 class="card-title">{{ transaction.added_at }} - Entrada Rejeitada</h5>
+                    <p>Tipo de pagamento: {{ transaction.payment_type }}</p>
+                    <p>Valor: R$ {{ transaction.value }}</p>
+                    <p>Rejeitado por: {{ transaction.allowed_by.name }}</p>
+                </div>
+            </div>
+            {% elif transaction.transaction_type == 'output' %}
+            <div class="card bg-light text-danger">
+                <div class="card-body">
+                    <h5 class="card-title">{{ transaction.added_at }} - Saída</h5>
+                    <p>Produto: {{ transaction.product.name }}</p>
+                    <p>Valor: R$ {{ transaction.product.value }}</p>
+                    <p>Vendido por: {{ transaction.sold_by.name }}</p>
+                    <p>Despachado (?): {{ 'Sim' if transaction.status == 'dispatched' else 'Não' }}</p>
                 </div>
             </div>
             {% endif %}

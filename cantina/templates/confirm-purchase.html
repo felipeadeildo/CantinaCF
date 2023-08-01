@@ -1,12 +1,8 @@
 {% extends "base.html" %}
 
-{% block title %}
-Confirmar Compra
-{% endblock title %}
-
 {% block content %}
 <div class="container">
-    <h4 class="text-center">Confirmação de Compra</h4>
+    <h3 class="text-center">{% block title %}{{ g.current_endpoint.name }}{% endblock title %}</h3>
 
     <div class="row mb-4">
         <div class="col-md-12">
@@ -25,14 +21,14 @@ Confirmar Compra
                                 {% for product in session.cart %}
                                 <tr>
                                     <td>{{ product.id }}</td>
-                                    <td>{{ product.nome }}</td>
-                                    <td>R$ {{ product.valor }}</td>
+                                    <td>{{ product.name }}</td>
+                                    <td>R$ {{ product.value }}</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
                         </table>
                     </div>
-                    <h5 class="text-end">Total: R$ {{ (session.cart|sum(attribute='valor'))|round(2, 'floor') }}</h5>
+                    <h5 class="text-end">Total: R$ {{ (session.cart|sum(attribute='value'))|round(2, 'floor') }}</h5>
                 </div>
             </div>
         </div>
@@ -62,7 +58,7 @@ Confirmar Compra
                 <button class="btn btn-primary" type="submit">
                     <i class="fas fa-check-circle"></i> Confirmar Compra
                 </button>
-                <a class="btn btn-secondary" href="{{ url_for('index') }}">
+                <a class="btn btn-secondary" href="{{ url_for('cantina') }}">
                     <i class="fas fa-arrow-left"></i> Voltar para Cantina
                 </a>
             </div>

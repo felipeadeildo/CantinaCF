@@ -1,4 +1,6 @@
 {% extends "base.html" %}
+{% import "_macros.html" as macros %}
+
 
 {% block additional_css %}
 <style>
@@ -24,11 +26,8 @@
 
 {% block content %}
 <div class="container mt-4">
-    <h3 class="text-center">
-        {% block title %}
-        Histórico de Recargas
-        {% endblock title %}
-    </h3>
+    <h3 class="text-center">{% block title %}{{ g.current_endpoint.name }}{% endblock title %}</h3>
+
 
     <div class="row">
         <div class="col-md-12">
@@ -44,9 +43,9 @@
 
                     <div class="col-md-6">
                         <div class="input-group mb-3">
-                            <label class="form-label" for="sold_for">Liberado para</label>
-                            <input type="text" name="sold_for" id="sold_for" class="form-control"
-                                value="{{ request.args.get('sold_for', '') }}">
+                            <label class="form-label" for="allowed_for">Liberado para</label>
+                            <input type="text" name="allowed_for" id="allowed_for" class="form-control"
+                                value="{{ request.args.get('allowed_for', '') }}">
                         </div>
                     </div>
 
@@ -93,9 +92,9 @@
                         <select name="recharge_type" id="recharge_type" class="form-select">
                             <option value="" {{ request.args.get( 'recharge_type' ) if request.args.get( 'recharge_type'
                                 ) else 'selected' }}>Todos</option>
-                            {% for name, value in payment_types.items() %}
-                            <option value="{{ name }}" {{ 'selected' if request.args.get( 'recharge_type' )==name
-                                else '' }}>{{ value }}</option>
+                            {% for id, name in payment_types.items() %}
+                            <option value="{{ id }}" {{ 'selected' if request.args.get( 'recharge_type' )==id
+                                else '' }}>{{ name }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -124,37 +123,35 @@
                         <tr>
                             <th>ID</th>
                             <th>Tipo de Pagamento</th>
-                            <th>Descrição</th>
+                            <th>Observação</th>
                             <th>Data e Hora</th>
                             <th>Valor</th>
                             <th>Liberado por</th>
-                            <th>Turno</th>
                             <th>Liberado para</th>
                             <th>Comprovante</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for result in results %}
+                        {% for result, allowed_by, allowed_for in results %}
                         <tr>
                             <td>{{ result.id }}</td>
-                            <td>{{ result.tipo_pagamento }}</td>
-                            <td>{{ result.descricao or '-'}}</td>
-                            <td>{{ result.data_hora }}</td>
-                            <td>R$ {{ result.valor }}</td>
+                            <td>{{ result.payment_method.name }}</td>
+                            <td>{{ result.observations or '-'}}</td>
+                            <td>{{ result.formatted_paid_at }}</td>
+                            <td>R$ {{ result.value }}</td>
                             <td>
-                                {% if result.liberado_por %}
-                                {{ result.liberado_por.name }} (<a
-                                    href="{{ url_for('profile', user_id=result.liberado_por.id) }}">Perfil</a>)
+                                {% if result.allowed_by_user %}
+                                {{ result.allowed_by_user.name }} (<a
+                                    href="{{ url_for('profile', user_id=result.allowed_by) }}">Perfil</a>)
                                 {% else %}
                                 Sem liberador
                                 {% endif %}
                             </td>
-                            <td>{{ result.turno }}</td>
-                            <td>{{ result.aluno.name }} (<a
-                                    href="{{ url_for('profile', user_id=result.aluno.id) }}">Perfil</a>)</td>
+                            <td>{{ result.user.name }} (<a
+                                    href="{{ url_for('profile', user_id=result.user.id) }}">Perfil</a>)</td>
                             <td>
-                                {% if result.comprovante_url %}
-                                <a href="{{ result.comprovante_url }}" class="btn btn-secondary"
+                                {% if result.proof_url %}
+                                <a href="{{ result.proof_url }}" class="btn btn-secondary"
                                     target="_blank">Comprovante</a>
                                 {% else %}
                                 Sem Comprovante
@@ -171,8 +168,7 @@
             </div>
 
             <div class="pagination mt-3">
-                {{ pagination.info|safe }}
-                {{ pagination.links|safe }}
+                {{ macros.render_pagination(pagination, request.endpoint) }}
             </div>
             <div class="clearfix"></div>
         </div>

@@ -1,9 +1,5 @@
 {% extends 'base.html' %}
 
-{% block title %}
-Pedidos de Recargas
-{% endblock %}
-
 {% block content %}
 <style>
     .card {
@@ -53,22 +49,21 @@ Pedidos de Recargas
 </style>
 
 <div class="container">
-    <h4 class="text-center">Pedidos de Recargas</h4>
-    {% if refill_requests %}
+    <h3 class="text-center">{% block title %}{{ g.current_endpoint.name }}{% endblock title %}</h3>
+    {% if verify_payments %}
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-        {% for request in refill_requests %}
+        {% for request in verify_payments %}
         <div class="col" id="request-{{ request.id }}">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">{{ request.aluno.name }} ({{ request.aluno.matricula }})</h5>
-                    <p><strong>Data e Hora:</strong> {{ request.data_hora }}</p>
-                    <p><strong>Turno:</strong> {{ request.turno }}</p>
-                    <p><strong>Tipo de Pagamento:</strong> {{ request.tipo_pagamento }}</p>
-                    <p><strong>Valor:</strong> R$ {{ request.valor }}</p>
-                    <p><strong>Turma:</strong> {{ request.aluno.turma }}</p>
-                    <p><strong>Série:</strong> {{ request.aluno.serie }}</p>
-                    <p><strong>CPF:</strong> {{ request.aluno.cpf }}</p>
-                    <p><strong>Username:</strong> {{ request.aluno.username }}</p>
+                    <h5 class="card-title">{{ request.user.name }} ({{ request.user.matricula }})</h5>
+                    <p><strong>Data e Hora:</strong> {{ request.added_at }}</p>
+                    <p><strong>Tipo de Pagamento:</strong> {{ request.payment_method.name }}</p>
+                    <p><strong>Valor:</strong> R$ {{ request.value }}</p>
+                    <p><strong>Turma:</strong> {{ request.user.turm }}</p>
+                    <p><strong>Série:</strong> {{ request.user.serie }}</p>
+                    <p><strong>CPF:</strong> {{ request.user.cpf }}</p>
+                    <p><strong>Username:</strong> {{ request.user.username }}</p>
                 </div>
                 <div class="card-footer">
                     <div class="btn-container">
@@ -80,7 +75,7 @@ Pedidos de Recargas
                             Rejeitar Saldo
                             <i class="fas fa-times"></i>
                         </button>
-                        <button onclick="openModal('{{ request.comprovante_url }}')" class="btn btn-info">
+                        <button onclick="openModal('{{ request.proof_url }}')" class="btn btn-info">
                             Ver Comprovante
                             <i class="fas fa-eye"></i>
                         </button>
@@ -123,7 +118,7 @@ Pedidos de Recargas
 
     function manageRefillRequest(id, accept) {
     let card = document.getElementById('request-' + id);
-    let url = '{{ url_for("refill_manage_request_api") }}';
+    let url = '{{ url_for("verify_payment_api") }}';
     fetch(url, {
         method: 'POST',
         headers: {
@@ -145,7 +140,7 @@ Pedidos de Recargas
                 // Remover o card após 2 segundos (2000 milissegundos)
                 setTimeout(() => {
                     card.remove();
-                }, 2000);
+                }, 1000);
             }
         })
     };

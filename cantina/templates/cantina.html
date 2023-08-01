@@ -1,12 +1,7 @@
 {% extends "base.html" %}
-
-{% block title %}
-Vendas
-{% endblock title %}
-
 {% block content %}
 <div class="container mt-4">
-    <h4 class="text-center">Carrinho de Compras</h4>
+    <h3 class="text-center">{% block title %}{{ g.current_endpoint.name }}{% endblock title %}</h3>
 
     <div class="input-group mb-3">
         <span class="input-group-text"><i class="bi bi-search"></i></span>
@@ -30,10 +25,10 @@ Vendas
                 {% for product in products %}
                 <tr>
                     <td>{{ product.id }}</td>
-                    <td>{{ product.nome }}</td>
-                    <td>R$ {{ product.valor }}</td>
-                    <td>{{ product.tipo }}</td>
-                    <td id="product-quantity-{{ product.id }}">{{ product.quantidade }}</td>
+                    <td>{{ product.name }}</td>
+                    <td>R$ {{ product.value }}</td>
+                    <td>{{ product.type }}</td>
+                    <td id="product-quantity-{{ product.id }}-row">{{ product.quantity }}</td>
                     <td>
                         <button class="btn btn-primary btn-sm" onclick="addToCart({{ product.id }})">
                             <i class="fas fa-plus"></i>
@@ -49,17 +44,15 @@ Vendas
         <div class="row">
             <ul id="cart-list" class="list-group list-group-flush col-md-6 offset-md-3">
                 <li class="list-group-item">
-                    <h4 class="text-center">Carrinho - R$ <span id="cart-total">{{ (session.cart|sum(attribute='valor'))|round(2, 'floor') }}</span></h4>
+                    <h4 class="text-center">Carrinho - R$ <span id="cart-total">{{ (session.cart|sum(attribute='value'))|round(2, 'floor') }}</span></h4>
                 </li>
                 {% for product in session.cart %}
-                <div class="col s4" id="cart-{{ product.id }}-{{ loop.index }}">
-                    <li class="list-group-item">
-                        <button class="btn btn-danger btn-sm" onclick="removeFromCart({{ product.id }}, 'cart-{{ product.id }}-{{ loop.index }}')">
-                            <i class="fas fa-minus"></i>
-                        </button>
-                        <span style="margin-left: 5px;">{{ product.nome }}</span>
-                    </li>
-                </div>
+                <li class="list-group-item" id="cart-item-{{ product.id }}">
+                    <button class="btn btn-danger btn-sm" onclick="removeFromCart({{ product.id }}, 'cart-item-{{ product.id }}')">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <span style="margin-left: 5px;">{{ product.name }}</span>
+                </li>
                 {% endfor %}
             </ul>
         </div>
@@ -67,7 +60,7 @@ Vendas
         <a href="{{ url_for('confirm_purchase') }}" class="btn btn-primary">Confirmar Compra</a>
     </div>
 </div>
-{% endblock content %}
+{% endblock %}
 
 {% block scripts %}
 <script>
@@ -104,25 +97,23 @@ Vendas
             if (data.ok) {
                 var cartList = document.getElementById('cart-list');
                 var count = cartList.childElementCount;
-                var divItem = document.createElement('div');
-                divItem.className = "col s4";
-                divItem.id = `cart-${data.product.id}-${count}`;
-                divItem.innerHTML = `
-                <li class="list-group-item">
-                    <button class="btn btn-danger btn-sm" onclick="removeFromCart(${data.product.id}, 'cart-${data.product.id}-${count}')">
+                var listItem = document.createElement('li');
+                listItem.className = "list-group-item";
+                listItem.id = `cart-item-${data.product.id}-${count}`;
+                listItem.innerHTML = `
+                    <button class="btn btn-danger btn-sm" onclick="removeFromCart(${data.product.id}, 'cart-item-${data.product.id}-${count}')">
                         <i class="fas fa-minus"></i>
                     </button>
-                    <span style="margin-left: 5px;">${data.product.nome}</span>
-                </li>
+                    <span style="margin-left: 5px;">${data.product.name}</span>
                 `;
-                cartList.appendChild(divItem);
+                cartList.appendChild(listItem);
 
                 var totalSpan = document.getElementById('cart-total');
-                var total = parseFloat(totalSpan.innerText) + data.product.valor;
+                var total = parseFloat(totalSpan.innerText) + parseFloat(data.product.value); // Converter para float
                 totalSpan.innerText = total.toFixed(2);
 
-                var quantidadeTag = document.getElementById(`product-quantity-${data.product.id}`);
-                quantidadeTag.innerText = data.product.quantidade;
+                var quantityTag = document.getElementById(`product-quantity-${data.product.id}-row`);
+                quantityTag.innerText = data.product.quantity;
 
             } else {
                 console.error(data.message);
@@ -133,7 +124,8 @@ Vendas
         });
     }
 
-    function removeFromCart(id, cartId) {
+
+    function removeFromCart(id, cartItemId) {
         var urlRemoveFromCart = "{{ url_for('remove_from_cart_api') }}";
 
         fetch(urlRemoveFromCart, {
@@ -148,17 +140,17 @@ Vendas
         })
         .then(response => response.json())
         .then(data => {
-            var cartItem = document.getElementById(cartId);
+            var cartItem = document.getElementById(cartItemId);
             if (cartItem) {
                 cartItem.remove();
             }
 
             var totalSpan = document.getElementById('cart-total');
-            var total = parseFloat(totalSpan.innerText) - data.product.valor;
+            var total = parseFloat(totalSpan.innerText) - parseFloat(data.product.value);
             totalSpan.innerText = total.toFixed(2);
 
-            var quantidadeTag = document.getElementById(`product-quantity-${data.product.id}`);
-            quantidadeTag.innerText = data.product.quantidade;
+            var quantityTag = document.getElementById(`product-quantity-${data.product.id}-row`);
+            quantityTag.innerText = data.product.quantity;
         })
         .catch((error) => {
             console.error(error);
@@ -181,4 +173,4 @@ Vendas
     }
 
 </script>
-{% endblock scripts %}
+{% endblock %}
