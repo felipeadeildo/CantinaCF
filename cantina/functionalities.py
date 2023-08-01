@@ -132,26 +132,30 @@ def profile():
     if user is None:
         flash("Usuário de ID {} não encontrado!".format(user_id), category="error")
         abort(404)
+    
     transactions = []
     inputs = Payment.query.filter_by(user_id=user_id).all()
     outputs = ProductSale.query.filter_by(sold_to=user_id).all()
     for input in inputs:
-        input = input.as_dict()
-        input["allowed_by"] = User.query.filter_by(id=input["allowed_by"]).first()
-        input["payment_type"] = PaymentMethod.query.filter_by(id=input["payment_method_id"]).first().name
-        input["transaction_type"] = 'input'
-        transactions.append(input)
+        dict_input = input.as_dict()
+        dict_input["allowed_by"] = User.query.filter_by(id=dict_input["allowed_by"]).first()
+        dict_input["payment_type"] = PaymentMethod.query.filter_by(id=dict_input["payment_method_id"]).first().name
+        dict_input["transaction_type"] = 'input'
+        dict_input["formatted_added_at"] = input.formatted_added_at
+        transactions.append(dict_input)
     for output in outputs:
-        output = output.as_dict()
-        output["product"] = Product.query.filter_by(id=output["product_id"]).first()
-        output["sold_by"] = User.query.filter_by(id=output["sold_by"]).first()
-        output["transaction_type"] = 'output'
-        transactions.append(output)
-    transactions.sort(key=lambda x: x['added_at'], reverse=True)
+        dict_output = output.as_dict()
+        dict_output["product"] = Product.query.filter_by(id=dict_output["product_id"]).first()
+        dict_output["sold_by"] = User.query.filter_by(id=dict_output["sold_by"]).first()
+        dict_output["transaction_type"] = 'output'
+        dict_output["formatted_added_at"] = output.formatted_added_at
+        transactions.append(dict_output)
+    
+    transactions.sort(key=lambda x: x["added_at"], reverse=True)
     
     context = {
         "user": user.as_friendly_dict(),
-        "transactions": transactions
+        "transactions": transactions,
     }
     return render_template("profile.html", **context)
 
@@ -712,7 +716,7 @@ def payments_history():
     start_date = request.args.get("start_date", "")
     end_date = request.args.get("end_date", "")
     order_mode = request.args.get("order_mode", "ASC")
-    order_by = request.args.get("order_by", "paid_at")
+    order_by = request.args.get("order_by", "added_at")
 
     allowed_by_user = aliased(User)
     allowed_for_user = aliased(User)

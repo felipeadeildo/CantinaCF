@@ -77,7 +77,12 @@ class User(db.Model):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
     
     def as_friendly_dict(self):
-        return {c.info.get("label", c.name): getattr(self, c.name) for c in self.__table__.columns if c.name not in ('password', 'role_id')}
+        dict_info = {c.info.get("label", c.name): getattr(self, c.name) for c in self.__table__.columns if c.name not in ('password', 'role_id')}
+        dict_info.update({
+            User.added_at.info.get("label", "added_at"): self.added_at.strftime("%d/%m/%Y às %H:%M"),
+            User.updated_at.info.get("label", "updated_at"): self.updated_at.strftime("%d/%m/%Y às %H:%M"),
+        })
+        return dict_info
 
 setup_updated_at_listener(User)
 
@@ -125,6 +130,10 @@ class ProductSale(db.Model):
     @property
     def dispatched_by_user(self):
         return User.query.get(self.dispatched_by) if self.dispatched_by else None
+    
+    @property
+    def formatted_added_at(self):
+        return self.added_at.strftime("%d/%m/%Y %H:%M")
 
 
 class PaymentMethod(db.Model):
@@ -142,7 +151,6 @@ class Payment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     payment_method_id = db.Column(db.Integer, db.ForeignKey('payment_method.id'))
     observations = db.Column(db.Text)
-    paid_at = db.Column(db.DateTime, default=datetime.now)
     value = db.Column(db.DECIMAL(10, 2), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     allowed_by = db.Column(db.Integer, db.ForeignKey('user.id'))
@@ -157,8 +165,8 @@ class Payment(db.Model):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
     
     @property
-    def formatted_paid_at(self):
-        return self.paid_at.strftime("%d/%m/%Y às %H:%M")
+    def formatted_added_at(self):
+        return self.added_at.strftime("%d/%m/%Y %H:%M")
     
     @property
     def user(self):

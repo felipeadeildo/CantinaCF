@@ -54,14 +54,14 @@
                         <select name="order_by" id="order_by" class="form-select">
                             <option value="" disabled {{ request.args.get('order_by') or 'selected' }}>Escolha uma
                                 opção</option>
-                            <option value="data_hora" {{ 'selected' if request.args.get('order_by')=='data_hora' else ''
+                            <option value="added_at" {{ 'selected' if request.args.get('order_by')=='added_at' else ''
                                 }}>Data e Hora</option>
-                            <option value="tipo_pagamento" {{ 'selected' if
-                                request.args.get('order_by')=='tipo_pagamento' else '' }}>Tipo de Pagamento</option>
-                            <option value="valor" {{ 'selected' if request.args.get('order_by')=='valor' else '' }}>
+                            <option value="payment_method" {{ 'selected' if
+                                request.args.get('order_by')=='payment_method' else '' }}>Tipo de Pagamento</option>
+                            <option value="value" {{ 'selected' if request.args.get('order_by')=='value' else '' }}>
                                 Valor</option>
-                            <option value="descricao" {{ 'selected' if request.args.get('order_by')=='descricao' else ''
-                                }}>Descrição</option>
+                            <option value="observations" {{ 'selected' if request.args.get('order_by')=='observations' else ''
+                                }}>Observação</option>
                         </select>
                     </div>
 
@@ -137,7 +137,7 @@
                             <td>{{ result.id }}</td>
                             <td>{{ result.payment_method.name }}</td>
                             <td>{{ result.observations or '-'}}</td>
-                            <td>{{ result.formatted_paid_at }}</td>
+                            <td>{{ result.added_at }}</td>
                             <td>R$ {{ result.value }}</td>
                             <td>
                                 {% if result.allowed_by_user %}

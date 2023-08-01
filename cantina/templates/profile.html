@@ -43,7 +43,7 @@
             {% if transaction.transaction_type == 'input' and transaction.status == 'accepted' %}
             <div class="card bg-light text-success">
                 <div class="card-body">
-                    <h5 class="card-title">{{ transaction.paid_at }} - Entrada</h5>
+                    <h5 class="card-title">{{ transaction.formatted_added_at }} - Entrada</h5>
                     <p>Tipo de pagamento: {{ transaction.payment_type }}</p>
                     <p>Valor: R$ {{ transaction.value }}</p>
                     <p>Liberado por: {{ transaction.allowed_by.name }}</p>
@@ -53,7 +53,7 @@
             {% elif transaction.transaction_type == 'input' and transaction.status == 'to allow' %}
             <div class="card bg-light text-warning">
                 <div class="card-body">
-                    <h5 class="card-title">{{ transaction.added_at }} - Entrada Pendente</h5>
+                    <h5 class="card-title">{{ transaction.formatted_added_at }} - Entrada Pendente</h5>
                     <p>Tipo de pagamento: {{ transaction.payment_type }}</p>
                     <p>Valor: R$ {{ transaction.value }}</p>
                     <p>Liberado por: Pendente</p>
@@ -62,7 +62,7 @@
             {% elif transaction.transaction_type == 'input' and transaction.status == 'rejected' %}
             <div class="card bg-light text-danger">
                 <div class="card-body">
-                    <h5 class="card-title">{{ transaction.added_at }} - Entrada Rejeitada</h5>
+                    <h5 class="card-title">{{ transaction.formatted_added_at }} - Entrada Rejeitada</h5>
                     <p>Tipo de pagamento: {{ transaction.payment_type }}</p>
                     <p>Valor: R$ {{ transaction.value }}</p>
                     <p>Rejeitado por: {{ transaction.allowed_by.name }}</p>
@@ -71,7 +71,7 @@
             {% elif transaction.transaction_type == 'output' %}
             <div class="card bg-light text-danger">
                 <div class="card-body">
-                    <h5 class="card-title">{{ transaction.added_at }} - Saída</h5>
+                    <h5 class="card-title">{{ transaction.formatted_added_at }} - Saída</h5>
                     <p>Produto: {{ transaction.product.name }}</p>
                     <p>Valor: R$ {{ transaction.product.value }}</p>
                     <p>Vendido por: {{ transaction.sold_by.name }}</p>
