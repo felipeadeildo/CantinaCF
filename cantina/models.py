@@ -16,7 +16,6 @@ class Route(db.Model):
     endpoint = db.Column(db.Text, nullable=False)
     updated_at = db.Column(db.DateTime, default=datetime.now)
 
-setup_updated_at_listener(Route)
 
 
 class CategoryPage(db.Model):
@@ -24,8 +23,6 @@ class CategoryPage(db.Model):
     name = db.Column(db.String(50), unique=True, nullable=False)
     description = db.Column(db.Text, nullable=True)
     updated_at = db.Column(db.DateTime, default=datetime.now)
-
-setup_updated_at_listener(CategoryPage)
 
 
 class Page(db.Model):
@@ -40,7 +37,7 @@ class Page(db.Model):
     route = db.relationship('Route', backref='pages')
     category_page = db.relationship('CategoryPage', backref='pages')
 
-setup_updated_at_listener(Page)
+
 
 
 class Role(db.Model):
@@ -51,7 +48,6 @@ class Role(db.Model):
     added_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, default=datetime.now)
 
-setup_updated_at_listener(Role)
 
 
 class User(db.Model):
@@ -84,7 +80,6 @@ class User(db.Model):
         })
         return dict_info
 
-setup_updated_at_listener(User)
 
 
 class Product(db.Model):
@@ -100,7 +95,6 @@ class Product(db.Model):
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
-setup_updated_at_listener(Product)
 
 
 class ProductSale(db.Model):
@@ -144,8 +138,6 @@ class PaymentMethod(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.now)
     is_payroll = db.Column(db.Boolean, default=False)
 
-setup_updated_at_listener(PaymentMethod)
-
 
 class Payment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -157,6 +149,7 @@ class Payment(db.Model):
     proof_path = db.Column(db.Text)
     added_at = db.Column(db.DateTime, default=datetime.now)
     is_payroll = db.Column(db.Boolean, default=False)
+    is_paypayroll = db.Column(db.Boolean, default=False)
     status = db.Column(db.String(20))
 
     payment_method = db.relationship('PaymentMethod', backref='payments')
@@ -259,3 +252,11 @@ class StockHistory(db.Model):
     @property
     def formatted_added_at(self):
         return self.added_at.strftime("%d/%m/%Y às %H:%M")
+
+setup_updated_at_listener(PaymentMethod)
+setup_updated_at_listener(Page)
+setup_updated_at_listener(Product)
+setup_updated_at_listener(User)
+setup_updated_at_listener(Role)
+setup_updated_at_listener(Route)
+setup_updated_at_listener(CategoryPage)

@@ -70,7 +70,7 @@
         <div class="card">
             <div class="card-body">
                 <h5 class="card-title text-center">Montante Acumulado</h5>
-                <p class="card-text text-center">R$ {{ ammount }}</p>
+                <p class="card-text text-center">R$ {{ session.user.balance_payroll }}</p>
                 <a href="{{ url_for('affiliates_history') }}" class="btn btn-info" data-bs-toggle="tooltip"
                     data-bs-placement="bottom" title="Histórico de recargas">
                     <i class="fas fa-history"></i>

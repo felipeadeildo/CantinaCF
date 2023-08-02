@@ -47,7 +47,9 @@
                     <p>Tipo de pagamento: {{ transaction.payment_type }}</p>
                     <p>Valor: R$ {{ transaction.value }}</p>
                     <p>Liberado por: {{ transaction.allowed_by.name }}</p>
-                    {% if transaction.is_payroll %}<p class="text-muted">*Referente ao pagamento de saldo devedor*</p>{% endif %}
+                    {% if transaction.is_paypayroll %}
+                        <p class="text-muted">*Referente ao pagamento de saldo devedor*</p>
+                    {% endif %}
                 </div>
             </div>
             {% elif transaction.transaction_type == 'input' and transaction.status == 'to allow' %}
@@ -57,6 +59,9 @@
                     <p>Tipo de pagamento: {{ transaction.payment_type }}</p>
                     <p>Valor: R$ {{ transaction.value }}</p>
                     <p>Liberado por: Pendente</p>
+                    {% if transaction.is_paypayroll %}
+                        <p class="text-muted">*Referente ao pagamento de saldo devedor*</p>
+                    {% endif %}
                 </div>
             </div>
             {% elif transaction.transaction_type == 'input' and transaction.status == 'rejected' %}

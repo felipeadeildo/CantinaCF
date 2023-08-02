@@ -138,30 +138,38 @@ def verify_payment_api():
     
     requester = User.query.filter_by(id=payment.user_id).first()
     if accepted:
-        if payment.is_payroll:
-            requester.balance_payroll -= payment.value
-            db.session.commit()
-        else:
-            requester.balance += payment.value
-        payment.allowed_by = session["user"].id
-        db.session.commit()
-        payment.status = 'accepted'
-        db.session.commit()
-
-        payment_method = PaymentMethod.query.filter_by(id=payment.payment_method_id).first()
-        if payment_method.is_payroll:
+        if payment.is_payroll and payment.is_paypayroll:
+            return jsonify({
+                "message": "Pode rejeitar, basicamente essa pessoa tentou pagar a folha de pagamento usando a folha de pagamento :D",
+                "error": True
+            })
+        
+        if payment.is_payroll: # forma de recarregar
             affiliation = Affiliation.query.filter_by(affiliated_id=requester.id).first()
+            if affiliation is None:
+                return jsonify({
+                    "message": "Matrix error, chama o felipe",
+                    "error": True
+                })
+            affiliation.affiliator.balance_payroll += payment.value
+
             new_payroll = Payroll(
-                value=payment.value,
-                affiliation_id=affiliation.id,
-                allowed_by=session["user"].id,
-                status='accepted'
+                value = payment.value,
+                affiliation_id = affiliation.id,
+                allowed_by = session["user"].id,
+                status = 'accepted',
+                affiliation = affiliation
             )
             db.session.add(new_payroll)
-            db.session.commit()
-            financiador = User.query.filter_by(id=affiliation.affiliator_id).first()
-            financiador.balance_payroll += payment.value
-            db.session.commit()
+        elif payment.is_paypayroll: # pagamento da folha de pagamento
+            affiliation = Affiliation.query.filter_by(affiliated_id=requester.id).first()
+            financiador = affiliation.affiliator
+            financiador.balance_payroll -= payment.value
+
+        requester.balance += payment.value
+        payment.allowed_by = session["user"].id
+        payment.status = 'accepted'
+        
         message = f"Pagamento de ID {payment.id} liberado com sucesso! Saldo do usuário {requester.name} foi alterado para R$ {requester.balance}."
         ok = True
     else:
@@ -169,7 +177,17 @@ def verify_payment_api():
         payment.allowed_by = session["user"].id # se status = 'rejected' então allowed_by é disallowed_by
         db.session.commit()
         message = f"Pagamento de ID {payment_id} rejeitado com sucesso!"
+        if payment.is_paypayroll:
+            new_payroll = Payroll(
+                value = payment.value,
+                affiliation_id = affiliation.id,
+                allowed_by = session["user"].id,
+                status = 'rejected',
+                affiliation = affiliation
+            )
+            db.session.add(new_payroll)
         ok = False
+    db.session.commit()
     
     return jsonify({
         "message": message,

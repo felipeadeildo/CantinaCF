@@ -500,10 +500,8 @@ def affiliates():
         flash("Usuário adicionado com sucesso!", category="success")
     
     affiliates = User.query.join(Affiliation, Affiliation.affiliated_id == User.id).filter(Affiliation.affiliator_id == session["user"].id).all()
-    ammount = db.session.query(db.func.sum(Payroll.value)).join(Affiliation, Payroll.affiliation_id == Affiliation.id).filter(Affiliation.affiliator_id == session["user"].id).scalar() or 0.0
     context = {
         "afiliados": affiliates,
-        "ammount": ammount
     } 
     return render_template("affiliates.html", **context)
 
@@ -534,11 +532,13 @@ def affiliates_history():
     pagination = query.paginate(page=page, per_page=per_page, error_out=False)
     
     results = pagination.items
-    print(results[0].affiliation.affiliated)
+
+    # ammount = db.session.query(db.func.sum(Payroll.value)).join(Affiliation, Payroll.affiliation_id == Affiliation.id).filter(Affiliation.affiliator_id == session["user"].id).scalar() or 0.0
     
     context = {
         "results": results,
         "pagination": pagination,
+        # "ammount": ammount
     }
     
     return render_template("affiliates-history.html", **context)
@@ -555,10 +555,19 @@ def security_pay_payroll():
         flash("Por favor, insira o método de pagamento!", category="error")
         return
     payment_method = PaymentMethod.query.filter_by(id=payment_method).first()
+    if payment_method is None:
+        flash("Método de pagamento não encontrado!", category="error")
+        return
+    
+    if payment_method.is_payroll:
+        flash("Você não pode pagar o saldo devedor com MAIS saldo devedor, engraçadinho(a)!")
+        return
+    
     payment_value = request.form.get("payment-value")
     if payment_value is None:
         flash("Por favor, insira o valor do pagamento!", category="error")
         return
+    
     value = float(payment_value)
     observations = request.form.get("obs")
     new_payment = Payment(
@@ -567,7 +576,7 @@ def security_pay_payroll():
         value=value,
         user_id=user_id,
         status="to allow",
-        is_payroll=True
+        is_paypayroll=True
     )
     if payment_method.need_proof:
         file = request.files.get('proof')
@@ -624,7 +633,6 @@ def history_edits_products():
             end_date = datetime.strptime(end_date, "%d/%m/%Y") + timedelta(hours=23, minutes=59, seconds=59)
         else:
             end_date = db.session.query(func.max(EditHistory.added_at)).scalar() + timedelta(seconds=1)
-        print(start_date, end_date)
 
         query = query.filter(EditHistory.added_at.between(start_date, end_date))
 
