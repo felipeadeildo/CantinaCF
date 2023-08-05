@@ -62,6 +62,7 @@ def init_db():
         Route(id=33, name="(API) Exportar para Excel", endpoint="export_to_excel_api"),
         Route(id=34, name="(API) Listar Produtos para Despache", endpoint="list_despaches_api"),
         Route(id=35, name="(API) Confirmar Produto Despachado", endpoint="confirm_despache_api"),
+        Route(id=36, name="Usuários com Saldo Disponível", endpoint="users_with_balance"),
     ]
     db.session.add_all(routes)
     db.session.commit()
@@ -72,6 +73,7 @@ def init_db():
         CategoryPage(name="Geral", description="Páginas referentes à funcionalidades Gerais"),
         CategoryPage(name="Cantina", description="Páginas referentes à funcionalidades da Cantina"),
         CategoryPage(name="Auditorias", description="Páginas referentes a auditoria em geral"),
+        CategoryPage(name="Administração", description="Páginas referentes à funcionalidades do Administrador"),
     ]
     db.session.add_all(categories)
     db.session.commit()
@@ -194,6 +196,12 @@ def init_db():
             route=routes[2],
             category_page=categories[0],
             appear_navbar=True,
+        ),
+        Page(
+            title="Usuários com Saldo Disponível",
+            description="Aqui você pode visualizar os usuários que tem saldo disponível, ou seja, usuários cujo saldo é maior que zero.",
+            route=routes[35],
+            category_page=categories[2],
         )
     ]
     db.session.add_all(pages)
@@ -206,7 +214,7 @@ def init_db():
         Role(
             name="Admin", 
             description="Administrador do Site :P (#GOD)",
-            allowed_routes=json.dumps(list(range(1, len(routes) + 2))), # TODO: rewrite to include 35 :D
+            allowed_routes=json.dumps(list(range(1, len(routes) + 1))),
         ),
         Role(
             name="Funcionário",

@@ -235,6 +235,9 @@ class EditHistory(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     role_id = db.Column(db.Integer, db.ForeignKey('role.id'))
     payment_method_id = db.Column(db.Integer, db.ForeignKey('payment_method.id'))
+    route_id = db.Column(db.Integer, db.ForeignKey('route.id'))
+    category_page_id = db.Column(db.Integer, db.ForeignKey('category_page.id'))
+    page_id = db.Column(db.Integer, db.ForeignKey('page.id'))
 
     def __repr__(self):
         return f"<EditHistory {self.object_type} ({self.key}) [{self.old_value} -> {self.new_value}]>"

@@ -782,3 +782,15 @@ def payments_history():
     }
 
     return render_template("payments-history.html", **context)
+
+@app.route("/usuarios-com-saldo")
+def users_with_balance():
+    users = User.query.filter(User.balance > 0).all()
+    identifier = f"usuarios-com-saldo-{datetime.now().timestamp()}"
+    hashed_query = hashlib.sha256(identifier.encode("utf-8")).hexdigest()
+    cache.set(hashed_query, {"identifier": identifier, "data": users})
+    context = {
+        "users": users,
+        "result_id": hashed_query
+    }
+    return render_template("users-with-balance.html", **context)
