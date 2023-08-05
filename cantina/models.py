@@ -3,11 +3,6 @@ from datetime import datetime
 from sqlalchemy import event
 from flask import url_for
 
-def setup_updated_at_listener(classe):
-    @event.listens_for(classe, "before_update")
-    def before_update(mapper, connection, classe):
-        classe.updated_at = datetime.now()
-
 
 class Route(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -15,7 +10,6 @@ class Route(db.Model):
     description = db.Column(db.Text, nullable=True)
     endpoint = db.Column(db.Text, nullable=False)
     updated_at = db.Column(db.DateTime, default=datetime.now)
-
 
 
 class CategoryPage(db.Model):
@@ -38,8 +32,6 @@ class Page(db.Model):
     category_page = db.relationship('CategoryPage', backref='pages')
 
 
-
-
 class Role(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), unique=True, nullable=False)
@@ -47,7 +39,6 @@ class Role(db.Model):
     description = db.Column(db.Text, nullable=True)
     added_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, default=datetime.now)
-
 
 
 class User(db.Model):
@@ -81,7 +72,6 @@ class User(db.Model):
         return dict_info
 
 
-
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Text, nullable=False, info={"label": "Nome"})
@@ -96,17 +86,16 @@ class Product(db.Model):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 
-
 class ProductSale(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    product_id = db.Column(db.Integer, db.ForeignKey('product.id'))
-    value = db.Column(db.DECIMAL(10, 2), nullable=False)
-    sold_by = db.Column(db.Integer, db.ForeignKey('user.id'))
-    sold_to = db.Column(db.Integer, db.ForeignKey('user.id'))
-    added_at = db.Column(db.DateTime, default=datetime.now)
-    dispatched_by = db.Column(db.Integer, db.ForeignKey('user.id'))
-    dispatched_at = db.Column(db.DateTime)
-    status = db.Column(db.String(20))
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id'), info={"label": "Produto ID"})
+    value = db.Column(db.DECIMAL(10, 2), nullable=False, info={"label": "Valor (R$)"})
+    sold_by = db.Column(db.Integer, db.ForeignKey('user.id'), info={"label": "Vendido Por"})
+    sold_to = db.Column(db.Integer, db.ForeignKey('user.id'), info={"label": "Vendido Para"})
+    added_at = db.Column(db.DateTime, default=datetime.now, info={"label": "Vendido em"})
+    dispatched_by = db.Column(db.Integer, db.ForeignKey('user.id'), info={"label": "Despachado Por"})
+    dispatched_at = db.Column(db.DateTime, info={"label": "Despachado em"})
+    status = db.Column(db.String(20), info={"label": "Status"})
 
     product = db.relationship('Product', backref='products_sales')
 
@@ -128,6 +117,22 @@ class ProductSale(db.Model):
     @property
     def formatted_added_at(self):
         return self.added_at.strftime("%d/%m/%Y %H:%M")
+    
+
+    def as_friendly_dict(self):
+        data = {}
+        for c in self.__table__.columns:
+            key = c.info.get("label", c.name)
+            if c.name in ('sold_by', 'sold_to', 'dispatched_by'):
+                value = get_user_name_and_id(getattr(self, c.name))
+            elif c.name in ('product_id', ):
+                value = get_product_name_and_id(getattr(self, c.name))
+            elif c.name in ('added_at', 'dispatched_at'):
+                value = get_friendly_datetime(getattr(self, c.name))
+            else:
+                value = getattr(self, c.name)
+            data[key] = value
+        return data
 
 
 class PaymentMethod(db.Model):
@@ -141,16 +146,16 @@ class PaymentMethod(db.Model):
 
 class Payment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    payment_method_id = db.Column(db.Integer, db.ForeignKey('payment_method.id'))
-    observations = db.Column(db.Text)
-    value = db.Column(db.DECIMAL(10, 2), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    allowed_by = db.Column(db.Integer, db.ForeignKey('user.id'))
-    proof_path = db.Column(db.Text)
-    added_at = db.Column(db.DateTime, default=datetime.now)
-    is_payroll = db.Column(db.Boolean, default=False)
-    is_paypayroll = db.Column(db.Boolean, default=False)
-    status = db.Column(db.String(20))
+    payment_method_id = db.Column(db.Integer, db.ForeignKey('payment_method.id'), info={"label": "Método de Pagamento"})
+    observations = db.Column(db.Text, info={"label": "Observações"})
+    value = db.Column(db.DECIMAL(10, 2), nullable=False, info={"label": "Valor (R$)"})
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), info={"label": "Usuário"})
+    allowed_by = db.Column(db.Integer, db.ForeignKey('user.id'), info={"label": "Permitido / Rejeitado por"})
+    proof_path = db.Column(db.Text, info={"label": "Comprovante"})
+    added_at = db.Column(db.DateTime, default=datetime.now, info={"label": "Data de cadastro"})
+    is_payroll = db.Column(db.Boolean, default=False, info={"label": "Recarga via Folha de Pagamento?"})
+    is_paypayroll = db.Column(db.Boolean, default=False, info={"label": "Pagamento de Folha de Pagamento?"})
+    status = db.Column(db.String(20), info={"label": "Status"})
 
     payment_method = db.relationship('PaymentMethod', backref='payments')
 
@@ -173,6 +178,22 @@ class Payment(db.Model):
     @property
     def allowed_by_user(self):
         return User.query.get(self.allowed_by)
+    
+    def as_friendly_dict(self):
+        data = {}
+        for c in self.__table__.columns:
+            key = c.info.get("label", c.name)
+            if c.name in ("user_id", "allowed_by"):
+                value = get_user_name_and_id(getattr(self, c.name))
+            elif c.name in ("added_at", ):
+                value = get_friendly_datetime(getattr(self, c.name))
+            elif c.name in ("payment_method_id", ):
+                value = get_payment_method_name_and_id(getattr(self, c.name))
+            else:
+                value = getattr(self, c.name)
+            data[key] = value
+        return data
+
 
 class Affiliation(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -182,6 +203,7 @@ class Affiliation(db.Model):
     affiliator = db.relationship('User', foreign_keys=[affiliator_id], backref='affiliated_users')
 
     added_at = db.Column(db.DateTime, default=datetime.now)
+
 
 class Payroll(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -200,14 +222,14 @@ class Payroll(db.Model):
 
 class EditHistory(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    added_at = db.Column(db.DateTime, default=datetime.now)
-    edited_by = db.Column(db.Integer, db.ForeignKey('user.id'))
-    key = db.Column(db.Text)
-    old_value = db.Column(db.Text)
-    new_value = db.Column(db.Text)
-    reason = db.Column(db.Text, nullable=False)
+    added_at = db.Column(db.DateTime, default=datetime.now, info={"label": "Criado em"})
+    edited_by = db.Column(db.Integer, db.ForeignKey('user.id'), info={"label": "Editado por"})
+    key = db.Column(db.Text, info={"label": "Chave"})
+    old_value = db.Column(db.Text, info={"label": "Valor anterior"})
+    new_value = db.Column(db.Text, info={"label": "Novo valor"})
+    reason = db.Column(db.Text, nullable=False, info={"label": "Motivo da Mudança"})
 
-    object_type = db.Column(db.String(50))    
+    object_type = db.Column(db.String(50), info={"label": "Objeto Atualizado"})    
 
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
@@ -233,7 +255,31 @@ class EditHistory(db.Model):
     def user(self):
         return User.query.get(self.user_id) if self.user_id else None
     
-
+    def as_friendly_dict(self):
+        data = {}
+        for c in self.__sable__.columns:
+            key = c.info.get("label", c.name)
+            if c.name in ('added_at', ):
+                value = get_friendly_datetime(getattr(self, c.name))
+            elif c.name in ('edited_by', ):
+                value = get_user_name_and_id(getattr(self, c.name))
+            elif c.name in ('object_type', ):
+                if self.object_type == 'product':
+                    value = get_product_name_and_id(getattr(self, c.name))
+                elif self.object_type == 'user':
+                    value = get_user_name_and_id(getattr(self, c.name))
+                elif self.object_type == 'role':
+                    value = get_role_name_and_id(getattr(self, c.name))
+                elif self.object_type == 'payment_method':
+                    value = get_payment_method_name_and_id(getattr(self, c.name))
+                else:
+                    value = getattr(self, c.name)
+            else:
+                value = getattr(self, c.name)
+            data[key] = value
+        return data
+            
+    
 
 class StockHistory(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -252,11 +298,95 @@ class StockHistory(db.Model):
     @property
     def formatted_added_at(self):
         return self.added_at.strftime("%d/%m/%Y às %H:%M")
+    
+    def as_friendly_dict(self):
+        data = {}
+        for c in self.__table__.columns:
+            key = c.info.get("label", c.name)
+            if c.name in ('received_by', ):
+                value = get_user_name_and_id(getattr(self, c.name))
+            elif c.name in ('product_id', ):
+                value = get_product_name_and_id(getattr(self, c.name))
+            elif c.name in ('added_at', ):
+                value = get_friendly_datetime(getattr(self, c.name))
+            else:
+                value = getattr(self, c.name)
+            data[key] = value
+        return data
 
-setup_updated_at_listener(PaymentMethod)
-setup_updated_at_listener(Page)
-setup_updated_at_listener(Product)
-setup_updated_at_listener(User)
-setup_updated_at_listener(Role)
-setup_updated_at_listener(Route)
-setup_updated_at_listener(CategoryPage)
+def setup_updated_at_listener(classe):
+    @event.listens_for(classe, "before_update")
+    def before_update(mapper, connection, classe):
+        classe.updated_at = datetime.now()
+
+models_can_be_updated = (PaymentMethod, Page, Product, User, Role, Route, CategoryPage)
+for model in models_can_be_updated: 
+    setup_updated_at_listener(model)
+
+
+def get_user_name_and_id(user_id):
+    """
+    Get the name and ID of a user based on their user ID.
+
+    Parameters:
+        user_id (int): The ID of the user.
+
+    Returns:
+        str: The name and ID of the user in the format "{name} ({id})".
+    """
+    user = User.query.get(user_id)
+    return f"{user.name} ({user.id})" if user else user_id
+
+
+def get_product_name_and_id(product_id):
+    """
+    Get the name and ID of a product.
+
+    Parameters:
+        product_id (int): The ID of the product.
+
+    Returns:
+        str: The name and ID of the product in the format "{name} ({id})".
+    """
+    product = Product.query.get(product_id)
+    return f"{product.name} ({product.id})" if product else product_id
+
+
+def get_role_name_and_id(role_id):
+    """
+    Get the name and ID of a role.
+
+    Parameters:
+        role_id (int): The ID of the role.
+
+    Returns:
+        str: The name and ID of the role in the format "{name} ({id})".
+    """
+    role = Role.query.get(role_id)
+    return f"{role.name} ({role.id})" if role else role_id
+
+def get_payment_method_name_and_id(payment_method_id):
+    """
+    Get the name and ID of a payment_method.
+
+    Parameters:
+        payment_method_id (int): The ID of the payment_method.
+
+    Returns:
+        str: The name and ID of the payment_method in the format "{name} ({id})".
+    """
+    payment_method = PaymentMethod.query.get(payment_method_id)
+    return f"{payment_method.name} ({payment_method.id})" if payment_method else payment_method_id
+
+
+def get_friendly_datetime(dtime):
+    """
+    Takes a datetime object and returns a formatted string representing the date and time in a friendly format.
+
+    Parameters:
+    - dtime (datetime): The datetime object to format.
+
+    Returns:
+    - str: The formatted string representing the date and time.
+    """
+    return dtime.strftime("%d/%m/%Y às %H:%M")

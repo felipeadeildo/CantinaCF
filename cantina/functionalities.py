@@ -444,7 +444,7 @@ def stock_history():
 
     identifier = f"historico-estoque-{recebido_por}-{start_date}-{end_date}-{session['user'].id}"
     hashed_query = hashlib.sha256(identifier.encode("utf-8")).hexdigest()
-    cache.set(hashed_query, results)
+    cache.set(hashed_query, {"identifier": identifier, "data": query.all()})
 
     context = {
         "results": results,
@@ -647,7 +647,8 @@ def history_edits_products():
 
     identificador = f"historico-edicoes-produtos-{editado_por}-{start_date}-{end_date}-{session['user'].id}"
     hashed_query = hashlib.sha256(identificador.encode("utf-8")).hexdigest()
-    cache.set(hashed_query, results)
+    cache.set(hashed_query, {"identifier": identificador, "data": query.all()})
+
 
     context = {
         "results": results,
@@ -703,7 +704,7 @@ def history_edits_users():
 
     identificador = f"historico-edicoes-usuarios-{editado_por}-{usuario}-{start_date}-{end_date}"
     hashed_query = hashlib.sha256(identificador.encode("utf-8")).hexdigest()
-    cache.set(hashed_query, results)
+    cache.set(hashed_query, {"identifier": identificador, "data": query.all()})
 
     context = {
         "results": results,
@@ -769,7 +770,7 @@ def payments_history():
 
     identificador = f"historico-recargas-{recharge_type}-{allowed_by}-{allowed_for}-{start_date}-{end_date}"
     hashed_query = hashlib.sha256(identificador.encode("utf-8")).hexdigest()
-    cache.set(hashed_query, query.all())
+    cache.set(hashed_query, {"identifier": identificador, "data": list(map(lambda row: row[0], query.all()))})
 
     context = {
         "results": results,

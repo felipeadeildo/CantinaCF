@@ -199,14 +199,15 @@ def verify_payment_api():
 def export_to_excel_api():
     result_id = request.args.get("result_id")
 
-    query = cache.get(result_id)
-
-    if query is None:
+    todo = cache.get(result_id)
+    if todo is None:
         return jsonify({
             "message": f"Resultado de ID {result_id} não encontrado ou expirado...",
         })
+    data = todo["data"]
+    identifier = todo["identifier"]
 
-    data = query.all()
+    data = list(map(lambda x: x.as_friendly_dict(), data))
 
     if not data:
         return jsonify({
@@ -220,7 +221,7 @@ def export_to_excel_api():
         df.to_excel(writer, index=False, sheet_name="Sheet1")
 
     output.seek(0)
-    return send_file(output, as_attachment=True, download_name=f"{result_id}.xlsx")
+    return send_file(output, as_attachment=True, download_name=f"{identifier}.xlsx")
 
 
 @app.route("/api/listar-produtos-para-despache", methods=["GET"])

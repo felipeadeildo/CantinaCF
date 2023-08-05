@@ -216,7 +216,7 @@ def sales_history():
 
     identificador = f"historico-vendas-{vendido_por}-{vendido_para}-{start_date}-{end_date}-{session['user'].id}"
     hashed_query = hashlib.sha256(identificador.encode("utf-8")).hexdigest()
-    cache.set(hashed_query, query)
+    cache.set(hashed_query, {'identifier': identificador, 'data': query.all()})
 
     stats = {}
     for result in results:
