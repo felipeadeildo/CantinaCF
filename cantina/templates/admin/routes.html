@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h3 class="text-center">{% block title %}{{ g.current_endpoint.name }}{% endblock title %}</h3>
+
+{% if is_editor %}
+
+<form method="post">
+    <input type="hidden" name="{{ config['CSRF_COOKIE_NAME'] }}" value="{{ csrf_token() }}">
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label for="name" class="form-label">Nome</label>
+            <input type="text" name="name" id="name" class="form-control" value="{{ route.name or ''}}">
+        </div>
+    </div>
+
+    <button class="btn btn-primary" type="submit" name="action">
+        Editar Rota
+        <i class="fas fa-paper-plane"></i>
+    </button>
+</form>
+
+{% else %}
+<div class="table-wrapper">
+    <table class="table table-striped tabled-bordered">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Endpoint</th>
+                <th>Data Última Atualização</th>
+                <th>Editar</th>
+            </tr>
+        </thead>
+        <tbody style="overflow-y: auto;">
+            {% for route in routes %}
+            <tr>
+                <td>{{ route.id }}</td>
+                <td>{{ route.name }}</td>
+                <td>{{ route.endpoint }}</td>
+                <td>{{ route.updated_at.strftime("%d/%m/%Y às %H:%M:%S") }}</td>
+                <td><a href="{{ url_for( g.current_endpoint.endpoint, route_id=route.id )}}" class="btn btn-primary btn-sm"><i class="fas fa-gear"></i></a></td>
+            </tr>
+            {% endfor %}
+    </table>
+</div>
+{% endif %}
+{% endblock content %}

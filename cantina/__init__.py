@@ -66,3 +66,4 @@ from . import cantina
 from . import auth
 from . import api
 from . import database
+from . import admin

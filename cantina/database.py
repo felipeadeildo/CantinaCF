@@ -53,6 +53,7 @@ def init_db():
         Route(id=23, name="Pagar Saldo Devedor", endpoint="pay_payroll"),
         Route(id=24, name="Histórico de Edição de Produtos", endpoint="history_edits_products"),
         Route(id=25, name="Histórico de Edição de Usuários", endpoint="history_edits_users"),
+        Route(id=26, name="Usuários com Saldo Disponível", endpoint="users_with_balance"),
         Route(id=27, name="(API) Adicionar ao carrinho", endpoint="add_to_cart_api"),
         Route(id=28, name="(API) Remover do carrinho", endpoint="remove_from_cart_api"),
         Route(id=29, name="(API) Obter Usuário", endpoint="get_user_api"),
@@ -62,7 +63,8 @@ def init_db():
         Route(id=33, name="(API) Exportar para Excel", endpoint="export_to_excel_api"),
         Route(id=34, name="(API) Listar Produtos para Despache", endpoint="list_despaches_api"),
         Route(id=35, name="(API) Confirmar Produto Despachado", endpoint="confirm_despache_api"),
-        Route(id=36, name="Usuários com Saldo Disponível", endpoint="users_with_balance"),
+        Route(id=36, name="(ADMIN) Rotas", endpoint="routes"),
+        Route(id=37, name="(ADMIN) Categoria das Páginas", endpoint="category_pages")
     ]
     db.session.add_all(routes)
     db.session.commit()
@@ -200,8 +202,20 @@ def init_db():
         Page(
             title="Usuários com Saldo Disponível",
             description="Aqui você pode visualizar os usuários que tem saldo disponível, ou seja, usuários cujo saldo é maior que zero.",
-            route=routes[35],
+            route=routes[25],
             category_page=categories[2],
+        ),
+        Page(
+            title="Rotas",
+            description="Aqui você pode visualizar as rotas do sistema bem como alterar seus nomes.",
+            route=routes[35],
+            category_page=categories[3],
+        ),
+        Page(
+            title="Gerenciamento das Categorias das Páginas", 
+            description="Aqui você pode gerenciar nome e descrição das categorias das páginas (essas que sã o apresentadas na página inicial).",
+            route=routes[36], 
+            category_page=categories[3],
         )
     ]
     db.session.add_all(pages)
