@@ -93,11 +93,9 @@
             {% for result in results %}
             <tr>
                 <td>{{ result.id }}</td>
-                <td>
-                    {{ result.edited_by_user.name }} (<a
-                        href="{{ url_for('profile', user_id=result.edited_by) }}">Perfil</a>)
+                <td><a href="{{ url_for('profile', user_id=result.edited_by) }}">{{ result.edited_by_user.name }}</a>
                 </td>
-                <td>{{ result.user.name }} (<a href="{{ url_for('profile', user_id=result.user.id) }}">Perfil</a>)</td>
+                <td><a href="{{ url_for('profile', user_id=result.user.id) }}">{{ result.user.name }}</a></td>
                 <td>{{ result.key }}</td>
                 <td>{{ result.old_value }}</td>
                 <td>{{ result.new_value }}</td>

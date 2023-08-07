@@ -60,8 +60,8 @@
                                 request.args.get('order_by')=='payment_method' else '' }}>Tipo de Pagamento</option>
                             <option value="value" {{ 'selected' if request.args.get('order_by')=='value' else '' }}>
                                 Valor</option>
-                            <option value="observations" {{ 'selected' if request.args.get('order_by')=='observations' else ''
-                                }}>Observação</option>
+                            <option value="observations" {{ 'selected' if request.args.get('order_by')=='observations'
+                                else '' }}>Observação</option>
                         </select>
                     </div>
 
@@ -93,8 +93,8 @@
                             <option value="" {{ request.args.get( 'recharge_type' ) if request.args.get( 'recharge_type'
                                 ) else 'selected' }}>Todos</option>
                             {% for id, name in payment_types.items() %}
-                            <option value="{{ id }}" {{ 'selected' if request.args.get( 'recharge_type' )==id
-                                else '' }}>{{ name }}</option>
+                            <option value="{{ id }}" {{ 'selected' if request.args.get( 'recharge_type' )==id else ''
+                                }}>{{ name }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -137,18 +137,18 @@
                             <td>{{ result.id }}</td>
                             <td>{{ result.payment_method.name }}</td>
                             <td>{{ result.observations or '-'}}</td>
-                            <td>{{ result.added_at }}</td>
+                            <td>{{ result.added_at.strftime('%d/%m/%Y às %H:%M') }}</td>
                             <td>R$ {{ result.value }}</td>
                             <td>
                                 {% if result.allowed_by_user %}
-                                {{ result.allowed_by_user.name }} (<a
-                                    href="{{ url_for('profile', user_id=result.allowed_by) }}">Perfil</a>)
+                                <a href="{{ url_for('profile', user_id=result.allowed_by) }}">{{
+                                    result.allowed_by_user.name }}</a>
                                 {% else %}
                                 Sem liberador
                                 {% endif %}
                             </td>
-                            <td>{{ result.user.name }} (<a
-                                    href="{{ url_for('profile', user_id=result.user.id) }}">Perfil</a>)</td>
+                            <td><a href="{{ url_for('profile', user_id=result.user.id) }}">{{ result.user.name }}</a>
+                            </td>
                             <td>
                                 {% if result.proof_url %}
                                 <a href="{{ result.proof_url }}" class="btn btn-secondary"

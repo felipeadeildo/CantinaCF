@@ -83,7 +83,8 @@
             {% for result in results %}
             <tr class="{{ 'table-light' if loop.index is even else 'table-dark' }}">
                 <td>{{ result.id }}</td>
-                <td>{{ result.received_by_user.name }} (<a href="{{ url_for('profile', user_id=result.received_by ) }}">Perfil</a>)</td>
+                <td><a href="{{ url_for('profile', user_id=result.received_by ) }}">{{ result.received_by_user.name
+                        }}</a></td>
                 <td>R$ {{ result.purchase_price }}</td>
                 <td>R$ {{ result.sale_value }}</td>
                 <td>{{ result.quantity }}</td>

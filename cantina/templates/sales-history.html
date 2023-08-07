@@ -48,12 +48,12 @@
                     <select name="order_by" id="order_by" class="form-select">
                         <option value="" disabled {{ request.args.get('order_by') or 'selected' }}>Escolha uma opção
                         </option>
-                        <option value="added_at" {{ 'selected' if request.args.get('order_by')=='data_hora' else ''
-                            }}>Data e Hora</option>
-                        <option value="sold_by" {{ 'selected' if request.args.get('order_by')=='vendido_por' else
-                            '' }}>Pessoa que recebeu</option>
-                        <option value="sold_to" {{ 'selected' if request.args.get('order_by')=='vendido_para' else
-                            '' }}>Pessoa que comprou</option>
+                        <option value="added_at" {{ 'selected' if request.args.get('order_by')=='data_hora' else '' }}>
+                            Data e Hora</option>
+                        <option value="sold_by" {{ 'selected' if request.args.get('order_by')=='vendido_por' else '' }}>
+                            Pessoa que recebeu</option>
+                        <option value="sold_to" {{ 'selected' if request.args.get('order_by')=='vendido_para' else ''
+                            }}>Pessoa que comprou</option>
                         <option value="id" {{ 'selected' if request.args.get('order_by')=='id' else '' }}>ID</option>
                     </select>
                 </div>
@@ -155,21 +155,24 @@
                     <tr>
                         <td>{{ result.id }}</td>
                         <td>
-                            {{ result.sold_by_user.name }} (<a href="{{ url_for('profile', user_id=result.sold_by ) }}">Perfil</a>)
+                            <a href="{{ url_for('profile', user_id=result.sold_by ) }}">{{ result.sold_by_user.name
+                                }}</a>
                         </td>
                         <td>
-                            {{ result.sold_to_user.name }} (<a href="{{ url_for('profile', user_id=result.sold_to ) }}">Perfil</a>)
+                            <a href="{{ url_for('profile', user_id=result.sold_to ) }}">{{ result.sold_to_user.name
+                                }}</a>
                         </td>
                         <td>
                             {% if result.dispatched_by %}
-                            {{ result.dispatched_by_user.name }} (<a href="{{ url_for('profile', user_id=result.dispatched_by ) }}">Perfil</a>)
+                            <a href="{{ url_for('profile', user_id=result.dispatched_by ) }}">{{
+                                result.dispatched_by_user.name }}</a>
                             {% else %}
                             Não despachado
                             {% endif %}
                         </td>
                         <td>{{ result.product.name }}</td>
                         <td>R$ {{ result.value }}</td>
-                        <td>{{ result.added_at }}</td>
+                        <td>{{ result.formatted_added_at }}</td>
                     </tr>
                     {% else %}
                     <tr>

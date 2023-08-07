@@ -23,17 +23,18 @@
             <div class="col-md-4 mb-3">
                 <label for="ordenar_por" class="form-label">Ordenar por</label>
                 <select name="ordenar_por" id="ordenar_por" class="form-select">
-                    <option value="" disabled {{ request.args.get( 'ordenar_por' ) if
-                        request.args.get( 'ordenar_por' ) else 'selected' }}>Ordenar Por</option>
-                    <option value="added_at" {{ 'selected' if request.args.get( 'ordenar_por' )=='added_at' else ''
-                        }}>Data e Hora</option>
-                    <option value="edited_by" {{ 'selected' if request.args.get( 'ordenar_por' )=='edited_by' else
-                        '' }}>
+                    <option value="" disabled {{ request.args.get( 'ordenar_por' ) if request.args.get( 'ordenar_por' )
+                        else 'selected' }}>Ordenar Por</option>
+                    <option value="added_at" {{ 'selected' if request.args.get( 'ordenar_por' )=='added_at' else '' }}>
+                        Data e Hora</option>
+                    <option value="edited_by" {{ 'selected' if request.args.get( 'ordenar_por' )=='edited_by' else ''
+                        }}>
                         Editado por</option>
                     <option value="product_id" {{ 'selected' if request.args.get( 'ordenar_por' )=='product_id' else ''
                         }}>
                         Produto</option>
-                    <option value="reason" {{ 'selected' if request.args.get( 'ordenar_por' )=='reason' else '' }}>Motivo
+                    <option value="reason" {{ 'selected' if request.args.get( 'ordenar_por' )=='reason' else '' }}>
+                        Motivo
                     </option>
                     <option value="id" {{ 'selected' if request.args.get( 'ordenar_por' )=='id' else '' }}>ID</option>
                 </select>
@@ -42,8 +43,8 @@
             <div class="col-md-4 mb-3">
                 <label for="ordenacao" class="form-label">Ordenação</label>
                 <select name="ordenacao" id="ordenacao" class="form-select">
-                    <option value="" disabled {{ request.args.get( 'ordenacao' ) if request.args.get( 'ordenacao' ) else
-                        'selected' }}>Ordenação</option>
+                    <option value="" disabled {{ request.args.get( 'ordenacao' ) if request.args.get( 'ordenacao' )
+                        else 'selected' }}>Ordenação</option>
                     <option value="ASC" {{ 'selected' if request.args.get( 'ordenacao' )=='ASC' else '' }}>Crescente
                     </option>
                     <option value="DESC" {{ 'selected' if request.args.get( 'ordenacao' )=='DESC' else '' }}>Decrescente
@@ -90,9 +91,8 @@
                 {% for result in results %}
                 <tr>
                     <td>{{ result.id }}</td>
-                    <td>
-                        {{ result.edited_by_user.name }} (<a
-                            href="{{ url_for('profile', user_id=result.edited_by ) }}">Perfil</a>)
+                    <td><a href="{{ url_for('profile', user_id=result.edited_by ) }}">{{ result.edited_by_user.name
+                            }}</a>
                     </td>
                     <td>{{ result.product.name }} ({{ result.product.id }})</td>
                     <td>{{ result.key }}</td>
