@@ -71,6 +71,8 @@ class User(db.Model):
         dict_info.update({
             User.added_at.info.get("label", "added_at"): self.added_at.strftime("%d/%m/%Y às %H:%M"),
             User.updated_at.info.get("label", "updated_at"): self.updated_at.strftime("%d/%m/%Y às %H:%M"),
+            User.balance.info.get("label", "balance"): float(self.balance),
+            User.balance_payroll.info.get("label", "balance_payroll"): float(self.balance_payroll),
         })
         return dict_info
 
@@ -132,6 +134,8 @@ class ProductSale(db.Model):
                 value = get_product_name_and_id(getattr(self, c.name))
             elif c.name in ('added_at', 'dispatched_at'):
                 value = get_friendly_datetime(getattr(self, c.name))
+            elif c.name in ('value', ):
+                value = float(getattr(self, c.name))
             else:
                 value = getattr(self, c.name)
             data[key] = value
@@ -192,6 +196,8 @@ class Payment(db.Model):
                 value = get_friendly_datetime(getattr(self, c.name))
             elif c.name in ("payment_method_id", ):
                 value = get_payment_method_name_and_id(getattr(self, c.name))
+            elif c.name in ("value", ):
+                value = float(getattr(self, c.name))
             else:
                 value = getattr(self, c.name)
             data[key] = value
