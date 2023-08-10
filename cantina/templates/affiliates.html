@@ -55,7 +55,7 @@
                 <h5 class="card-title text-center">Adicionar Afiliado</h5>
                 <form method="post" action="{{ url_for('affiliates', action='add') }}">
                     <div class="mb-3">
-                        <label for="matricula" class="form-label">Matrícula</label>
+                        <label for="matricula" class="form-label">Matrícula ou Usuário</label>
                         <input type="text" class="form-control" id="matricula" name="matricula">
                     </div>
                     <input type="hidden" name="{{ config['CSRF_COOKIE_NAME'] }}" value="{{ csrf_token() }}">

@@ -483,7 +483,10 @@ def affiliates():
             flash("O que estás tentando fazer..?!", category="error")
             return redirect(url_for("affiliates"))
         matricula = request.form.get("matricula")
-        user = User.query.filter_by(matricula=matricula).first()
+        if matricula is None or matricula == '':
+            flash("Por favor, insira a matrícula!", category="error")
+            return redirect(url_for("affiliates"))
+        user = User.query.filter((User.matricula == matricula) | (User.username == matricula)).first()
         if user is None:
             flash("Matrícula {} não encontrada!".format(matricula), category="error")
             return redirect(url_for("affiliates"))
