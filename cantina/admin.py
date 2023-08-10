@@ -1,7 +1,7 @@
 from . import app, db
 from flask import request, render_template, redirect, url_for, flash
 from .models import Route, CategoryPage, Page, Role, PaymentMethod, EditHistory
-
+import json
 
 @app.route('/administração/rotas', methods=('GET', 'POST'))
 def routes():
@@ -60,7 +60,7 @@ def category_pages():
     return render_template('admin/category-pages.html', **context)
 
 
-@app.route("/adeministração/paginas", methods=('GET', 'POST'))
+@app.route("/administração/paginas", methods=('GET', 'POST'))
 def pages():
     page_id = request.args.get('page_id')
     is_editor = False
@@ -114,3 +114,100 @@ def pages():
             "pages": Page.query.all()
         }
     return render_template('admin/pages.html', **context)
+
+@app.route("/administração/cargos", methods=('GET', 'POST'))
+def roles():
+    context = {}
+    routes = {_route.id: _route for _route in Route.query.all()}
+    action = request.args.get('action', 'view')
+    if action == 'view':
+        roles = []
+        for role in Role.query.all():
+            role = role.as_dict()
+            role['allowed_routes'] = json.loads(role["allowed_routes"])
+            role["allowed_routes"] = map(lambda route_id: routes[route_id], role["allowed_routes"])
+            roles.append(role)
+            context = {
+                "roles": roles
+            }
+    elif action == 'edit':
+        role_id = request.args.get('role_id')
+        if role_id is None:
+            flash("Primeiro você precisa especificar qual é o cargo né amore?", category="error")
+            return redirect(url_for('roles', action='view'))
+        role = Role.query.filter_by(id=role_id).first()
+        if role is None:
+            flash("Cargo de ID {} não encontrada!".format(role_id), category="error")
+            return redirect(url_for('roles', action='view'))
+        
+        if request.method == "POST":
+            name = request.form.get("name")
+            if name is not None and name != role.name:
+                flash(f"Nome do cargo alterado com sucesso ({role.name} -> {name})!", category="success")
+                role.name = name
+            description = request.form.get("description")
+            if description is not None and description != role.description:
+                flash(f"Descrição do cargo alterado com sucesso ({role.description} -> {description})!", category="success")
+                role.description = description
+            allowed_routes = request.form.getlist("allowed_routes[]")
+            if allowed_routes is not None:
+                try:
+                    allowed_routes = list(map(int, allowed_routes))
+                except ValueError:
+                    flash("Então, a lista de cargos permitidos é inválida!", category="error")
+                    return redirect(url_for('roles', action='view'))
+                else:
+                    old_allowed_routes = json.loads(role.allowed_routes)
+                    for route_id in old_allowed_routes:
+                        if route_id not in allowed_routes:
+                            flash(f"Acesso à Rota '{routes[route_id].name}' (#{route_id}) foi removida do cargo!", category="success")
+                    for route_id in allowed_routes:
+                        if route_id not in old_allowed_routes:
+                            flash(f"Acesso à Rota '{routes[route_id].name}' (#{route_id}) foi adicionada ao cargo!", category="success")
+                    role.allowed_routes = json.dumps(allowed_routes)
+            db.session.commit()
+        role = role.as_dict()
+        role["allowed_routes"] = json.loads(role["allowed_routes"])
+        context = {
+            "role": role,
+            "routes": routes
+        }
+    elif action == "add":
+        if request.method == 'POST':
+            name = request.form.get('name')
+            description = request.form.get('description')
+            allowed_routes = request.form.getlist('allowed_routes[]')
+            print(allowed_routes)
+            try:
+                allowed_routes = list(map(int, allowed_routes))
+            except ValueError:
+                flash("Então, a lista de cargos permitidos é inválida!", category="error")
+                return redirect(url_for('roles', action='add'))
+            already_exists = Role.query.filter_by(name=name).first() is not None
+            if already_exists:
+                flash(f"Já existe um cargo com o nome '{name}'!", category="error")
+                return redirect(url_for('roles', action='add'))
+            role = Role(name=name, description=description, allowed_routes=json.dumps(allowed_routes))
+            db.session.add(role)
+            db.session.commit()
+            flash(f"Cargo adicionado '{name}' com sucesso!", category="success")
+            return redirect(url_for('roles', action='edit', role_id=role.id))
+        context = {
+            "routes": routes
+        }
+    elif action == "delete":
+        flash("Por enquanto essa funcionalidade está desativada para demais testes!", category="warning")
+        return redirect(url_for('roles', action='view'))
+        role_id = request.args.get('role_id')
+        if role_id is None:
+            flash("Primeiro você precisa especificar qual é o cargo né amore?", category="error")
+            return redirect(url_for('roles', action='view'))
+        role = Role.query.filter_by(id=role_id).first()
+        if role is None:
+            flash("Cargo de ID {} não encontrada!".format(role_id), category="error")
+            return redirect(url_for('roles', action='view'))
+        db.session.delete(role)
+        db.session.commit()
+        flash("Cargo removido com sucesso!", category="success")
+        return redirect(url_for('roles', action='view'))
+    return render_template("admin/roles.html", **context)

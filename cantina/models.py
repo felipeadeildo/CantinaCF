@@ -40,6 +40,9 @@ class Role(db.Model):
     added_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, default=datetime.now)
 
+    def as_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)

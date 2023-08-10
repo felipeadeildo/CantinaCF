@@ -64,7 +64,9 @@ def init_db():
         Route(id=34, name="(API) Listar Produtos para Despache", endpoint="list_despaches_api"),
         Route(id=35, name="(API) Confirmar Produto Despachado", endpoint="confirm_despache_api"),
         Route(id=36, name="(ADMIN) Rotas", endpoint="routes"),
-        Route(id=37, name="(ADMIN) Categoria das Páginas", endpoint="category_pages")
+        Route(id=37, name="(ADMIN) Categoria das Páginas", endpoint="category_pages"),
+        Route(id=38, name="(ADMIN) Cargos", endpoint="roles"),
+        Route(id=39, name="(ADMIN) Páginas", endpoint="pages"),
     ]
     db.session.add_all(routes)
     db.session.commit()
@@ -216,7 +218,13 @@ def init_db():
             description="Aqui você pode gerenciar nome e descrição das categorias das páginas (essas que sã o apresentadas na página inicial).",
             route=routes[36], 
             category_page=categories[3],
-        )
+        ),
+        Page(
+            title="Gerenciamento de Cargos", 
+            description="Gerenciamento de Cargos :p", 
+            route=routes[37], 
+            category_page=categories[3]
+        ),
     ]
     db.session.add_all(pages)
     db.session.commit()
