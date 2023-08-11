@@ -225,6 +225,12 @@ def init_db():
             route=routes[37], 
             category_page=categories[3]
         ),
+        Page(
+            title="Gerenciamento das Páginas",
+            description="Gerenciamento das Páginas",
+            route=routes[38],
+            category_page=categories[3],
+        )
     ]
     db.session.add_all(pages)
     db.session.commit()
