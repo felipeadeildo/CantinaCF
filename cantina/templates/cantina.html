@@ -1,84 +1,104 @@
 {% extends "base.html" %}
+
 {% block content %}
-<div class="container mt-4">
+<div class="container">
     <h3 class="text-center">{% block title %}{{ g.current_endpoint.name }}{% endblock title %}</h3>
-
-    <div class="input-group mb-3">
-        <span class="input-group-text"><i class="fas fa-search"></i></span>
-        <input type="text" id="product-search" class="form-control" oninput="searchProducts()"
-            placeholder="Pesquisar produtos por nome ou ID...">
-    </div>
-
-    <div class="product-list" style="overflow-y: auto; max-height: 55vh;">
-        <table class="table table-striped table-responsive">
-            <thead>
-                <tr>
-                    <th>Adc. Carrinho</th>
-                    <th>Nome</th>
-                    <th>Valor</th>
-                    <th>Quant.</th>
-                    <th>Tipo</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for product in products %}
-                <tr>
-                    <td>
-                        <button class="btn btn-primary btn-sm" onclick="addToCart({{ product.id }})">
-                            <i class="fas fa-plus"></i>
-                        </button>
-                    </td>
-                    <td>{{ product.name }}</td>
-                    <td>R$ {{ product.value }}</td>
-                    <td id="product-quantity-{{ product.id }}-row">{{ product.quantity }}</td>
-                    <td>{{ product.type }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-
-    <div class="cart-container mt-4">
-        <div class="row">
-            <ul id="cart-list" class="list-group list-group-flush col-md-6 offset-md-3">
-                <li class="list-group-item">
-                    <h4 class="text-center">Carrinho - R$ <span id="cart-total">{{ (session.cart|sum(attribute='value'))|round(2, 'floor') }}</span></h4>
-                </li>
-                {% for product in session.cart %}
-                <li class="list-group-item" id="cart-item-{{ product.id }}">
-                    <button class="btn btn-danger btn-sm" onclick="removeFromCart({{ product.id }}, 'cart-item-{{ product.id }}')">
-                        <i class="fas fa-minus"></i>
+    <div class="row">
+        <div class="col-md-8">
+            <div class="input-group mb-3">
+                <input type="text" class="form-control" placeholder="Search..." id="search">
+                <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="button" id="search-btn">
+                        <i class="fa fa-search"></i>
                     </button>
-                    <span style="margin-left: 5px;">{{ product.name }}</span>
-                </li>
-                {% endfor %}
-            </ul>
-        </div>
+                </div>
+            </div>
+            <div class="products">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Produtos</h3>
+                    </div>
+                    <div class="card-body" style="height: 400px; overflow-y: auto;">
+                        <ul class="list-group" id="products-list">
+                            {% for product in products %}
 
-        <a href="{{ url_for('confirm_purchase') }}" class="btn btn-primary mt-2">Confirmar Compra</a>
+                            <li class="list-group-item">
+                                <button class="btn btn-success btn-sm" onclick="addToCart({{ product.id }})">
+                                    R$ {{ product.value }} <i class="fas fa-shopping-cart"></i>
+                                </button>
+                                {{ product.name }}
+                                <div class="badge border border-dark bg-light text-dark">
+                                    <div id="product-quantity-{{product.id}}-row">
+                                        {{product.quantity}}
+                                    </div> restantes
+                                </div>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="sticky-top">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Carrinho <span id="cart-count">{{ session.cart|length }}</span></h3>
+                    </div>
+                    <ul class="list-group list-group-flush" id="cart-list">
+                        <li class="list-group-item font-weight-bold">
+                            Total: R$ <span id="cart-total">{{ (session.cart|sum(attribute='value'))|round(2, 'floor')
+                                or 0 }}</span>
+                        </li>
+                        {% for item in session.cart %}
+                        <li class="list-group-item" id="cart-item-{{ item.id }}">
+                            <button class="btn btn-danger btn-sm"
+                                onclick="removeFromCart({{ item.id }}, 'cart-item-{{ item.id }}')">
+                                R$ {{ item.value }} <i class="fas fa-trash"></i>
+                            </button>
+                            {{ item.name }}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    <div class="card-footer">
+                        <a href="{{ url_for('confirm_purchase') }}">
+                            <button class="btn btn-success btn-block">Confirmar Compra</button>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
-{% endblock %}
+{% endblock content %}
 
 {% block scripts %}
 <script>
-    function searchProducts() {
-        var query = document.getElementById('product-search').value.toLowerCase();
-        var rows = document.querySelectorAll('.product-list tbody tr');
+    const searchInput = document.getElementById('search');
+    const searchBtn = document.getElementById('search-btn');
+    const productsList = document.getElementById('products-list');
+    const cartList = document.getElementById('cart-list');
+    const cartCount = document.getElementById('cart-count');
+    const cartTotal = document.getElementById('cart-total');
 
-        rows.forEach(row => {
-            var productId = row.querySelector('td:nth-child(1)').innerText;
-            var productName = row.querySelector('td:nth-child(2)').innerText.toLowerCase();
-            if (productName.includes(query) || productId.includes(query)) {
-                row.style.display = '';
+    searchInput.addEventListener('input', function () {
+        const query = searchInput.value.toLowerCase();
+        filterProducts(query);
+    });
+
+    function filterProducts(query) {
+
+        for (let product of productsList.getElementsByTagName('li')) {
+            if (product.innerText.toLowerCase().includes(query)) {
+                product.style.display = '';
             } else {
-                row.style.display = 'none';
+                product.style.display = 'none';
             }
-        });
+        };
     }
 
-    function addToCart(id) {
-        var urlAddToCart = "{{ url_for('add_to_cart_api') }}";
+    function addToCart(productId) {
+        const urlAddToCart = "{{ url_for('add_to_cart_api') }}";
 
         fetch(urlAddToCart, {
             method: "POST",
@@ -87,44 +107,38 @@
                 '{{ config["CSRF_HEADER_NAME"] }}': '{{ csrf_token() }}'
             },
             body: JSON.stringify({
-                id: id,
+                id: productId,
             })
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.ok) {
-                var cartList = document.getElementById('cart-list');
-                var count = cartList.childElementCount;
-                var listItem = document.createElement('li');
-                listItem.className = "list-group-item";
-                listItem.id = `cart-item-${data.product.id}-${count}`;
-                listItem.innerHTML = `
-                    <button class="btn btn-danger btn-sm" onclick="removeFromCart(${data.product.id}, 'cart-item-${data.product.id}-${count}')">
-                        <i class="fas fa-minus"></i>
+            .then(response => response.json())
+            .then(data => {
+                if (data.ok) {
+                    var listItem = document.createElement('li');
+                    listItem.className = 'list-group-item';
+                    listItem.id = `cart-item-${data.product.id}-${cartCount.innerText}`;
+                    listItem.innerHTML = `
+                    <button class="btn btn-danger btn-sm" onclick="removeFromCart(${data.product.id}, 'cart-item-${data.product.id}-${cartCount.innerText}')">
+                        R$ ${data.product.value} <i class="fas fa-trash"></i>
                     </button>
-                    <span style="margin-left: 5px;">${data.product.name}</span>
+                    ${data.product.name}
                 `;
-                cartList.appendChild(listItem);
-
-                var totalSpan = document.getElementById('cart-total');
-                var total = parseFloat(totalSpan.innerText) + parseFloat(data.product.value); // Converter para float
-                totalSpan.innerText = total.toFixed(2);
-
-                var quantityTag = document.getElementById(`product-quantity-${data.product.id}-row`);
-                quantityTag.innerText = data.product.quantity;
-
-            } else {
-                console.error(data.message);
-            }
-        })
-        .catch((error) => {
-            console.error(error);
-        });
+                    cartList.appendChild(listItem);
+                    cartCount.innerText = parseInt(cartCount.innerText) + 1;
+                    cartTotal.innerText = parseFloat(cartTotal.innerText) + parseFloat(data.product.value);
+                    var quantityTag = document.getElementById(`product-quantity-${data.product.id}-row`);
+                    quantityTag.innerText = data.product.quantity;
+                    toastr.success(data.message);
+                } else {
+                    toastr.error(data.message);
+                }
+            })
+            .catch(error => {
+                toastr.error('Erro ao adicionar ao carrinho: ' + error.message);
+            });
     }
 
-
-    function removeFromCart(id, cartItemId) {
-        var urlRemoveFromCart = "{{ url_for('remove_from_cart_api') }}";
+    function removeFromCart(productId, cartItemId) {
+        const urlRemoveFromCart = "{{ url_for('remove_from_cart_api') }}";
 
         fetch(urlRemoveFromCart, {
             method: "POST",
@@ -133,42 +147,25 @@
                 '{{ config["CSRF_HEADER_NAME"] }}': '{{ csrf_token() }}'
             },
             body: JSON.stringify({
-                id: id,
+                id: productId
             })
         })
-        .then(response => response.json())
-        .then(data => {
-            var cartItem = document.getElementById(cartItemId);
-            if (cartItem) {
-                cartItem.remove();
-            }
+            .then(response => response.json())
+            .then(data => {
+                console.log(cartItemId);
+                var listItem = document.getElementById(cartItemId);
+                listItem.remove();
 
-            var totalSpan = document.getElementById('cart-total');
-            var total = parseFloat(totalSpan.innerText) - parseFloat(data.product.value);
-            totalSpan.innerText = total.toFixed(2);
-
-            var quantityTag = document.getElementById(`product-quantity-${data.product.id}-row`);
-            quantityTag.innerText = data.product.quantity;
-        })
-        .catch((error) => {
-            console.error(error);
-        });
+                cartCount.innerText = parseInt(cartCount.innerText) - 1;
+                cartTotal.innerText = parseFloat(cartTotal.innerText) - parseFloat(data.product.value);
+                var quantityTag = document.getElementById(`product-quantity-${data.product.id}-row`);
+                quantityTag.innerText = data.product.quantity;
+                toastr.success(data.message);
+            })
+            .catch(error => {
+                toastr.error('Erro ao remover do carrinho: ' + error.message);
+            })
     }
-
-    document.getElementById('product-search').addEventListener('keydown', function (e) {
-        if (e.key == 'Enter' || e.keyCode == 13) {
-            e.preventDefault();
-            selectFirstProduct();
-        }
-    });
-
-    function selectFirstProduct() {
-        var productRow = document.querySelector('.product-list tbody tr:not([style*="display: none"])');
-        if (productRow) {
-            var productId = parseInt(productRow.querySelector('td:nth-child(1)').innerText);
-            addToCart(productId);
-        }
-    }
-
 </script>
-{% endblock %}
+
+{% endblock scripts %}
