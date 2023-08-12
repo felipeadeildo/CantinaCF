@@ -1,26 +1,25 @@
 {% extends "base.html" %}
 {% block content %}
+<h3 class="text-center">{% block title %}{{ g.current_endpoint.name }}{% endblock title %}</h3>
 <div class="row">
-    <div class="col-md-9">
-        
-
+    <div class="col-lg-9 col-md-12">
         <form method="get">
             <div class="row">
-                <div class="col-md-6">
+                <div class="col-md-6 col-sm-12">
                     <div class="mb-3">
                         <label for="start_date" class="form-label">Data Inicial</label>
                         <input type="text" class="form-control datepicker" id="start_date" name="start_date"
                             value="{{ request.args.get('start_date', '')}}">
                     </div>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-6 col-sm-12">
                     <div class="mb-3">
                         <label for="end_date" class="form-label">Data Final</label>
                         <input type="text" class="form-control datepicker" id="end_date" name="end_date"
                             value="{{ request.args.get('end_date', '')}}">
                     </div>
                 </div>
-                <div class="col-md-12 text-center">
+                <div class="col-12 text-center">
                     <button class="btn btn-primary" type="submit">
                         Filtrar
                         <i class="fas fa-paper-plane"></i>
@@ -35,7 +34,7 @@
             Resultados
         </h3>
 
-        <div class="table-wrapper" style="overflow:auto; height: 60vh;">
+        <div class="table-responsive" style="height: 60vh;">
             <table class="table table-striped">
                 <thead>
                     <tr>
@@ -77,7 +76,7 @@
             {{ pagination.links|safe }}
         </div>
     </div>
-    <div class="col-md-3 sticky-action">
+    <div class="col-lg-3 col-md-12 sticky-action">
         <div class="card">
             <div class="card-body">
                 <h5 class="card-title">Saldo Devedor</h5>
