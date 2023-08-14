@@ -724,7 +724,7 @@ def history_edits_users():
 def payments_history():
     recharge_type = request.args.get("recharge_type", "")
     allowed_by = request.args.get("allowed_by", "")
-    allowed_for = request.args.get("sold_for", "")
+    allowed_for = request.args.get("allowed_for", "")
     start_date = request.args.get("start_date", "")
     end_date = request.args.get("end_date", "")
     order_mode = request.args.get("order_mode", "ASC")
