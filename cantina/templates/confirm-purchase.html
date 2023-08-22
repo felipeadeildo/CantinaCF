@@ -55,9 +55,10 @@
             <input type="hidden" name="{{ config['CSRF_COOKIE_NAME'] }}" value="{{ csrf_token() }}">
 
             <div class="d-grid gap-2">
-                <button class="btn btn-primary" type="submit">
+                <button class="btn btn-primary" type="submit" id="confirmButton">
                     <i class="fas fa-check-circle"></i> Confirmar Compra
                 </button>
+
                 <a class="btn btn-secondary" href="{{ url_for('cantina') }}">
                     <i class="fas fa-arrow-left"></i> Voltar para Cantina
                 </a>
@@ -66,3 +67,16 @@
     </div>
 </div>
 {% endblock content %}
+
+{% block scripts %}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const confirmButton = document.getElementById("confirmButton");
+        confirmButton.addEventListener("click", function () {
+            confirmButton.disabled = true;
+            confirmButton.innerHTML = '<i class="fas fa-check-circle"></i> Processando...';
+            document.querySelector("form").submit();
+        });
+    });
+</script>
+{% endblock scripts %}
