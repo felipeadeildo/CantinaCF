@@ -7,7 +7,9 @@ from flask_caching import Cache
 from datetime import timedelta
 from flask import Flask
 import tempfile
+import threading
 
+lock = threading.Lock()
 
 SESSION_TYPE = 'filesystem'
 SESSION_PERMANENT = True

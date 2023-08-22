@@ -10,6 +10,7 @@ class Route(db.Model):
     description = db.Column(db.Text, nullable=True)
     endpoint = db.Column(db.Text, nullable=False)
     updated_at = db.Column(db.DateTime, default=datetime.now)
+    block_recurring_access = db.Column(db.Boolean, default=False)
 
 
 class CategoryPage(db.Model):

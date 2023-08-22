@@ -1,7 +1,9 @@
 from flask import flash, redirect, render_template, request, session, url_for, abort, g
 from .models import User, Route, Role, Route, Page
 from werkzeug.security import check_password_hash
-from . import app
+from . import app, lock
+import json
+
 
 
 @app.route("/login", methods=("GET", "POST"))
@@ -73,16 +75,26 @@ def check_permission():
     if "cart" not in session:
         session["cart"] = []
     g.current_endpoint = Route.query.filter_by(endpoint=request.endpoint).first()
+    if g.current_endpoint.block_recurring_access:
+        lock.acquire()
 
 def role_has_permission(role_name:str):
     """Check if user has permission to access current endpoint"""
     role = Role.query.filter_by(name=role_name).first()
     if role is None:
         raise Exception(f"Role {role_name} not found!")
-    import json
     allowed_routes_ids = json.loads(role.allowed_routes)
     session["allowed_routes"] = Route.query.filter(Route.id.in_(allowed_routes_ids)).all()
     session["permissions"] = list(map(lambda route: route.endpoint, session["allowed_routes"]))
     session["navbar_pages"] = Page.query.filter_by(appear_navbar=True).all()
     session["navbar_pages"] = [p for p in session["navbar_pages"] if p.route.id in allowed_routes_ids]
     return request.endpoint in session["permissions"]
+
+
+@app.after_request
+def after_request(response):
+    try:
+        lock.release()
+    except RuntimeError:
+        pass
+    return response
