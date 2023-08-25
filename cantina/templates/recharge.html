@@ -36,7 +36,7 @@
 
             <input type="hidden" name="{{ config['CSRF_COOKIE_NAME'] }}" value="{{ csrf_token() }}">
 
-            <button id="submit-btn" class="btn btn-primary btn-icon-center" type="submit" name="action">
+            <button id="submit-btn" class="btn btn-primary btn-icon-center" type="submit" name="action" onclick="">
                 Recarregar
                 <i class="fas fa-paper-plane"></i>
             </button>
@@ -48,6 +48,12 @@
 {% block scripts %}
 <script>
     document.addEventListener("DOMContentLoaded", function () {
+        const confirmButton = document.getElementById("submit-btn");
+        confirmButton.addEventListener("click", function () {
+            confirmButton.disabled = true;
+            confirmButton.innerHTML = '<i class="fas fa-check-circle"></i> Processando...';
+            document.querySelector("form").submit();
+        })
         let paymentMethodTag = document.getElementById('payment-method');
         let proofContainerTag = document.getElementById('proof-container');
         let payment_methods_need_proof = [];
@@ -73,5 +79,6 @@
 
         paymentMethodTag.addEventListener('change', verify_proof_visualization);
     });
+
 </script>
 {% endblock %}
