@@ -61,12 +61,15 @@ def init_db():
         Route(id=31, name="(API) Obter pagamentos", endpoint="get_payments_api"),
         Route(id=32, name="(API) Verificar pagamento", endpoint="verify_payment_api", block_recurring_access=True),
         Route(id=33, name="(API) Exportar para Excel", endpoint="export_to_excel_api"),
-        Route(id=34, name="(API) Listar Produtos para Despache", endpoint="list_despaches_api"),
+        Route(id=34, name="(API) Listar Produtos para Despacho", endpoint="list_users_pending_desp_api"),
         Route(id=35, name="(API) Confirmar Produto Despachado", endpoint="confirm_despache_api", block_recurring_access=True),
         Route(id=36, name="(ADMIN) Rotas", endpoint="routes"),
         Route(id=37, name="(ADMIN) Categoria das Páginas", endpoint="category_pages"),
         Route(id=38, name="(ADMIN) Cargos", endpoint="roles"),
         Route(id=39, name="(ADMIN) Páginas", endpoint="pages"),
+        Route(id=40, name="(API) Despachar todos os produtos de todos os usuários", endpoint="confirm_all_despaches_api"),
+        Route(id=41, name="(API) Despachar todos os produtos de um usuário", endpoint="confirm_all_user_despaches_api"),
+        Route(id=42, name="(API) Listar produtos para despacho de um usuário", endpoint="list_user_despaches_api"),
     ]
     db.session.add_all(routes)
     db.session.commit()

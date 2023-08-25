@@ -224,15 +224,11 @@ def export_to_excel_api():
     return send_file(output, as_attachment=True, download_name=f"{identifier}.xlsx")
 
 
-@app.route("/api/listar-produtos-para-despache", methods=["GET"])
-def list_despaches_api():
+@app.route("/api/listar-usuários-para-despache", methods=["POST"])
+def list_users_pending_desp_api():
     products = ProductSale.query.filter_by(status='to dispatch').all()
-    result = []
-    for product in products:
-        sale_data = product.as_dict()
-        sale_data["user"] = User.query.filter_by(id=product.sold_to).first().as_dict()
-        sale_data["product"] = Product.query.filter_by(id=product.product_id).first().as_dict()
-        result.append(sale_data)
+    users_id = set([product.sold_to for product in products])
+    result = [user.as_dict() for user in User.query.filter(User.id.in_(users_id)).all()]
     return jsonify(result)
 
 
@@ -261,3 +257,62 @@ def confirm_despache_api():
         "message": f"Confirmado o despacho da venda de ID {venda_id} com sucesso!",
         "error": False
     })
+
+
+@app.route("/api/confirmar-todos-produtos", methods=["POST"])
+def confirm_all_despaches_api():
+    products = ProductSale.query.filter_by(status='to dispatch').all()
+    for product in products:
+        product.status = 'dispatched'
+        product.dispatched_by = session["user"].id
+        product.dispatched_at = datetime.now()
+        db.session.commit()
+    return jsonify({
+        "message": "Todos os produtos foram despachados com sucesso!",
+        "error": False
+    })
+
+@app.route("/api/confirmar-todos-produtos-usuario", methods=["POST"])
+def confirm_all_user_despaches_api():
+    data = request.get_json()
+    user_id = data.get("user_id")
+    if user_id is None:
+        return jsonify({
+            "message": f"ID do usuário deve ser especificado...",
+            "error": True
+        })
+    products = ProductSale.query.filter_by(sold_to=user_id, status='to dispatch').all()
+    if not products:
+        return jsonify({
+            "message": f"Nenhum produto do usário {user_id} encontrado!",
+            "error": True
+        })
+    for product in products:
+        product.status = 'dispatched'
+        product.dispatched_by = session["user"].id
+        product.dispatched_at = datetime.now()
+        db.session.commit()
+    return jsonify({
+        "message": f"Todos os produtos do usário {user_id} foram despachados com sucesso!",
+        "error": False
+    })
+
+
+@app.route("/api/produtos-para-despache-do-usuario", methods=["POST"])
+def list_user_despaches_api():
+    data = request.get_json()
+    user_id = data.get("user_id")
+    if user_id is None:
+        return jsonify({
+            "message": f"ID do usuário deve ser especificado...",
+            "error": True
+        })
+    
+    products = ProductSale.query.filter_by(sold_to=user_id, status='to dispatch').all()
+    products_list = []
+    for product in products:
+        product_item = product.as_dict()
+        product_item["sold_to_user"] = product.sold_to_user.as_dict()
+        product_item["product"] = product.product.as_dict()
+        products_list.append(product_item)
+    return jsonify(products_list)

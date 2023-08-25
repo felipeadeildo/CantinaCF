@@ -1,24 +1,52 @@
 {% extends 'base.html' %}
 
-
 {% block content %}
 <div class="container mt-4">
     <h3 class="text-center mb-3">{% block title %}{{ g.current_endpoint.name }}{% endblock title %}</h3>
 
-    <div class="row" id="despache-cards">
-        <!-- Os cards dos produtos para despache serão carregados aqui dinamicamente -->
+    <div class="text-center">
+        <button class="btn btn-primary btn-lg" onclick="confirmDespacheAll()">
+            Despachar TUDO de uma vez <i class="fas fa-truck"></i>
+        </button>
+    </div>
+
+    <div class="row mt-4" id="despache-cards">
+        <!-- Os cards dos usuários para despache serão carregados aqui dinamicamente -->
     </div>
 </div>
 
+<!-- Modal para exibir detalhes dos produtos de um usuário -->
+<div class="modal fade" id="userProductsModal" tabindex="-1" aria-labelledby="userProductsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="userProductsModalLabel">Produtos do Usuário</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body scrollable-modal" id="userProductsModalBody">
+                <!-- Os detalhes dos produtos do usuário serão carregados aqui dinamicamente -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-primary" id="confirmAllForUserModalButton">Despachar Todos <i class="fas fa-truck"></i></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
 <script>
-    // Função para atualizar os cards dos produtos para despache
-    function updateDespacheCards() {
-        // toastr.info("Atualizando lista de produtos para despache...");
-
-        // Endpoint da API de list_despaches_api (substitua pelo endpoint correto)
-        var urlListDespachesApi = "{{ url_for('list_despaches_api') }}";
-
-        fetch(urlListDespachesApi)
+    function updateUserDespacheCards() {
+        var urlListDespachesApi = "{{ url_for('list_users_pending_desp_api') }}";
+        fetch(urlListDespachesApi, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                '{{ config["CSRF_HEADER_NAME"] }}': '{{ csrf_token() }}'
+            }
+        })
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Erro ao atualizar os cards: ' + response.statusText);
@@ -26,7 +54,6 @@
                 return response.json();
             })
             .then(data => {
-                // Limpar os cards existentes
                 document.getElementById('despache-cards').innerHTML = '';
 
                 if (data.length === 0) {
@@ -36,20 +63,24 @@
                         </div>
                     `;
                 } else {
-                    // Criar os novos cards com as informações dos produtos para despache
-                    data.forEach(item => {
+                    data.forEach(user => {
                         var card = `
                             <div class="col-md-4 mb-4">
                                 <div class="card">
                                     <div class="card-body">
-                                        <h5 class="card-title">${item.product.name}</h5>
+                                        <h5 class="card-title">${user.name}</h5>
                                         <p class="card-text">
-                                            ID da Venda: ${item.id}<br>
-                                            Valor: R$ ${item.product.value}<br>
-                                            Destinatário: ${item.user.name} [Username: ${item.user.username}] (ID: ${item.user.id})
+                                            <b>Matrícula</b>: ${user.matricula || 'Sem matrícula'}<br>
+                                            <b>Username</b>: ${user.username} (${user.id})<br>
+                                            <b>Turma</b>: ${user.turm || 'Sem turma'}<br>
+                                            <b>Série</b>: ${user.serie || 'Sem série'}<br>
                                         </p>
-                                        <button class="btn btn-primary" onclick="confirmDespache(${item.id})">
-                                            Despachar
+                                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#userProductsModal" data-user-id="${user.id}" onclick="loadUserProducts(${user.id})">
+                                            Visualizar Produtos
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn btn-danger" onclick="confirmDespacheAllForUser(${user.id})">
+                                            Despachar Todos
                                             <i class="fas fa-truck"></i>
                                         </button>
                                     </div>
@@ -65,17 +96,89 @@
             });
     }
 
-    function confirmDespache(id) {
-        var urlConfirmSaleApi = "{{ url_for('confirm_despache_api') }}";
+    function loadUserProducts(userId) {
+        var urlUserProductsApi = "{{ url_for('list_user_despaches_api') }}";
 
-        fetch(urlConfirmSaleApi, {
+        fetch(urlUserProductsApi, {
             method: "POST",
             headers: {
                 'Content-Type': 'application/json',
                 '{{ config["CSRF_HEADER_NAME"] }}': '{{ csrf_token() }}'
             },
             body: JSON.stringify({
-                id: id
+                'user_id': userId
+            })
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Erro ao carregar os produtos do usuário: ' + response.statusText);
+                }
+                return response.json();
+            })
+            .then(products => {
+                if (products.error) {
+                    toastr.error(products.message);
+                    return;
+                }
+                var modalBody = document.getElementById('userProductsModalBody');
+                modalBody.innerHTML = '';
+
+                if (products.length === 0) {
+                    modalBody.innerHTML = `
+                        <p class="text-muted">Nenhum produto encontrado para este usuário.</p>
+                    `;
+                } else {
+                    // Agregar os produtos repetidos e exibir a quantidade de cada produto
+                    var aggregatedProducts = {};
+                    products.forEach(product => {
+                        if (aggregatedProducts[product.product.id]) {
+                            aggregatedProducts[product.product.id].quantity += 1;
+                        } else {
+                            aggregatedProducts[product.product.id] = {
+                                product: product.product,
+                                quantity: 1,
+                                sold_to_user: product.sold_to_user
+                            };
+                        }
+                    });
+
+                    for (const productId in aggregatedProducts) {
+                        var product = aggregatedProducts[productId];
+                        var productDetail = `
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h6 class="card-title">${product.product.name}</h6>
+                                    <p class="card-text">
+                                        <b>Valor</b>: R$ ${product.product.value}<br>
+                                        <b>Quantidade</b>: ${product.quantity}
+                                    </p>
+                                </div>
+                            </div>
+                        `;
+                        modalBody.innerHTML += productDetail;
+                    }
+                    modal_title = `Produtos do Usuário ${product.sold_to_user.name} (${product.sold_to_user.id})`;
+                    document.getElementById('userProductsModalLabel').innerHTML = modal_title;
+                    onclick_button_modal_caller = 'confirmDespacheAllForUser(' + userId + ')';
+                    document.getElementById('confirmAllForUserModalButton').setAttribute('onclick', onclick_button_modal_caller);
+                }
+            })
+            .catch(error => {
+                toastr.error(error.message);
+            });
+    }
+
+    function confirmDespacheAllForUser(userId) {
+        var urlConfirmAllForUserApi = "{{ url_for('confirm_all_user_despaches_api') }}";
+
+        fetch(urlConfirmAllForUserApi, {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json',
+                '{{ config["CSRF_HEADER_NAME"] }}': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({
+                'user_id': userId
             })
         })
         .then(response => response.json())
@@ -86,7 +189,39 @@
                 toastr.error(data.message);
             }
 
-            updateDespacheCards();
+            updateUserDespacheCards();
+            var modal = bootstrap.Modal.getInstance(document.getElementById('userProductsModal'));
+            modal.hide();
+        })
+        .catch(error => {
+            toastr.error('Erro ao confirmar despache: ' + error.message);
+        });
+    }
+
+    function confirmDespacheAll() {
+        var urlConfirmAllApi = "{{ url_for('confirm_all_despaches_api') }}";
+
+        fetch(urlConfirmAllApi, {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json',
+                '{{ config["CSRF_HEADER_NAME"] }}': '{{ csrf_token() }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (!data.error) {
+                toastr.success(data.message);
+            } else {
+                toastr.error(data.message);
+            }
+
+            updateUserDespacheCards();
+            // Fechar o modal após o despacho de todos
+            var modal = bootstrap.Modal.getInstance(document.getElementById('userProductsModal'));
+            if (modal) {
+                modal.hide();
+            }
         })
         .catch(error => {
             toastr.error('Erro ao confirmar despache: ' + error.message);
@@ -95,11 +230,27 @@
 
     // Chamar a função de atualização ao carregar a página
     document.addEventListener('DOMContentLoaded', function () {
-        updateDespacheCards();
+        updateUserDespacheCards();
     });
 
     setInterval(function () {
-        updateDespacheCards();
+        updateUserDespacheCards();
     }, 8000);
 </script>
-{% endblock %}
+{% endblock scripts %}
+
+
+{% block additional_css %}
+<style>
+    @media (max-width: 576px) {
+        .modal-lg {
+            max-width: 95%;
+        }
+    }
+
+    .scrollable-modal {
+        max-height: 70vh;
+        overflow-y: auto;
+    }
+</style>
+{% endblock additional_css %}
