@@ -1,5 +1,8 @@
 import random
 import os
+import json
+
+config = json.load(open("config.json", encoding="utf-8"))
 
 debug = os.getenv("DEBUG")
 debug = debug or "false"
@@ -24,13 +27,8 @@ if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
 
-ALLOWED_EXTENSIONS = {"pdf", "png", "jpg", "jpeg"}
+ALLOWED_EXTENSIONS = set(config["allowed_extensions"])
 """Allowed extensions for uploaded files"""
 
-SERIES = [
-    '1º EM', '2º EM', '3º EM',
-    '1º EF', '2º EF', '3º EF',
-    '4º EF', '5º EF', '6º EF',
-    '7º EF', '8º EF', '9º EF',
-]
+SERIES = config["series"]
 """Series of School"""
