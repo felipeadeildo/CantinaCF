@@ -214,6 +214,9 @@ class Affiliation(db.Model):
 
     added_at = db.Column(db.DateTime, default=datetime.now)
 
+    def as_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
 
 class Payroll(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -347,7 +350,7 @@ def get_user_name_and_id(user_id):
     Returns:
         str: The name and ID of the user in the format "{name} ({id})".
     """
-    user = User.query.get(user_id)
+    user = User.query.filter_by(id=user_id).first()
     return f"{user.name} ({user.id})" if user else user_id
 
 
@@ -361,7 +364,7 @@ def get_product_name_and_id(product_id):
     Returns:
         str: The name and ID of the product in the format "{name} ({id})".
     """
-    product = Product.query.get(product_id)
+    product = Product.query.filter_by(id=product_id).first()
     return f"{product.name} ({product.id})" if product else product_id
 
 
@@ -375,7 +378,7 @@ def get_role_name_and_id(role_id):
     Returns:
         str: The name and ID of the role in the format "{name} ({id})".
     """
-    role = Role.query.get(role_id)
+    role = Role.query.filter_by(id=role_id).first()
     return f"{role.name} ({role.id})" if role else role_id
 
 def get_payment_method_name_and_id(payment_method_id):
@@ -388,7 +391,7 @@ def get_payment_method_name_and_id(payment_method_id):
     Returns:
         str: The name and ID of the payment_method in the format "{name} ({id})".
     """
-    payment_method = PaymentMethod.query.get(payment_method_id)
+    payment_method = PaymentMethod.query.filter_by(id=payment_method_id).first()
     return f"{payment_method.name} ({payment_method.id})" if payment_method else payment_method_id
 
 
