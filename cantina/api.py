@@ -162,11 +162,11 @@ def verify_payment_api():
             )
             db.session.add(new_payroll)
         elif payment.is_paypayroll: # pagamento da folha de pagamento
-            affiliation = Affiliation.query.filter_by(affiliated_id=requester.id).first()
-            financiador = affiliation.affiliator
+            financiador = User.query.filter_by(id=requester.id).first()
             financiador.balance_payroll -= payment.value
 
-        requester.balance += payment.value
+        if not payment.is_paypayroll:
+            requester.balance += payment.value
         payment.allowed_by = session["user"].id
         payment.status = 'accepted'
         
