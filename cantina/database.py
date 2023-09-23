@@ -70,6 +70,7 @@ def init_db():
         Route(id=40, name="(API) Despachar todos os produtos de todos os usuários", endpoint="confirm_all_despaches_api", block_recurring_access=True),
         Route(id=41, name="(API) Despachar todos os produtos de um usuário", endpoint="confirm_all_user_despaches_api", block_recurring_access=True),
         Route(id=42, name="(API) Listar produtos para despacho de um usuário", endpoint="list_user_despaches_api"),
+        Route(id=43, name="Usuários com Saldo Devedor", endpoint="users_with_balance_payroll"),
     ]
     db.session.add_all(routes)
     db.session.commit()
@@ -232,6 +233,12 @@ def init_db():
             title="Gerenciamento das Páginas",
             description="Gerenciamento das Páginas",
             route=routes[38],
+            category_page=categories[3],
+        ),
+        Page(
+            title="Usuários com Saldo Devedor",
+            description="Visualização dos usuários com saldo devedor maior que zero.",
+            route=routes[42],
             category_page=categories[3],
         )
     ]

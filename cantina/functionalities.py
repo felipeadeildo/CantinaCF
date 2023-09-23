@@ -797,3 +797,15 @@ def users_with_balance():
         "result_id": hashed_query
     }
     return render_template("users-with-balance.html", **context)
+
+@app.route("/usuários-com-saldo-devedor")
+def users_with_balance_payroll():
+    users = User.query.filter(User.balance_payroll > 0).all()
+    identifier = f"usuarios-com-saldo-devedor-{datetime.now().timestamp()}"
+    hashed_query = hashlib.sha256(identifier.encode("utf-8")).hexdigest()
+    cache.set(hashed_query, {"identifier": identifier, "data": users})
+    context = {
+        "users": users,
+        "result_id": hashed_query
+    }
+    return render_template("users-with-balance-payroll.html", **context)
