@@ -45,8 +45,8 @@ settings_map = {
     'AUTHOR': {
         'name': 'Felipe Adeildo',
         'whatsapp': '558294011841',
-        'email': 'oie.eu.sou.um@gmail.com',
-        'instagram': 'felipe.adeildo',
+        'email': 'felipe.adeildo0@gmail.com',
+        'instagram': 'felipe.adeildo.new',
         'linkedin': 'felipe-adeildo',
         'github': 'sr-pato',
     }
@@ -69,3 +69,4 @@ from . import auth
 from . import api
 from . import database
 from . import admin
+from . import tasks

@@ -329,6 +329,33 @@ class StockHistory(db.Model):
                 value = getattr(self, c.name)
             data[key] = value
         return data
+    
+class Task(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    type = db.Column(db.String(50), nullable=False)
+    added_at = db.Column(db.DateTime, default=datetime.now)
+    expires_at = db.Column(db.DateTime, default=datetime.now)
+    is_done = db.Column(db.Boolean, default=False)
+    target_id = db.Column(db.Integer)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    target_type = db.Column(db.String(50))
+    finished_by_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), default=1)
+
+    @property
+    def target(self):
+        targets = {
+            "product": Product,
+            "user": User
+        }
+        targeter = targets.get(self.target_type)
+        if targeter is None:
+            raise ValueError(f"Target type {self.target_type} not found")
+        return targeter.query.filter_by(id=self.target_id).first()
+    
+    @property
+    def user(self):
+        return User.query.filter_by(id=self.user_id).first()
+
 
 def setup_updated_at_listener(classe):
     @event.listens_for(classe, "before_update")

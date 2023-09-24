@@ -1,9 +1,11 @@
-from .models import Product, User, Payment, PaymentMethod, Affiliation, Payroll, ProductSale
+from .models import Product, User, Payment, Affiliation, Payroll, Task, ProductSale
 from flask import request, jsonify, session, send_file
-from datetime import datetime
+from datetime import datetime, timedelta
+from .settings import CART_TIMEOUT
 from . import app, cache, db
 from io import BytesIO
 import pandas as pd
+
 
 @app.route("/api/adicionar-ao-carrinho", methods=["POST"])
 def add_to_cart_api():
@@ -16,13 +18,13 @@ def add_to_cart_api():
                 "message": f"Produto de ID {product_id} não encontrado!",
                 "ok": False
             }
-            return jsonify(context), 201
+            return jsonify(context)
         if product.quantity < 1:
             context = {
                 "message": f"O produto {product.name} não possui estoque!",
                 "ok": False
             }
-            return jsonify(context), 201
+            return jsonify(context)
         product.quantity -= 1
         db.session.commit()
     except Exception as e:
@@ -30,13 +32,16 @@ def add_to_cart_api():
             "message": "Alguma coisa deu errado...",
             "ok": False
         }
-        return jsonify(context), 201
+        return jsonify(context)
     else:
         context = {
             "message": f"Produto {product.name} adicionado com sucesso!",
             "product": product.as_dict(),
             "ok": True
         }
+        new_task = Task(type="product_cleanup", target_id=product.id, user_id=session["user"].id, expires_at=datetime.now() + timedelta(seconds=CART_TIMEOUT), target_type="product")
+        db.session.add(new_task)
+        db.session.commit()
         session["cart"].append(product)
         return jsonify(context)
 
@@ -46,23 +51,32 @@ def remove_from_cart_api():
     data = request.get_json()
     product_id = data.get("id")
     found = False
+    task = Task.query.filter_by(target_id=product_id, user_id=session["user"].id, is_done=False).first()
+    if task is not None:
+        task.is_done = True
+        task.finished_by_user_id = session["user"].id
+        db.session.commit()
+        found = True
+    
     for product in session["cart"]:
         if product.id == product_id:
             session["cart"].remove(product)
-            found = True
             break
+    
     if not found:
         context = {
-            "message": f"Produto de ID {product_id} não está em sua sessão!",
-            "ok": False
+            "message": f"Produto de ID {product_id} removido com sucesso!", # neste caso, ta mais pra expirado, mas serve.
+            "ok": False,
+            "product": Product.query.filter_by(id=product_id).first().as_dict()
         }
-        return jsonify(context), 201
+        return jsonify(context)
     product = Product.query.filter_by(id=product_id).first()
     product.quantity += 1
     db.session.commit()
     return jsonify({
         "message": f"Produto {product.name} removido com sucesso!",
         "product": product.as_dict(),
+        "ok": True
     })
 
 
@@ -83,6 +97,7 @@ def get_user_api():
         }
     return jsonify(context)
 
+
 @app.route("/api/gerar-usuario-aleatorio", methods=["POST"])
 def generate_random_username_api():
     data = request.get_json()
@@ -98,6 +113,7 @@ def generate_random_username_api():
     if existing_usernames:
         username = f"{username}{len(existing_usernames)}"
     return jsonify({"username": username})
+
 
 @app.route("/api/obter-pagamentos", methods=["POST"])
 def get_payments_api():

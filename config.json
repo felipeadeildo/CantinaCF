@@ -22,5 +22,6 @@
         "Maternal",
         "Jardim I",
         "Jardim II"
-    ]
+    ],
+    "cart_timeout": 3600
 }

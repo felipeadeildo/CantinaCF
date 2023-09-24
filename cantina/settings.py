@@ -18,7 +18,6 @@ CSRF_HEADER_NAME = "".join([chr(random.randint(97, 122)) for i in range(32)])
 DB_PATH = 'sqlite:///database.sqlite3'
 """Database URI"""
 
-
 # static/uploads
 UPLOAD_FOLDER = os.path.join(os.getcwd(), "cantina", "static", "uploads")
 """Upload folder to save uploaded files with proof of recharge"""
@@ -32,3 +31,7 @@ ALLOWED_EXTENSIONS = set(config["allowed_extensions"])
 
 SERIES = config["series"]
 """Series of School"""
+
+
+CART_TIMEOUT = config["cart_timeout"]
+"""Tempo em segundos que determinado produto fica no carrinho de um usuário."""

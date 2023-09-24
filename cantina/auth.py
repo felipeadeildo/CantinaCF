@@ -1,5 +1,5 @@
 from flask import flash, redirect, render_template, request, session, url_for, abort, g
-from .models import User, Route, Role, Route, Page
+from .models import User, Route, Role, Route, Page, Task
 from werkzeug.security import check_password_hash
 from . import app, lock
 import json
@@ -72,8 +72,7 @@ def check_permission():
         if not role_has_permission(user.role.name):
             abort(403) # user does not have permission
 
-    if "cart" not in session:
-        session["cart"] = []
+    session["cart"] = [task.target for task in Task.query.filter_by(user_id=current_user_id, type="product_cleanup", is_done=False).all()]
     g.current_endpoint = Route.query.filter_by(endpoint=request.endpoint).first()
     if g.current_endpoint.block_recurring_access:
         lock.acquire()

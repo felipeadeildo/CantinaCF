@@ -39,4 +39,5 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
+cantina.tasks.TaskManager().run()
 cantina.app.run(host=args.host, port=args.port, debug=args.debug)
