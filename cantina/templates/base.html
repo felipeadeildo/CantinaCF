@@ -41,6 +41,14 @@
             color: #005cb2;
             margin: 0 5px;
         }
+
+        .custom-toast {
+            /* background-color: #333; */
+            /* color: #fff; */
+            border-radius: 10px;
+            padding: 1rem;
+        }
+
     </style>
 
     {% block additional_css %}{% endblock %}
@@ -181,6 +189,17 @@
                 todayHighlight: true
             });
         });
+
+        // Inicialização do Toast
+        toastr.options = {
+            "positionClass": "toast-bottom-center",
+            "timeOut": "3000",
+            "extendedTimeOut": "1000",
+            "preventDuplicates": true,
+            "progressBar": true,
+            "toastClass": "custom-toast"
+        }
+
     </script>
 
     {% block scripts %}{% endblock %}
