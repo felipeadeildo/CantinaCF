@@ -6,11 +6,11 @@
 <nav class="d-flex justify-content-center mt-4">
     <ul class="pagination">
         <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
-            <a class="page-link" href="{{ url_for(endpoint, page=1, per_page=pagination.per_page, **args_without_page_per_page) }}">First</a>
+            <a class="page-link" href="{{ url_for(endpoint, page=1, per_page=pagination.per_page, **args_without_page_per_page) }}">Primeiro</a>
         </li>
         {% if pagination.has_prev %}
         <li class="page-item">
-            <a class="page-link" href="{{ url_for(endpoint, page=pagination.prev_num, per_page=pagination.per_page, **args_without_page_per_page) }}">Previous</a>
+            <a class="page-link" href="{{ url_for(endpoint, page=pagination.prev_num, per_page=pagination.per_page, **args_without_page_per_page) }}">Anterior</a>
         </li>
         {% endif %}
         {% for page in pagination.iter_pages() %}
@@ -30,11 +30,11 @@
         {% endfor %}
         {% if pagination.has_next %}
         <li class="page-item">
-            <a class="page-link" href="{{ url_for(endpoint, page=pagination.next_num, per_page=pagination.per_page, **args_without_page_per_page) }}">Next</a>
+            <a class="page-link" href="{{ url_for(endpoint, page=pagination.next_num, per_page=pagination.per_page, **args_without_page_per_page) }}">Próximo</a>
         </li>
         {% endif %}
         <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
-            <a class="page-link" href="{{ url_for(endpoint, page=pagination.pages, **args_without_page_per_page) }}">Last</a>
+            <a class="page-link" href="{{ url_for(endpoint, page=pagination.pages, **args_without_page_per_page) }}">Último</a>
         </li>
     </ul>
 </nav>
