@@ -26,6 +26,11 @@ def users():
         name = request.form.get("name")
         role_id = request.form.get("role_id")
         serie = request.form.get("serie")
+        try:
+            serie = SERIES[int(serie)]
+        except:
+            flash("A série especificada não existe!", category="error")
+            return redirect(url_for("users"))
         turma = request.form.get("turma")
         matricula = request.form.get("matricula")
         has_username = False
