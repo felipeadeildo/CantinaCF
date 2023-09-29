@@ -150,6 +150,7 @@ class PaymentMethod(db.Model):
     added_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, default=datetime.now)
     is_payroll = db.Column(db.Boolean, default=False)
+    is_protected = db.Column(db.Boolean, default=False)
 
 
 class Payment(db.Model):

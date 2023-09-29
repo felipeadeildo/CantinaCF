@@ -1,7 +1,8 @@
 from . import app, db
-from flask import request, render_template, redirect, url_for, flash
-from .models import Route, CategoryPage, Page, Role, PaymentMethod, EditHistory
+from flask import request, render_template, redirect, url_for, flash, session
+from .models import Route, CategoryPage, Page, Role, User, Payment, PaymentMethod
 import json
+from decimal import Decimal
 
 @app.route('/administração/rotas', methods=('GET', 'POST'))
 def routes():
@@ -198,16 +199,68 @@ def roles():
     elif action == "delete":
         flash("Por enquanto essa funcionalidade está desativada para demais testes!", category="warning")
         return redirect(url_for('roles', action='view'))
-        role_id = request.args.get('role_id')
-        if role_id is None:
-            flash("Primeiro você precisa especificar qual é o cargo né amore?", category="error")
-            return redirect(url_for('roles', action='view'))
-        role = Role.query.filter_by(id=role_id).first()
-        if role is None:
-            flash("Cargo de ID {} não encontrada!".format(role_id), category="error")
-            return redirect(url_for('roles', action='view'))
-        db.session.delete(role)
-        db.session.commit()
-        flash("Cargo removido com sucesso!", category="success")
-        return redirect(url_for('roles', action='view'))
+        # role_id = request.args.get('role_id')
+        # if role_id is None:
+        #     flash("Primeiro você precisa especificar qual é o cargo né amore?", category="error")
+        #     return redirect(url_for('roles', action='view'))
+        # role = Role.query.filter_by(id=role_id).first()
+        # if role is None:
+        #     flash("Cargo de ID {} não encontrada!".format(role_id), category="error")
+        #     return redirect(url_for('roles', action='view'))
+        # db.session.delete(role)
+        # db.session.commit()
+        # flash("Cargo removido com sucesso!", category="success")
+        # return redirect(url_for('roles', action='view'))
     return render_template("admin/roles.html", **context)
+
+
+@app.route("/checkout-payroll", methods=("GET", "POST"))
+def checkout_payroll():
+    action = request.args.get("action", "view")
+    search_query = request.args.get("q", "")
+    users_balance_payroll_gt0 = User.query.filter(User.balance_payroll > 0, User.name.ilike(f"%{search_query}%")).all()
+    if action == "view":
+        return render_template("admin/checkout-payroll.html", target_users=users_balance_payroll_gt0)
+    elif action == "checkout" and request.method == "POST":
+        target_user_id = request.form.get("user_id")
+        target_user = User.query.filter_by(id=target_user_id).first()
+        if target_user is None:
+            flash("Usuário de ID {} não encontrado!".format(target_user_id), category="error")
+            return redirect(url_for("checkout_payroll", action="view"))
+        value = request.form.get("value")
+        if value is None:
+            flash("Por favor, insira o valor do pagamento!", category="error")
+            return redirect(url_for("checkout_payroll", action="view"))
+        try:
+            value = float(value)
+        except ValueError:
+            flash("Por favor, insira um valor numérico!", category="error")
+            return redirect(url_for("checkout_payroll", action="view"))
+        if value <= 0:
+            flash("Então, espertinho(a), por favor, insira um estritamente positivo!", category="error")
+            return redirect(url_for("checkout_payroll", action="view"))
+        if value > float(target_user.balance_payroll):
+            flash("Por favor, insira um valor menor ou igual ao saldo devedor do usuário!", category="error")
+            return redirect(url_for("checkout_payroll", action="view"))
+        
+        old_balance = target_user.balance_payroll
+        target_user.balance_payroll -= Decimal(value)
+        payment_method = PaymentMethod.query.filter_by(name="System").first()
+        new_payment = Payment(
+            payment_method_id=payment_method.id,
+            observations="(System) Baixa no pagamento",
+            value=value,
+            user_id=target_user.id,
+            allowed_by=session["user"].id,
+            is_paypayroll=True,
+            status="accepted",
+            payment_method=payment_method
+        )
+        db.session.add(new_payment)
+        db.session.commit()
+        flash(f"O saldo devedor do usuário {target_user.name} ({target_user.id}) foi atualizado de R$ {old_balance} para R$ {target_user.balance_payroll}!", category="success")
+        return redirect(url_for('checkout_payroll', action="view"))
+    else:
+        flash("Funcionalidade requisitada é inválida!", category="error")
+    return render_template("admin/checkout-payroll.html", target_users=users_balance_payroll_gt0)
+

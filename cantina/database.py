@@ -21,6 +21,7 @@ def init_db():
         PaymentMethod(name="Cartão de Debito", need_proof=False, is_payroll=False),
         PaymentMethod(name="Espécie", need_proof=False, is_payroll=False),
         PaymentMethod(name="Folha de Pagamento", need_proof=True, is_payroll=True),
+        PaymentMethod(name="System", need_proof=False, is_payroll=False, is_protected=True),
     ]
     db.session.add_all(payments_method)
     db.session.commit()
@@ -71,6 +72,7 @@ def init_db():
         Route(id=41, name="(API) Despachar todos os produtos de um usuário", endpoint="confirm_all_user_despaches_api", block_recurring_access=True),
         Route(id=42, name="(API) Listar produtos para despacho de um usuário", endpoint="list_user_despaches_api"),
         Route(id=43, name="Usuários com Saldo Devedor", endpoint="users_with_balance_payroll"),
+        Route(id=44, name="Checkout Folha de Pagamento", endpoint="checkout_payroll"),
     ]
     db.session.add_all(routes)
     db.session.commit()
@@ -240,6 +242,12 @@ def init_db():
             description="Visualização dos usuários com saldo devedor maior que zero.",
             route=routes[42],
             category_page=categories[3],
+        ),
+        Page(
+            title="Checkout Folha de Pagamento",
+            description="Permite debitar a folha de pagamento dos usuários.",
+            route=routes[43],
+            category_page=categories[4],
         )
     ]
     db.session.add_all(pages)

@@ -249,7 +249,11 @@ def security_recharge():
     if value is None:
         flash("Por favor, insira o valor!", category="error")
         return
-    value = float(value)
+    try:
+        value = float(value)
+    except ValueError:
+        flash("Por favor, insira um valor válido!", category="error")
+        return
     if value < 0:
         flash(f"Então, espertinho(a), por favor, insira um valor positivo!", category="error")
         return
@@ -257,6 +261,12 @@ def security_recharge():
         flash(f"Não vejo como uma recarga de R$ 0 poderia lhe ser útil...", category="error")
         return
     payment_method = PaymentMethod.query.filter_by(id=payment_method).first()
+    if payment_method is None:
+        flash("Método de pagamento não encontrado!", category="error")
+        return
+    if payment_method.is_protected:
+        flash("Tenta a sorte!", category="error")
+        return
     observations = request.form.get("observations")
     new_payment = Payment(
         payment_method_id=payment_method.id,
@@ -300,7 +310,7 @@ def recharge():
     if request.method == "POST":
         security_recharge()
     context = {
-        "payment_methods": PaymentMethod.query.all()
+        "payment_methods": PaymentMethod.query.filter(~PaymentMethod.is_protected).all()
     }
     return render_template('recharge.html', **context)
 
