@@ -1,5 +1,5 @@
 from flask import render_template, request, flash, session, redirect, url_for
-from .models import Product, User, ProductSale, EditHistory, Page
+from .models import Product, User, ProductSale, EditHistory, Page, Task
 from datetime import datetime, timedelta
 from sqlalchemy.orm import aliased
 from .auth import verify_password
@@ -46,9 +46,10 @@ def confirm_purchase():
     if len(session["cart"]) == 0:
         flash("Nenhum produto adicionado ao carrinho para confirmação...", "error")
         return redirect(url_for("cantina"))
+    response = None
     if request.method == "POST":
-        process_purchase(request.form)
-    return render_template("confirm-purchase.html")
+        response = process_purchase(request.form)
+    return response or render_template("confirm-purchase.html")
 
 
 def process_purchase(form):
@@ -89,11 +90,20 @@ def process_purchase(form):
             sold_by=session["user"].id,
             status="to dispatch"
         )
+        db.session.commit()
         db.session.add(new_product_sale)
+        task = Task.query.filter_by(target_id=product.id, target_type="product", user_id=session["user"].id, type="product_cleanup", is_done=False).first()
+        if task:
+            task.is_done = True
+            task.finished_by_user_id = session["user"].id
+            task.finished_at = datetime.now()
+            db.session.commit()
+
     db.session.commit()
 
     session["cart"] = []
     flash("Compra realizada com sucesso, dirija-se ao local de despachemento!", "success")
+    return redirect(url_for("cantina"))
 
 
 @app.route("/produtos")
