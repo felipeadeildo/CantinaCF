@@ -1,7 +1,10 @@
-from .models import User, PaymentMethod, Role, Route, CategoryPage, Page
-from werkzeug.security import generate_password_hash
 from getpass import getpass
+
+from werkzeug.security import generate_password_hash
+
 from . import app, db
+from .models import CategoryPage, Page, PaymentMethod, Role, Route, User
+
 
 @app.cli.command("initdb")
 def init_db():
@@ -12,16 +15,24 @@ def init_db():
     db.drop_all()
     db.create_all()
     print("Database initialized.")
-    
+
     # Adiciona métodos de pagameto padrão
     print("Adding default payment methods...")
     payments_method = [
         PaymentMethod(name="PIX", need_proof=True, is_payroll=False),
-        PaymentMethod(name="Cartão de Crédito", need_proof=False, is_payroll=False),
-        PaymentMethod(name="Cartão de Debito", need_proof=False, is_payroll=False),
+        PaymentMethod(
+            name="Cartão de Crédito", need_proof=False, is_payroll=False
+        ),
+        PaymentMethod(
+            name="Cartão de Debito", need_proof=False, is_payroll=False
+        ),
         PaymentMethod(name="Espécie", need_proof=False, is_payroll=False),
-        PaymentMethod(name="Folha de Pagamento", need_proof=True, is_payroll=True),
-        PaymentMethod(name="System", need_proof=False, is_payroll=False, is_protected=True),
+        PaymentMethod(
+            name="Folha de Pagamento", need_proof=True, is_payroll=True
+        ),
+        PaymentMethod(
+            name="System", need_proof=False, is_payroll=False, is_protected=True
+        ),
     ]
     db.session.add_all(payments_method)
     db.session.commit()
@@ -34,45 +45,140 @@ def init_db():
         Route(id=3, name="Logout", endpoint="logout"),
         Route(id=4, name="Home", endpoint="index"),
         Route(id=5, name="Cantina", endpoint="cantina"),
-        Route(id=6, name="Confirmar Compra", endpoint="confirm_purchase", block_recurring_access=True),
-        Route(id=7, name="Produtos para Despache", endpoint="products_for_despache"),
+        Route(
+            id=6,
+            name="Confirmar Compra",
+            endpoint="confirm_purchase",
+            block_recurring_access=True,
+        ),
+        Route(
+            id=7,
+            name="Produtos para Despache",
+            endpoint="products_for_despache",
+        ),
         Route(id=8, name="Perfil", endpoint="profile"),
         Route(id=9, name="Editar Perfil", endpoint="edit_profile"),
         Route(id=10, name="Editar Senha", endpoint="edit_password"),
         Route(id=11, name="Usuários", endpoint="users"),
         Route(id=12, name="Recarregar", endpoint="recharge"),
-        Route(id=13, name="Histórico de Pagamentos", endpoint="payments_history"),
+        Route(
+            id=13, name="Histórico de Pagamentos", endpoint="payments_history"
+        ),
         Route(id=14, name="Produtos", endpoint="products"),
-        Route(id=15, name='Verificação de Pagamentos', endpoint='verify_payments'),
-        Route(id=16, name='Controle de Estoque', endpoint='stock_control'),
-        Route(id=17, name='Histórico de Entrada do Estoque', endpoint='stock_history'),
+        Route(
+            id=15, name="Verificação de Pagamentos", endpoint="verify_payments"
+        ),
+        Route(id=16, name="Controle de Estoque", endpoint="stock_control"),
+        Route(
+            id=17,
+            name="Histórico de Entrada do Estoque",
+            endpoint="stock_history",
+        ),
         Route(id=18, name="Editar Produto", endpoint="edit_product"),
         Route(id=19, name="Histórico de Vendas", endpoint="sales_history"),
         Route(id=20, name="Afiliados", endpoint="affiliates"),
-        Route(id=21, name="Histórico de Recarga dos Afiliados", endpoint="affiliates_history"),
-        Route(id=22, name="Filtrar Vendas de HOJE", endpoint="filter_today_sales"),
+        Route(
+            id=21,
+            name="Histórico de Recarga dos Afiliados",
+            endpoint="affiliates_history",
+        ),
+        Route(
+            id=22, name="Filtrar Vendas de HOJE", endpoint="filter_today_sales"
+        ),
         Route(id=23, name="Pagar Saldo Devedor", endpoint="pay_payroll"),
-        Route(id=24, name="Histórico de Edição de Produtos", endpoint="history_edits_products"),
-        Route(id=25, name="Histórico de Edição de Usuários", endpoint="history_edits_users"),
-        Route(id=26, name="Usuários com Saldo Disponível", endpoint="users_with_balance"),
-        Route(id=27, name="(API) Adicionar ao carrinho", endpoint="add_to_cart_api", block_recurring_access=True),
-        Route(id=28, name="(API) Remover do carrinho", endpoint="remove_from_cart_api", block_recurring_access=True),
+        Route(
+            id=24,
+            name="Histórico de Edição de Produtos",
+            endpoint="history_edits_products",
+        ),
+        Route(
+            id=25,
+            name="Histórico de Edição de Usuários",
+            endpoint="history_edits_users",
+        ),
+        Route(
+            id=26,
+            name="Usuários com Saldo Disponível",
+            endpoint="users_with_balance",
+        ),
+        Route(
+            id=27,
+            name="(API) Adicionar ao carrinho",
+            endpoint="add_to_cart_api",
+            block_recurring_access=True,
+        ),
+        Route(
+            id=28,
+            name="(API) Remover do carrinho",
+            endpoint="remove_from_cart_api",
+            block_recurring_access=True,
+        ),
         Route(id=29, name="(API) Obter Usuário", endpoint="get_user_api"),
-        Route(id=30, name="(API) Gerar Nome de Usuário Aleatório", endpoint="generate_random_username_api"),
-        Route(id=31, name="(API) Obter pagamentos", endpoint="get_payments_api"),
-        Route(id=32, name="(API) Verificar pagamento", endpoint="verify_payment_api", block_recurring_access=True),
-        Route(id=33, name="(API) Exportar para Excel", endpoint="export_to_excel_api"),
-        Route(id=34, name="(API) Listar Produtos para Despacho", endpoint="list_users_pending_desp_api"),
-        Route(id=35, name="(API) Confirmar Produto Despachado", endpoint="confirm_despache_api", block_recurring_access=True),
+        Route(
+            id=30,
+            name="(API) Gerar Nome de Usuário Aleatório",
+            endpoint="generate_random_username_api",
+        ),
+        Route(
+            id=31, name="(API) Obter pagamentos", endpoint="get_payments_api"
+        ),
+        Route(
+            id=32,
+            name="(API) Verificar pagamento",
+            endpoint="verify_payment_api",
+            block_recurring_access=True,
+        ),
+        Route(
+            id=33,
+            name="(API) Exportar para Excel",
+            endpoint="export_to_excel_api",
+        ),
+        Route(
+            id=34,
+            name="(API) Listar Produtos para Despacho",
+            endpoint="list_users_pending_desp_api",
+        ),
+        Route(
+            id=35,
+            name="(API) Confirmar Produto Despachado",
+            endpoint="confirm_despache_api",
+            block_recurring_access=True,
+        ),
         Route(id=36, name="(ADMIN) Rotas", endpoint="routes"),
-        Route(id=37, name="(ADMIN) Categoria das Páginas", endpoint="category_pages"),
+        Route(
+            id=37,
+            name="(ADMIN) Categoria das Páginas",
+            endpoint="category_pages",
+        ),
         Route(id=38, name="(ADMIN) Cargos", endpoint="roles"),
         Route(id=39, name="(ADMIN) Páginas", endpoint="pages"),
-        Route(id=40, name="(API) Despachar todos os produtos de todos os usuários", endpoint="confirm_all_despaches_api", block_recurring_access=True),
-        Route(id=41, name="(API) Despachar todos os produtos de um usuário", endpoint="confirm_all_user_despaches_api", block_recurring_access=True),
-        Route(id=42, name="(API) Listar produtos para despacho de um usuário", endpoint="list_user_despaches_api"),
-        Route(id=43, name="Usuários com Saldo Devedor", endpoint="users_with_balance_payroll"),
-        Route(id=44, name="Checkout Folha de Pagamento", endpoint="checkout_payroll"),
+        Route(
+            id=40,
+            name="(API) Despachar todos os produtos de todos os usuários",
+            endpoint="confirm_all_despaches_api",
+            block_recurring_access=True,
+        ),
+        Route(
+            id=41,
+            name="(API) Despachar todos os produtos de um usuário",
+            endpoint="confirm_all_user_despaches_api",
+            block_recurring_access=True,
+        ),
+        Route(
+            id=42,
+            name="(API) Listar produtos para despacho de um usuário",
+            endpoint="list_user_despaches_api",
+        ),
+        Route(
+            id=43,
+            name="Usuários com Saldo Devedor",
+            endpoint="users_with_balance_payroll",
+        ),
+        Route(
+            id=44,
+            name="Checkout Folha de Pagamento",
+            endpoint="checkout_payroll",
+        ),
     ]
     db.session.add_all(routes)
     db.session.commit()
@@ -80,10 +186,22 @@ def init_db():
     # Adiciona Categorias de Páginas Padrão
     print("Adding default categories...")
     categories = [
-        CategoryPage(name="Geral", description="Páginas referentes à funcionalidades Gerais"),
-        CategoryPage(name="Cantina", description="Páginas referentes à funcionalidades da Cantina"),
-        CategoryPage(name="Auditorias", description="Páginas referentes a auditoria em geral"),
-        CategoryPage(name="Administração", description="Páginas referentes à funcionalidades do Administrador"),
+        CategoryPage(
+            name="Geral",
+            description="Páginas referentes à funcionalidades Gerais",
+        ),
+        CategoryPage(
+            name="Cantina",
+            description="Páginas referentes à funcionalidades da Cantina",
+        ),
+        CategoryPage(
+            name="Auditorias",
+            description="Páginas referentes a auditoria em geral",
+        ),
+        CategoryPage(
+            name="Administração",
+            description="Páginas referentes à funcionalidades do Administrador",
+        ),
     ]
     db.session.add_all(categories)
     db.session.commit()
@@ -92,8 +210,8 @@ def init_db():
     print("Adding default pages...")
     pages = [
         Page(
-            title="Home", 
-            description="Coleção de Páginas em Geral", 
+            title="Home",
+            description="Coleção de Páginas em Geral",
             route=routes[3],
             category_page=categories[0],
         ),
@@ -220,16 +338,16 @@ def init_db():
             category_page=categories[3],
         ),
         Page(
-            title="Gerenciamento das Categorias das Páginas", 
+            title="Gerenciamento das Categorias das Páginas",
             description="Aqui você pode gerenciar nome e descrição das categorias das páginas (essas que sã o apresentadas na página inicial).",
-            route=routes[36], 
+            route=routes[36],
             category_page=categories[3],
         ),
         Page(
-            title="Gerenciamento de Cargos", 
-            description="Gerenciamento de Cargos :p", 
-            route=routes[37], 
-            category_page=categories[3]
+            title="Gerenciamento de Cargos",
+            description="Gerenciamento de Cargos :p",
+            route=routes[37],
+            category_page=categories[3],
         ),
         Page(
             title="Gerenciamento das Páginas",
@@ -247,8 +365,8 @@ def init_db():
             title="Checkout Folha de Pagamento",
             description="Permite debitar a folha de pagamento dos usuários.",
             route=routes[43],
-            category_page=categories[4],
-        )
+            category_page=categories[3],
+        ),
     ]
     db.session.add_all(pages)
     db.session.commit()
@@ -256,9 +374,10 @@ def init_db():
     # Adiciona os Cargos Padrões
     print("Adding default roles...")
     import json
+
     roles = [
         Role(
-            name="Admin", 
+            name="Admin",
             description="Administrador do Site :P (#GOD)",
             allowed_routes=json.dumps(list(range(1, len(routes) + 1))),
         ),
@@ -270,18 +389,46 @@ def init_db():
         Role(
             name="Aluno",
             description="Alunos da Escola",
-            allowed_routes=json.dumps([1, 2, 3, 4, 8, 10, 12, 14, 27, 28, 5, 6]),
+            allowed_routes=json.dumps(
+                [1, 2, 3, 4, 8, 10, 12, 14, 27, 28, 5, 6]
+            ),
         ),
         Role(
             name="Caixa",
             description="Caixas da Cantina",
-            allowed_routes=json.dumps([1, 2, 3, 4, 8, 10, 12, 15, 20, 21, 23, 17, 22, 19, 13, 14, 5, 6, 31, 32, 33, 27, 28]),
+            allowed_routes=json.dumps(
+                [
+                    1,
+                    2,
+                    3,
+                    4,
+                    8,
+                    10,
+                    12,
+                    15,
+                    20,
+                    21,
+                    23,
+                    17,
+                    22,
+                    19,
+                    13,
+                    14,
+                    5,
+                    6,
+                    31,
+                    32,
+                    33,
+                    27,
+                    28,
+                ]
+            ),
         ),
         Role(
             name="Guest",
             description="Visitante (ignore)",
             allowed_routes=json.dumps([1, 2]),
-        )
+        ),
     ]
     db.session.add_all(roles)
     db.session.commit()
@@ -294,7 +441,9 @@ def create_superuser():
     Creates a superuser.
     """
     print("Creating superuser...")
-    role = Role.query.get(1) # admin :D // Role.query.filter_by(name="Admin").first()
+    role = Role.query.get(
+        1
+    )  # admin :D // Role.query.filter_by(name="Admin").first()
     print("Insert the username and password for superuser: ")
     username = input("Username: ")
     while True:
@@ -307,7 +456,12 @@ def create_superuser():
             print("Passwords do not match.")
             continue
         break
-    superuser = User(name=username.capitalize(), username=username, password=generate_password_hash(password), role=role)
+    superuser = User(
+        name=username.capitalize(),
+        username=username,
+        password=generate_password_hash(password),
+        role=role,
+    )
     db.session.add(superuser)
     db.session.commit()
     print("Superuser created.")
