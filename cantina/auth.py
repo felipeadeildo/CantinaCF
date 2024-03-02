@@ -25,7 +25,7 @@ def login():
         else:
             login_user(user)
             flash("Você está logado com sucesso!", category="success")
-            return redirect(url_for("index"))
+            return redirect(url_for("cantina"))
     return render_template("login.html")
 
 
