@@ -1,6 +1,6 @@
-import random
-import os
 import json
+import os
+import random
 
 config = json.load(open("config.json", encoding="utf-8"))
 
@@ -15,7 +15,7 @@ SECRET_KEY = "".join([chr(random.randint(97, 122)) for i in range(32)])
 CSRF_HEADER_NAME = "".join([chr(random.randint(97, 122)) for i in range(32)])
 """Random CSRF Header Name"""
 
-DB_PATH = 'sqlite:///database.sqlite3'
+DB_PATH = "sqlite:///database.sqlite3"
 """Database URI"""
 
 # static/uploads

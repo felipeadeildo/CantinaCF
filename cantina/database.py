@@ -20,19 +20,11 @@ def init_db():
     print("Adding default payment methods...")
     payments_method = [
         PaymentMethod(name="PIX", need_proof=True, is_payroll=False),
-        PaymentMethod(
-            name="Cartão de Crédito", need_proof=False, is_payroll=False
-        ),
-        PaymentMethod(
-            name="Cartão de Debito", need_proof=False, is_payroll=False
-        ),
+        PaymentMethod(name="Cartão de Crédito", need_proof=False, is_payroll=False),
+        PaymentMethod(name="Cartão de Debito", need_proof=False, is_payroll=False),
         PaymentMethod(name="Espécie", need_proof=False, is_payroll=False),
-        PaymentMethod(
-            name="Folha de Pagamento", need_proof=True, is_payroll=True
-        ),
-        PaymentMethod(
-            name="System", need_proof=False, is_payroll=False, is_protected=True
-        ),
+        PaymentMethod(name="Folha de Pagamento", need_proof=True, is_payroll=True),
+        PaymentMethod(name="System", need_proof=False, is_payroll=False, is_protected=True),
     ]
     db.session.add_all(payments_method)
     db.session.commit()
@@ -61,13 +53,9 @@ def init_db():
         Route(id=10, name="Editar Senha", endpoint="edit_password"),
         Route(id=11, name="Usuários", endpoint="users"),
         Route(id=12, name="Recarregar", endpoint="recharge"),
-        Route(
-            id=13, name="Histórico de Pagamentos", endpoint="payments_history"
-        ),
+        Route(id=13, name="Histórico de Pagamentos", endpoint="payments_history"),
         Route(id=14, name="Produtos", endpoint="products"),
-        Route(
-            id=15, name="Verificação de Pagamentos", endpoint="verify_payments"
-        ),
+        Route(id=15, name="Verificação de Pagamentos", endpoint="verify_payments"),
         Route(id=16, name="Controle de Estoque", endpoint="stock_control"),
         Route(
             id=17,
@@ -82,9 +70,7 @@ def init_db():
             name="Histórico de Recarga dos Afiliados",
             endpoint="affiliates_history",
         ),
-        Route(
-            id=22, name="Filtrar Vendas de HOJE", endpoint="filter_today_sales"
-        ),
+        Route(id=22, name="Filtrar Vendas de HOJE", endpoint="filter_today_sales"),
         Route(id=23, name="Pagar Saldo Devedor", endpoint="pay_payroll"),
         Route(
             id=24,
@@ -119,9 +105,7 @@ def init_db():
             name="(API) Gerar Nome de Usuário Aleatório",
             endpoint="generate_random_username_api",
         ),
-        Route(
-            id=31, name="(API) Obter pagamentos", endpoint="get_payments_api"
-        ),
+        Route(id=31, name="(API) Obter pagamentos", endpoint="get_payments_api"),
         Route(
             id=32,
             name="(API) Verificar pagamento",
@@ -389,9 +373,7 @@ def init_db():
         Role(
             name="Aluno",
             description="Alunos da Escola",
-            allowed_routes=json.dumps(
-                [1, 2, 3, 4, 8, 10, 12, 14, 27, 28, 5, 6]
-            ),
+            allowed_routes=json.dumps([1, 2, 3, 4, 8, 10, 12, 14, 27, 28, 5, 6]),
         ),
         Role(
             name="Caixa",
@@ -441,9 +423,7 @@ def create_superuser():
     Creates a superuser.
     """
     print("Creating superuser...")
-    role = Role.query.get(
-        1
-    )  # admin :D // Role.query.filter_by(name="Admin").first()
+    role = Role.query.get(1)  # admin :D // Role.query.filter_by(name="Admin").first()
     print("Insert the username and password for superuser: ")
     username = input("Username: ")
     while True:
