@@ -1,94 +1,120 @@
-{% extends "base.html" %}
-
-{% block content %}
+{% extends "base.html" %} {% block content %}
 <div class="container">
-    <h3 class="text-center">{% block title %}{{ g.current_endpoint.name }}{% endblock title %}</h3>
+  <h3 class="text-center">
+    {% block title %}{{ g.current_endpoint.name }}{% endblock title %}
+  </h3>
 
-    <div class="card mb-4">
-        <div class="card-body">
-            <div class="table-responsive" style="max-height: 50vh; overflow-y: auto;">
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Nome</th>
-                            <th>Valor</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for product in session.cart %}
-                        <tr>
-                            <td>{{ product.id }}</td>
-                            <td>{{ product.name }}</td>
-                            <td>R$ {{ product.value }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            <h5 class="text-end mt-3">Total: R$ {{ (session.cart|sum(attribute='value'))|round(2, 'floor') }}</h5>
-        </div>
+  <div class="card mb-4">
+    <div class="card-body">
+      <div class="table-responsive" style="max-height: 50vh; overflow-y: auto">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nome</th>
+              <th>Valor</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for product in session.cart %}
+            <tr>
+              <td>{{ product.id }}</td>
+              <td>{{ product.name }}</td>
+              <td>R$ {{ product.value }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <h5 class="text-end mt-3">
+        Total: R$ {{ (session.cart|sum(attribute='value'))|round(2, 'floor') }}
+      </h5>
+    </div>
+  </div>
+
+  <form
+    class="col-md-6 offset-md-3"
+    method="POST"
+    action="{{ url_for('confirm_purchase') }}"
+    enctype="multipart/form-data"
+  >
+    <div class="mb-3" id="targetUser" style="display: none">
+      <div class="input-group">
+        <span class="input-group-text"><i class="fas fa-id-card"></i></span>
+        <input
+          type="text"
+          class="form-control"
+          id="matricula"
+          name="matricula"
+          value="{{ session.user.id }}"
+          placeholder="Número de Matrícula ou ID"
+        />
+      </div>
+    </div>
+    <div class="mb-3">
+      <div class="input-group">
+        <span class="input-group-text"><i class="fas fa-lock"></i></span>
+        <input
+          type="password"
+          class="form-control"
+          id="password"
+          name="password"
+          required
+          placeholder="Senha"
+        />
+      </div>
     </div>
 
-    <form class="col-md-6 offset-md-3" method="POST" action="{{ url_for('confirm_purchase') }}"
-        enctype="multipart/form-data">
-        <div class="mb-3" id="targetUser" style="display: none">
-            <div class="input-group">
-                <span class="input-group-text"><i class="fas fa-id-card"></i></span>
-                <input type="text" class="form-control" id="matricula" name="matricula" value="{{ session.user.id }}"
-                    placeholder="Número de Matrícula ou ID">
-            </div>
-        </div>
-        <div class="mb-3">
-            <div class="input-group">
-                <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                <input type="password" class="form-control" id="password" name="password" required placeholder="Senha">
-            </div>
-        </div>
+    <input
+      type="hidden"
+      name="{{ config['CSRF_COOKIE_NAME'] }}"
+      value="{{ csrf_token() }}"
+    />
 
+    <div class="d-grid gap-2">
+      <button class="btn btn-primary" type="submit" id="confirmButton">
+        <i class="fas fa-check-circle"></i> Comprar!
+      </button>
 
-        <input type="hidden" name="{{ config['CSRF_COOKIE_NAME'] }}" value="{{ csrf_token() }}">
+      <button class="btn btn-outline-primary" type="submit" id="confirmForOther">
+        <i class="fa-solid fa-people-robbery"></i> Confirmar para outro usuário
+      </button>
 
-        <div class="d-grid gap-2">
-            <button class="btn btn-primary" type="submit" id="confirmButton">
-                <i class="fas fa-check-circle"></i> Comprar!
-            </button>
-
-            <button class="btn btn-outline-primary" type="submit" id="confirmForOther" data-bs-toggle="tooltip"
-                data-bs-placement="top" title="Confirmar para outro usuário">
-                <i class="fa-solid fa-people-robbery"></i>
-            </button>
-
-            <a class="btn btn-outline-primary" href="{{ url_for('cantina') }}" data-bs-toggle="tooltip"
-                data-bs-placement="top" title="Voltar para Cantina">
-                <i class="fas fa-arrow-left"></i>
-            </a>
-        </div>
-    </form>
+      <a
+        class="btn btn-outline-primary"
+        href="{{ url_for('cantina') }}"
+        data-bs-toggle="tooltip"
+        data-bs-placement="top"
+        title="Voltar para Cantina"
+      >
+        <i class="fas fa-arrow-left"></i>
+      </a>
+    </div>
+  </form>
 </div>
-{% endblock content %}
-
-{% block scripts %}
+{% endblock content %} {% block scripts %}
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const confirmButton = document.getElementById("confirmButton");
-        confirmButton.addEventListener("click", function () {
-            confirmButton.disabled = true;
-            confirmButton.innerHTML = '<i class="fas fa-check-circle"></i> Processando...';
-            document.querySelector("form").submit();
-        });
-        const _USER_ID = '{{ session.user.id }}';
-        const confirmForOther = document.getElementById("confirmForOther");
-        const targetUser = document.getElementById("targetUser");
-        let for_other = false;
-        confirmForOther.addEventListener("click", function () {
-            for_other = !for_other;
-            const buttonText = for_other ? 'Confirmar para mim!' : 'Confirmar para outro usuário';
-            const iconClass = for_other ? 'fa-people-robbery' : 'fa-people-robbery';
-            confirmForOther.innerHTML = `<i class="fa-solid ${iconClass}"></i> ${buttonText}`;
-            targetUser.style.display = for_other ? "block" : "none";
-            document.getElementById("matricula").value = for_other ? "" : _USER_ID;
-        })
-    });
+  document.addEventListener("DOMContentLoaded", function () {
+    const confirmButton = document.getElementById("confirmButton")
+    confirmButton.addEventListener("click", function () {
+      confirmButton.disabled = true
+      confirmButton.innerHTML = '<i class="fas fa-check-circle"></i> Processando...'
+      document.querySelector("form").submit()
+    })
+    const _USER_ID = "{{ session.user.id }}"
+    const confirmForOther = document.getElementById("confirmForOther")
+    const targetUser = document.getElementById("targetUser")
+    let for_other = false
+    confirmForOther.addEventListener("click", function () {
+      for_other = !for_other
+      const buttonText = for_other
+        ? "Confirmar para mim!"
+        : "Confirmar para outro usuário"
+      const iconClass = for_other ? "fa-people-robbery" : "fa-people-robbery"
+      confirmForOther.innerHTML = `<i class="fa-solid ${iconClass}"></i> ${buttonText}`
+      targetUser.style.display = for_other ? "block" : "none"
+      document.getElementById("matricula").value = for_other ? "" : _USER_ID
+    })
+  })
 </script>
 {% endblock scripts %}
