@@ -1,199 +1,262 @@
 {% extends "base.html" %}
-
+<!--  -->
 {% block content %}
 <div class="row">
-    <h3 class="text-center">{% block title %}{{ g.current_endpoint.name }}{% endblock title %}</h3>
-    <div class="col-md-8 {% if session.user.role.name == 'Admin' %}col-lg-8{% else %}col-lg-12{% endif %}">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">Gerenciamento de Usuários</h5>
-                <div class="input-group mb-3">
-                    <input id="search" type="text" onkeyup="searchUsers()" class="form-control"
-                        placeholder="Pesquisar usuários...">
-                </div>
-                <div class="table-responsive">
-                    <table class="table table-striped table-hover text-center">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Nome</th>
-                                <th>Usuário</th>
-                                <th>Cargo</th>
-                                <th>Matrícula</th>
-                                <th>Perfil</th>
-                                <th>Editar</th>
-                            </tr>
-                        </thead>
-                        <tbody id="userTableBody">
-                            {% for user in users %}
-                            <tr>
-                                <td>{{ user.id }}</td>
-                                <td>{{ user.name }}</td>
-                                <td>{{ user.username }}</td>
-                                <td>{{ user.role.name }}</td>
-                                <td>{{ user.matricula or "-" }}</td>
-                                <td>
-                                    <a href="{{ url_for('profile', user_id=user.id) }}" class="btn btn-primary btn-sm">
-                                        <i class="fas fa-user"></i>
-                                    </a>
-                                </td>
-                                <td>
-                                    <a href="{{ url_for('edit_profile', user_id=user.id) }}" class="btn btn-info btn-sm">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+  <h3 class="text-center">
+    {% block title %}{{ g.current_endpoint.name }}{% endblock title %}
+  </h3>
+  <div
+    class="col-md-8 {% if session.user.role.name == 'Admin' %}col-lg-8{% else %}col-lg-12{% endif %}"
+  >
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Gerenciamento de Usuários</h5>
+        <div class="input-group mb-3">
+          <input
+            id="search"
+            type="text"
+            onkeyup="searchUsers()"
+            class="form-control"
+            placeholder="Pesquisar usuários..."
+          />
         </div>
-    </div>
-    {% if session.user.role.name == 'Admin' %}
-    <div class="col-md-4 col-lg-4">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">Adicionar Usuário</h5>
-                <form method="post" action="{{ url_for('users') }}">
-                    <div class="mb-3">
-                        <label for="name" class="form-label">Nome</label>
-                        <input id="name" type="text" name="name" class="form-control">
-                    </div>
-                    <div class="mb-3 input-group">
-                        <label for="username" class="form-label">Usuário</label>
-                        <input id="username" class="form-control validate" type="text" name="username" required>
-                        <button class="btn btn-primary" type="button" onclick="generateRandomUsername()">
-                            Usuário Aleatório
-                        </button>
-                    </div>
-                    <div class="mb-3 input-group">
-                        <label for="password" class="form-label">Senha</label>
-                        <input id="password" type="password" name="password" required class="form-control">
-                        <button class="btn btn-primary" type="button" onclick="generateRandomPassword()">
-                            Senha Aleatória
-                        </button>
-                        <button class="btn btn-primary" type="button" onclick="viewPassword()">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                    </div>
-                    <div class="mb-3">
-                        <label for="role_id" class="form-label">Cargo</label>
-                        <select id="role_id" name="role_id" required class="form-select">
-                            <option value="" disabled selected>Selecione Cargo</option>
-                            {% for role in roles %}
-                            <option value="{{ role.id }}">{{ role.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div id="serie-input" style="display: none;">
-                        <div class="mb-3">
-                            <label for="serie" class="form-label">Série</label>
-                            <select id="serie" name="serie" class="form-select">
-                                <option value="" disabled selected>Selecione Série</option>
-                                {% for serie in series %}
-                                <option value="{{ loop.index0 }}">{{ serie }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                    </div>
-                    <div id="turma-input" style="display: none;">
-                        <div class="mb-3">
-                            <label for="turma" class="form-label">Turma</label>
-                            <input id="turma" type="text" name="turma" class="form-control">
-                        </div>
-                    </div>
-                    <div id="matricula-input" style="display: none;">
-                        <div class="mb-3">
-                            <label for="matricula" class="form-label">Matrícula</label>
-                            <input id="matricula" type="text" name="matricula" class="form-control">
-                        </div>
-                    </div>
-                    <input type="hidden" name="{{ config['CSRF_COOKIE_NAME'] }}" value="{{ csrf_token() }}">
-                    <button class="btn btn-success" type="submit" name="action">Adicionar Usuário
-                        <i class="fas fa-user-plus"></i>
-                    </button>
-                </form>
-            </div>
+        <div class="table-responsive">
+          <table class="table table-striped table-hover text-center">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Usuário</th>
+                <th>Cargo</th>
+                <th>Matrícula</th>
+                <th>Perfil</th>
+                <th>Editar</th>
+              </tr>
+            </thead>
+            <tbody id="userTableBody">
+              {% for user in users %}
+              <tr>
+                <td>{{ user.id }}</td>
+                <td>{{ user.name }}</td>
+                <td>{{ user.username }}</td>
+                <td>{{ user.role.name }}</td>
+                <td>{{ user.matricula or "-" }}</td>
+                <td>
+                  <a
+                    href="{{ url_for('profile', user_id=user.id) }}"
+                    class="btn btn-primary btn-sm"
+                  >
+                    <i class="fas fa-user"></i>
+                  </a>
+                </td>
+                <td>
+                  <a
+                    href="{{ url_for('edit_profile', user_id=user.id) }}"
+                    class="btn btn-info btn-sm"
+                  >
+                    <i class="fas fa-edit"></i>
+                  </a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
         </div>
+      </div>
     </div>
-    {% endif %}
+  </div>
+  {% if session.user.role.id == 1 %}
+  <div class="col-md-4 col-lg-4">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Adicionar Usuário</h5>
+        <form method="post" action="{{ url_for('users') }}">
+          <div class="mb-3">
+            <label for="name" class="form-label">Nome</label>
+            <input id="name" type="text" name="name" class="form-control" />
+          </div>
+          <div class="mb-3">
+            <label for="username" class="form-label">Usuário</label>
+            <div class="row">
+              <div class="col-8">
+                <input
+                  id="username"
+                  class="form-control validate"
+                  type="text"
+                  name="username"
+                  required
+                />
+              </div>
+              <div class="col-4">
+                <button
+                  class="btn btn-primary"
+                  type="button"
+                  onclick="generateRandomUsername()"
+                >
+                  Random
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="password" class="form-label">Senha</label>
+            <div class="row">
+              <div class="col-7">
+                <input
+                  id="password"
+                  type="password"
+                  name="password"
+                  required
+                  class="form-control"
+                />
+              </div>
+              <div class="col-5">
+                <button
+                  class="btn btn-primary"
+                  type="button"
+                  onclick="generateRandomPassword()"
+                >
+                  Random
+                </button>
+                <button
+                  class="btn btn-primary"
+                  type="button"
+                  id="show-password"
+                  onclick="viewPassword()"
+                >
+                  <i class="fas fa-eye"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="role_id" class="form-label">Cargo</label>
+            <select id="role_id" name="role_id" required class="form-select">
+              <option value="" disabled selected>Selecione Cargo</option>
+              {% for role in roles %}
+              <option value="{{ role.id }}">{{ role.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div id="serie-input" style="display: none">
+            <div class="mb-3">
+              <label for="serie" class="form-label">Série</label>
+              <select id="serie" name="serie" class="form-select">
+                <option value="" disabled selected>Selecione Série</option>
+                {% for serie in series %}
+                <option value="{{ loop.index0 }}">{{ serie }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div id="turma-input" style="display: none">
+            <div class="mb-3">
+              <label for="turma" class="form-label">Turma</label>
+              <input id="turma" type="text" name="turma" class="form-control" />
+            </div>
+          </div>
+          <div id="matricula-input" style="display: none">
+            <div class="mb-3">
+              <label for="matricula" class="form-label">Matrícula</label>
+              <input id="matricula" type="text" name="matricula" class="form-control" />
+            </div>
+          </div>
+          <input
+            type="hidden"
+            name="{{ config['CSRF_COOKIE_NAME'] }}"
+            value="{{ csrf_token() }}"
+          />
+          <button class="btn btn-success" type="submit" name="action">
+            Adicionar Usuário
+            <i class="fas fa-user-plus"></i>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% endif %}
 </div>
-{% endblock %}
-
-{% block scripts %}
+{% endblock %} {% block scripts %}
 
 <script>
-    function generateRandomPassword() {
-        let randomPassword = '';
-        const possibleChars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-        for (let i = 0; i < 8; i++) {
-            randomPassword += possibleChars[Math.floor(Math.random() * possibleChars.length)];
-        }
-        document.getElementById("password").value = randomPassword;
+  function generateRandomPassword() {
+    let randomPassword = ""
+    const possibleChars = "abcdefghijklmnopqrstuvwxyz0123456789"
+    for (let i = 0; i < 8; i++) {
+      randomPassword += possibleChars[Math.floor(Math.random() * possibleChars.length)]
     }
+    document.getElementById("password").value = randomPassword
+  }
 
-    function viewPassword() {
-        let password_tag = document.getElementById("password");
-        password_tag.type === 'password' ? password_tag.type = 'text' : password_tag.type = 'password';
+  function viewPassword() {
+    let password_tag = document.getElementById("password")
+    password_tag.type === "password"
+      ? (password_tag.type = "text")
+      : (password_tag.type = "password")
+
+    let show_password_tag = document.getElementById("show-password")
+    show_password_tag.innerHTML === '<i class="fas fa-eye"></i>'
+      ? (show_password_tag.innerHTML = '<i class="fas fa-eye-slash"></i>')
+      : (show_password_tag.innerHTML = '<i class="fas fa-eye"></i>')
+  }
+
+  let roleTag = document.getElementById("role_id")
+  roleTag.addEventListener("change", function () {
+    if (roleTag.value === "{{ aluno_role_id }}") {
+      document.getElementById("serie-input").style.display = "block"
+      document.getElementById("turma-input").style.display = "block"
+      document.getElementById("matricula-input").style.display = "block"
+    } else {
+      document.getElementById("serie-input").style.display = "none"
+      document.getElementById("turma-input").style.display = "none"
+      document.getElementById("matricula-input").style.display = "none"
     }
+  })
 
-    let roleTag = document.getElementById("role_id");
-    roleTag.addEventListener("change", function () {
-        if (roleTag.value === '{{ aluno_role_id }}') {
-            document.getElementById("serie-input").style.display = 'block';
-            document.getElementById("turma-input").style.display = 'block';
-            document.getElementById("matricula-input").style.display = 'block';
-        } else {
-            document.getElementById("serie-input").style.display = 'none';
-            document.getElementById("turma-input").style.display = 'none';
-            document.getElementById("matricula-input").style.display = 'none';
-        }
+  function generateRandomUsername() {
+    let nameTag = document.getElementById("name")
+    fetch('{{ url_for("generate_random_username_api") }}', {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        '{{ config["CSRF_HEADER_NAME"] }}': "{{ csrf_token() }}",
+      },
+      body: JSON.stringify({
+        name: nameTag.value,
+      }),
     })
+      .then((response) => response.json())
+      .then((data) => {
+        let usernameTag = document.getElementById("username")
+        usernameTag.value = data.username
+      })
+  }
 
-    function generateRandomUsername() {
-        let nameTag = document.getElementById("name");
-        fetch('{{ url_for("generate_random_username_api") }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                '{{ config["CSRF_HEADER_NAME"] }}': '{{ csrf_token() }}'
-            },
-            body: JSON.stringify({
-                name: nameTag.value
-            })
-        })
-            .then(response => response.json())
-            .then(data => {
-                let usernameTag = document.getElementById('username');
-                usernameTag.value = data.username;
-            })
-    }
-
-    function searchUsers() {
-        let input, filter, table, tr, td, i, txtValue;
-        input = document.getElementById("search");
-        filter = input.value.toUpperCase();
-        table = document.getElementById("userTableBody");
-        tr = table.getElementsByTagName("tr");
-        for (i = 0; i < tr.length; i++) {
-            td_nome = tr[i].getElementsByTagName("td")[1]; // Índice 1 corresponde ao campo de nome do usuário
-            td_username = tr[i].getElementsByTagName("td")[2]; // Índice 2 corresponde ao campo de usuário do usuário
-            td_id = tr[i].getElementsByTagName("td")[0]; // Índice 0 corresponde ao campo de ID do usuário
-            td_matricula = tr[i].getElementsByTagName("td")[4]; // Índice 3 corresponde ao campo de matrícula do usuário
-            if (td_nome || td_username) {
-                txtValue_nome = td_nome.textContent || td_nome.innerText;
-                txtValue_username = td_username.textContent || td_username.innerText;
-                txtValue_id = td_id.textContent || td_id.innerText;
-                txtValue_matricula = td_matricula.textContent || td_matricula.innerText;
-                let txtValue_combined = txtValue_nome + txtValue_username + txtValue_id + txtValue_matricula; // Concatena ID, MAtrícula, Nome e Usuário
-                if (txtValue_combined.toUpperCase().indexOf(filter) > -1) {
-                    tr[i].style.display = "";
-                } else {
-                    tr[i].style.display = "none";
-                }
-            }
+  function searchUsers() {
+    let input, filter, table, tr, td, i, txtValue
+    input = document.getElementById("search")
+    filter = input.value.toUpperCase()
+    table = document.getElementById("userTableBody")
+    tr = table.getElementsByTagName("tr")
+    for (i = 0; i < tr.length; i++) {
+      td_nome = tr[i].getElementsByTagName("td")[1] // Índice 1 corresponde ao campo de nome do usuário
+      td_username = tr[i].getElementsByTagName("td")[2] // Índice 2 corresponde ao campo de usuário do usuário
+      td_id = tr[i].getElementsByTagName("td")[0] // Índice 0 corresponde ao campo de ID do usuário
+      td_matricula = tr[i].getElementsByTagName("td")[4] // Índice 3 corresponde ao campo de matrícula do usuário
+      if (td_nome || td_username) {
+        txtValue_nome = td_nome.textContent || td_nome.innerText
+        txtValue_username = td_username.textContent || td_username.innerText
+        txtValue_id = td_id.textContent || td_id.innerText
+        txtValue_matricula = td_matricula.textContent || td_matricula.innerText
+        let txtValue_combined =
+          txtValue_nome + txtValue_username + txtValue_id + txtValue_matricula // Concatena ID, MAtrícula, Nome e Usuário
+        if (txtValue_combined.toUpperCase().indexOf(filter) > -1) {
+          tr[i].style.display = ""
+        } else {
+          tr[i].style.display = "none"
         }
+      }
     }
+  }
 </script>
 {% endblock %}
