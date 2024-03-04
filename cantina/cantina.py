@@ -36,7 +36,9 @@ def cantina():
         The rendered index.html template with the products as the context.
     """
     context = {
-        "products": Product.query.order_by(Product.quantity.desc(), Product.name.asc()).all()
+        "products": Product.query.order_by(
+            Product.quantity.desc(), Product.name.asc()
+        ).all()
     }
     return render_template("cantina.html", **context)
 
@@ -47,7 +49,9 @@ def confirm_purchase():
     A function that confirms a purchase by processing the purchase details and rendering the 'confirm-purchase.html' template.
     """
     if len(session["cart"]) == 0:
-        flash("Nenhum produto adicionado ao carrinho para confirmação...", "error")
+        flash(
+            "Nenhum produto adicionado ao carrinho para confirmação...", "error"
+        )
         return redirect(url_for("cantina"))
     response = None
     if request.method == "POST":
@@ -69,7 +73,9 @@ def process_purchase(form):
         return
 
     user = User.query.filter(
-        (User.matricula == matricula) | (User.username == matricula) | (User.id == matricula)
+        (User.matricula == matricula)
+        | (User.username == matricula)
+        | (User.id == matricula)
     ).first()
     if user is None:
         flash(
@@ -145,7 +151,8 @@ def products():
         per_page = 10
 
     query = Product.query.filter(
-        (Product.name.ilike(f"%{search}%")) | (Product.description.ilike(f"%{search}%"))
+        (Product.name.ilike(f"%{search}%"))
+        | (Product.description.ilike(f"%{search}%"))
     )
 
     pagination = query.paginate(page=page, per_page=per_page, error_out=False)
@@ -174,7 +181,9 @@ def edit_product():
     if request.method == "POST":
         motivo = request.form.get("motivo")
         if motivo is None:
-            flash("Por favor, insira o motivo, é obrigatório!", category="error")
+            flash(
+                "Por favor, insira o motivo, é obrigatório!", category="error"
+            )
             return redirect(url_for("edit_product", product_id=product_id))
         product_values = product.as_dict()
         for key, value in request.form.items():
@@ -195,7 +204,9 @@ def edit_product():
                 )
                 db.session.add(edit_history)
                 db.session.commit()
-                column = [c for c in product.__table__.columns if c.name == key][0]
+                column = [
+                    c for c in product.__table__.columns if c.name == key
+                ][0]
                 friendly_key_name = column.info.get("label", key)
                 flash(
                     f"Alteração de '{friendly_key_name}' foi feita com sucesso ({old_value} -> {value})!",
@@ -247,7 +258,9 @@ def sales_history():
     else:
         end_date = db.session.query(func.max(ProductSale.added_at)).scalar()
 
-    query = query.join(dispatched_by_user, ProductSale.dispatched_by == dispatched_by_user.id)
+    query = query.join(
+        dispatched_by_user, ProductSale.dispatched_by == dispatched_by_user.id
+    )
     query = query.join(Product, Product.id == ProductSale.product_id)
 
     query = query.filter(ProductSale.added_at.between(start_date, end_date))
@@ -268,7 +281,7 @@ def sales_history():
     cache.set(hashed_query, {"identifier": identificador, "data": query.all()})
 
     stats = {}
-    for result in results:
+    for result in query.all():
         product = result.product
         product_name = product.name
 
@@ -282,6 +295,8 @@ def sales_history():
                 "valor": result.value,
                 "ammount": result.value,
             }
+
+    stats = sorted(stats.items(), key=lambda x: x[1]["ammount"], reverse=True)
 
     context = {
         "results": results,
