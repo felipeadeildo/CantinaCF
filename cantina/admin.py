@@ -4,7 +4,15 @@ from decimal import Decimal
 from flask import flash, redirect, render_template, request, session, url_for
 
 from . import app, db
-from .models import CategoryPage, Page, Payment, PaymentMethod, Role, Route, User
+from .models import (
+    CategoryPage,
+    Page,
+    Payment,
+    PaymentMethod,
+    Role,
+    Route,
+    User,
+)
 
 
 @app.route("/administração/rotas", methods=("GET", "POST"))
@@ -14,7 +22,10 @@ def routes():
     if route_id is not None:
         route = Route.query.filter_by(id=route_id).first()
         if route is None:
-            flash("Rota de ID {} não encontrada!".format(route_id), category="error")
+            flash(
+                "Rota de ID {} não encontrada!".format(route_id),
+                category="error",
+            )
         else:
             is_editor = True
         if request.method == "POST":
@@ -37,10 +48,14 @@ def category_pages():
     category_page_id = request.args.get("category_page_id")
     is_editor = False
     if category_page_id is not None:
-        category_page = CategoryPage.query.filter_by(id=category_page_id).first()
+        category_page = CategoryPage.query.filter_by(
+            id=category_page_id
+        ).first()
         if category_page is None:
             flash(
-                "Categoria de página de ID {} não encontrada!".format(category_page_id),
+                "Categoria de página de ID {} não encontrada!".format(
+                    category_page_id
+                ),
                 category="error",
             )
         else:
@@ -54,7 +69,10 @@ def category_pages():
                     category="success",
                 )
                 category_page.name = name
-            if description is not None and description != category_page.description:
+            if (
+                description is not None
+                and description != category_page.description
+            ):
                 flash(
                     f"Descrição da categoria de página alterada com sucesso ({category_page.description} -> {description})!",
                     category="success",
@@ -74,7 +92,10 @@ def pages():
     if page_id is not None:
         page = Page.query.filter_by(id=page_id).first()
         if page is None:
-            flash("Página de ID {} não encontrada!".format(page_id), category="error")
+            flash(
+                "Página de ID {} não encontrada!".format(page_id),
+                category="error",
+            )
         else:
             is_editor = True
         if request.method == "POST":
@@ -98,7 +119,10 @@ def pages():
             if route_id is not None and route_id != str(page.route_id):
                 route = Route.query.filter_by(id=route_id).first()
                 if route is None:
-                    flash("Rota de ID {} não encontrada!".format(route_id), category="error")
+                    flash(
+                        "Rota de ID {} não encontrada!".format(route_id),
+                        category="error",
+                    )
                 else:
                     flash(
                         f"Rota da página alterada com sucesso ({page.route_id} -> {route_id})!",
@@ -106,11 +130,17 @@ def pages():
                     )
                     page.route_id = route_id
                     page.route = route
-            if category_page_id is not None and category_page_id != str(page.category_page_id):
-                category_page = CategoryPage.query.filter_by(id=category_page_id).first()
+            if category_page_id is not None and category_page_id != str(
+                page.category_page_id
+            ):
+                category_page = CategoryPage.query.filter_by(
+                    id=category_page_id
+                ).first()
                 if category_page is None:
                     flash(
-                        "Categoria de página de ID {} não encontrada!".format(category_page_id),
+                        "Categoria de página de ID {} não encontrada!".format(
+                            category_page_id
+                        ),
                         category="error",
                     )
                 else:
@@ -149,17 +179,33 @@ def roles():
         for role in Role.query.all():
             role = role.as_dict()
             role["allowed_routes"] = json.loads(role["allowed_routes"])
-            role["allowed_routes"] = map(lambda route_id: routes[route_id], role["allowed_routes"])
+            role["allowed_routes"] = map(
+                lambda route_id: routes.get(
+                    int(route_id),
+                    Route(
+                        id=route_id,
+                        name=f"Rota {route_id}",
+                        description=f"Rota {route_id}",
+                    ),
+                ),
+                role["allowed_routes"],
+            )
             roles.append(role)
             context = {"roles": roles}
     elif action == "edit":
         role_id = request.args.get("role_id")
         if role_id is None:
-            flash("Primeiro você precisa especificar qual é o cargo né amore?", category="error")
+            flash(
+                "Primeiro você precisa especificar qual é o cargo né amore?",
+                category="error",
+            )
             return redirect(url_for("roles", action="view"))
         role = Role.query.filter_by(id=role_id).first()
         if role is None:
-            flash("Cargo de ID {} não encontrada!".format(role_id), category="error")
+            flash(
+                "Cargo de ID {} não encontrada!".format(role_id),
+                category="error",
+            )
             return redirect(url_for("roles", action="view"))
 
         if request.method == "POST":
@@ -182,7 +228,10 @@ def roles():
                 try:
                     allowed_routes = list(map(int, allowed_routes))
                 except ValueError:
-                    flash("Então, a lista de cargos permitidos é inválida!", category="error")
+                    flash(
+                        "Então, a lista de cargos permitidos é inválida!",
+                        category="error",
+                    )
                     return redirect(url_for("roles", action="view"))
                 else:
                     old_allowed_routes = json.loads(role.allowed_routes)
@@ -212,14 +261,21 @@ def roles():
             try:
                 allowed_routes = list(map(int, allowed_routes))
             except ValueError:
-                flash("Então, a lista de cargos permitidos é inválida!", category="error")
+                flash(
+                    "Então, a lista de cargos permitidos é inválida!",
+                    category="error",
+                )
                 return redirect(url_for("roles", action="add"))
             already_exists = Role.query.filter_by(name=name).first() is not None
             if already_exists:
-                flash(f"Já existe um cargo com o nome '{name}'!", category="error")
+                flash(
+                    f"Já existe um cargo com o nome '{name}'!", category="error"
+                )
                 return redirect(url_for("roles", action="add"))
             role = Role(
-                name=name, description=description, allowed_routes=json.dumps(allowed_routes)
+                name=name,
+                description=description,
+                allowed_routes=json.dumps(allowed_routes),
             )
             db.session.add(role)
             db.session.commit()
@@ -256,13 +312,17 @@ def checkout_payroll():
     ).all()
     if action == "view":
         return render_template(
-            "admin/checkout-payroll.html", target_users=users_balance_payroll_gt0
+            "admin/checkout-payroll.html",
+            target_users=users_balance_payroll_gt0,
         )
     elif action == "checkout" and request.method == "POST":
         target_user_id = request.form.get("user_id")
         target_user = User.query.filter_by(id=target_user_id).first()
         if target_user is None:
-            flash("Usuário de ID {} não encontrado!".format(target_user_id), category="error")
+            flash(
+                "Usuário de ID {} não encontrado!".format(target_user_id),
+                category="error",
+            )
             return redirect(url_for("checkout_payroll", action="view"))
         value = request.form.get("value")
         if value is None:
@@ -308,4 +368,6 @@ def checkout_payroll():
         return redirect(url_for("checkout_payroll", action="view"))
     else:
         flash("Funcionalidade requisitada é inválida!", category="error")
-    return render_template("admin/checkout-payroll.html", target_users=users_balance_payroll_gt0)
+    return render_template(
+        "admin/checkout-payroll.html", target_users=users_balance_payroll_gt0
+    )
