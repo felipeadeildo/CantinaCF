@@ -2,7 +2,15 @@ import hashlib
 import os
 from datetime import datetime, timedelta
 
-from flask import abort, flash, redirect, render_template, request, session, url_for
+from flask import (
+    abort,
+    flash,
+    redirect,
+    render_template,
+    request,
+    session,
+    url_for,
+)
 from sqlalchemy import func, or_
 from sqlalchemy.orm import aliased
 from werkzeug.security import generate_password_hash
@@ -31,7 +39,7 @@ def users():
     A function that handles requests related to users.
     """
     if request.method == "POST":
-        if session["user"].role.name != "Admin":
+        if session["user"].role.id != 1:
             abort(403)
         name = request.form.get("name")
         username = request.form.get("username")
@@ -39,11 +47,6 @@ def users():
         name = request.form.get("name")
         role_id = request.form.get("role_id")
         serie = request.form.get("serie")
-        try:
-            serie = SERIES[int(serie)]  # type: ignore
-        except:
-            flash("A série especificada não existe!", category="error")
-            return redirect(url_for("users"))
         turma = request.form.get("turma")
         matricula = request.form.get("matricula")
         if not password:
@@ -52,19 +55,37 @@ def users():
         has_username = False
         has_matricula = False
         if username:
-            has_username = User.query.filter(User.username == username).first() is not None
+            has_username = (
+                User.query.filter(User.username == username).first() is not None
+            )
         if matricula:
-            has_matricula = User.query.filter(User.matricula == matricula).first() is not None
+            has_matricula = (
+                User.query.filter(User.matricula == matricula).first()
+                is not None
+            )
+
         if not (has_username and has_matricula):
             # TODO: verificar role, serie e turma antes de adicionar, por exemplo, verificar se a pessoa está tentando colocar um role com mais perm que ela, ou se está colocando serie ou turma que não existe no escopo do sistema
             role = Role.query.filter(Role.id == role_id).first()
+            is_aluno = role.name.lower() == "aluno"
+
+            if not role:
+                flash("Por favor, insira um cargo!", category="error")
+                return redirect(url_for("users"))
+            try:
+                serie = SERIES[int(serie)]  # type: ignore
+            except:
+                if is_aluno:
+                    flash("A série especificada não existe!", category="error")
+                    return redirect(url_for("users"))
+
             new_user = User(
                 name=name,
                 username=username,
                 password=generate_password_hash(password),
                 role_id=role_id,
-                serie=serie,
-                turm=turma,
+                serie=serie if is_aluno else None,
+                turm=turma if is_aluno else None,
                 role=role,
                 matricula=matricula,
             )
@@ -89,7 +110,9 @@ def users():
     return render_template("users.html", **context)
 
 
-def security_edit_password(to_change_user, changer_user, old_password, new_password):
+def security_edit_password(
+    to_change_user, changer_user, old_password, new_password
+):
     """
     A function that allows a user with the role of "admin" to edit the password of another user.
 
@@ -103,7 +126,9 @@ def security_edit_password(to_change_user, changer_user, old_password, new_passw
         None
     """
     if new_password is None:
-        flash("Por favor, insira a nova senha!", category="error")  # no new password
+        flash(
+            "Por favor, insira a nova senha!", category="error"
+        )  # no new password
         return
 
     if changer_user.role.name != "Admin" and old_password is None:
@@ -115,7 +140,9 @@ def security_edit_password(to_change_user, changer_user, old_password, new_passw
     if changer_user.role.name != "Admin" and not verify_password(
         old_password, changer_user.password
     ):
-        flash("Senha antiga incorreta!", category="error")  # old password is incorrect
+        flash(
+            "Senha antiga incorreta!", category="error"
+        )  # old password is incorrect
         return
 
     motivo = request.form.get("motivo", "Não informado")
@@ -144,12 +171,17 @@ def edit_password():
     to_change_user = User.query.filter_by(id=to_change_user_id).first()
     changer_user = session["user"]
     # verify if user is non-admin and id that it wants to change
-    if changer_user.role.name != "Admin" and int(to_change_user_id) != changer_user.id:
+    if (
+        changer_user.role.name != "Admin"
+        and int(to_change_user_id) != changer_user.id
+    ):
         abort(403)
     if request.method == "POST":
         old_password = request.form.get("old_password")
         new_password = request.form.get("new_password")
-        security_edit_password(to_change_user, changer_user, old_password, new_password)
+        security_edit_password(
+            to_change_user, changer_user, old_password, new_password
+        )
 
     return render_template("edit-password.html", user=to_change_user)
 
@@ -175,17 +207,25 @@ def profile():
     outputs = ProductSale.query.filter_by(sold_to=user_id).all()
     for input in inputs:
         dict_input = input.as_dict()
-        dict_input["allowed_by"] = User.query.filter_by(id=dict_input["allowed_by"]).first()
+        dict_input["allowed_by"] = User.query.filter_by(
+            id=dict_input["allowed_by"]
+        ).first()
         dict_input["payment_type"] = (
-            PaymentMethod.query.filter_by(id=dict_input["payment_method_id"]).first().name
+            PaymentMethod.query.filter_by(id=dict_input["payment_method_id"])
+            .first()
+            .name
         )
         dict_input["transaction_type"] = "input"
         dict_input["formatted_added_at"] = input.formatted_added_at
         transactions.append(dict_input)
     for output in outputs:
         dict_output = output.as_dict()
-        dict_output["product"] = Product.query.filter_by(id=dict_output["product_id"]).first()
-        dict_output["sold_by"] = User.query.filter_by(id=dict_output["sold_by"]).first()
+        dict_output["product"] = Product.query.filter_by(
+            id=dict_output["product_id"]
+        ).first()
+        dict_output["sold_by"] = User.query.filter_by(
+            id=dict_output["sold_by"]
+        ).first()
         dict_output["transaction_type"] = "output"
         dict_output["formatted_added_at"] = output.formatted_added_at
         transactions.append(dict_output)
@@ -223,7 +263,9 @@ def edit_profile():
             if key in (app.config["CSRF_COOKIE_NAME"], "action", "motivo"):
                 continue
             if key == "serie":
-                value = SERIES[int(value)]  # TODO: Verificar se isso daqui está certo mesmo....
+                value = SERIES[
+                    int(value)
+                ]  # TODO: Verificar se isso daqui está certo mesmo....
             if key == "turma":
                 value = value.lower()
             value = value.strip()
@@ -264,7 +306,10 @@ def allowed_file(filename):
     Returns:
         bool: True if the file is allowed, False otherwise.
     """
-    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+    return (
+        "." in filename
+        and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+    )
 
 
 def security_recharge():
@@ -356,7 +401,10 @@ def security_recharge():
         file.save(os.path.join(UPLOAD_FOLDER, filename))
 
     if payment_method.is_payroll:
-        is_affiliation = Affiliation.query.filter_by(affiliated_id=user_id).first() is not None
+        is_affiliation = (
+            Affiliation.query.filter_by(affiliated_id=user_id).first()
+            is not None
+        )
         if not is_affiliation:
             flash(
                 f"Então, meu anjo, você não está afiliado a ninguém ainda...",
@@ -381,7 +429,11 @@ def recharge():
     """
     if request.method == "POST":
         security_recharge()
-    context = {"payment_methods": PaymentMethod.query.filter(~PaymentMethod.is_protected).all()}
+    context = {
+        "payment_methods": PaymentMethod.query.filter(
+            ~PaymentMethod.is_protected
+        ).all()
+    }
     return render_template("recharge.html", **context)
 
 
@@ -401,7 +453,9 @@ def verify_payments():
             id=request["payment_method_id"]
         ).first()
         request["user"] = User.query.filter_by(id=request["user_id"]).first()
-        request["proof_url"] = url_for("static", filename=f"uploads/{request['proof_path']}")
+        request["proof_url"] = url_for(
+            "static", filename=f"uploads/{request['proof_path']}"
+        )
         requests.append(request)
     context = {"verify_payments": requests}
     return render_template("verify_payments.html", **context)
@@ -415,7 +469,9 @@ def add_to_stock():
     try:
         product_quantity = int(request.form.get("quantity"))  # type: ignore
     except:
-        flash("Por favor, insira uma quantidade válida, safado!", category="error")
+        flash(
+            "Por favor, insira uma quantidade válida, safado!", category="error"
+        )
         return
     try:
         product_purchase_price = float(request.form.get("purchase_price"))  # type: ignore
@@ -490,7 +546,10 @@ def stock_control():
 
     context = {
         "products": Product.query.all(),
-        "types": [x[0] for x in Product.query.with_entities(Product.type).distinct().all()],
+        "types": [
+            x[0]
+            for x in Product.query.with_entities(Product.type).distinct().all()
+        ],
     }
     # context["types"] = set(map(lambda x: x['tipo'], context["products"]))
     # unique_types = db.session.query(Product.type).distinct().all()
@@ -516,20 +575,22 @@ def stock_history():
         if start_date:
             start_date = datetime.strptime(start_date, "%d/%m/%Y")
         else:
-            start_date = db.session.query(func.min(StockHistory.added_at)).scalar() + timedelta(
-                seconds=1
-            )
+            start_date = db.session.query(
+                func.min(StockHistory.added_at)
+            ).scalar() + timedelta(seconds=1)
 
         if end_date:
             end_date = datetime.strptime(end_date, "%d/%m/%Y") + timedelta(
                 hours=23, minutes=59, seconds=59
             )
         else:
-            end_date = db.session.query(func.max(StockHistory.added_at)).scalar() + timedelta(
-                seconds=1
-            )
+            end_date = db.session.query(
+                func.max(StockHistory.added_at)
+            ).scalar() + timedelta(seconds=1)
 
-        query = query.filter(StockHistory.added_at.between(start_date, end_date))
+        query = query.filter(
+            StockHistory.added_at.between(start_date, end_date)
+        )
 
     if order_by:
         column = getattr(StockHistory, order_by)
@@ -602,14 +663,20 @@ def affiliates():
                 category="error",
             )
             return redirect(url_for("affiliates"))
-        has_affiliation = Affiliation.query.filter_by(affiliated_id=user.id).first()
+        has_affiliation = Affiliation.query.filter_by(
+            affiliated_id=user.id
+        ).first()
         if has_affiliation:
             flash(
-                "Usuário já é afiliado do usuário de ID {}!".format(has_affiliation.affiliator_id),
+                "Usuário já é afiliado do usuário de ID {}!".format(
+                    has_affiliation.affiliator_id
+                ),
                 category="error",
             )
             return redirect(url_for("affiliates"))
-        new_affiliation = Affiliation(affiliated_id=user.id, affiliator_id=session["user"].id)
+        new_affiliation = Affiliation(
+            affiliated_id=user.id, affiliator_id=session["user"].id
+        )
         db.session.add(new_affiliation)
         db.session.commit()
         flash("Usuário adicionado com sucesso!", category="success")
@@ -641,7 +708,9 @@ def affiliates_history():
         if start_date:
             start_date = datetime.strptime(start_date, "%d/%m/%Y")
         else:
-            start_date = db.session.query(func.min(ProductSale.added_at)).scalar()
+            start_date = db.session.query(
+                func.min(ProductSale.added_at)
+            ).scalar()
         if end_date:
             end_date = datetime.strptime(end_date, "%d/%m/%Y")
         else:
@@ -686,7 +755,9 @@ def security_pay_payroll():
         return
 
     if payment_method.is_payroll:
-        flash("Você não pode pagar o saldo devedor com MAIS saldo devedor, engraçadinho(a)!")
+        flash(
+            "Você não pode pagar o saldo devedor com MAIS saldo devedor, engraçadinho(a)!"
+        )
         return
 
     payment_value = request.form.get("payment-value")
@@ -707,7 +778,9 @@ def security_pay_payroll():
     if payment_method.need_proof:
         file = request.files.get("proof")
         if file is None:
-            flash("Por favor, insira o documento de pagamento!", category="error")
+            flash(
+                "Por favor, insira o documento de pagamento!", category="error"
+            )
             return
         if not allowed_file(file.filename):
             flash("Arquivo não permitido!", category="error")
@@ -734,7 +807,11 @@ def pay_payroll():
     )
     if request.method == "POST":
         security_pay_payroll()
-    context = {"payment_methods": PaymentMethod.query.filter(~PaymentMethod.is_payroll).all()}
+    context = {
+        "payment_methods": PaymentMethod.query.filter(
+            ~PaymentMethod.is_payroll
+        ).all()
+    }
     return render_template("pay-payroll.html", **context)
 
 
@@ -763,24 +840,26 @@ def history_edits_products():
         )
 
     if produto:
-        query = query.filter(or_(Product.name.contains(produto), Product.id == produto))
+        query = query.filter(
+            or_(Product.name.contains(produto), Product.id == produto)
+        )
 
     if start_date or end_date:
         if start_date:
             start_date = datetime.strptime(start_date, "%d/%m/%Y")
         else:
-            start_date = db.session.query(func.min(EditHistory.added_at)).scalar() + timedelta(
-                seconds=1
-            )
+            start_date = db.session.query(
+                func.min(EditHistory.added_at)
+            ).scalar() + timedelta(seconds=1)
 
         if end_date:
             end_date = datetime.strptime(end_date, "%d/%m/%Y") + timedelta(
                 hours=23, minutes=59, seconds=59
             )
         else:
-            end_date = db.session.query(func.max(EditHistory.added_at)).scalar() + timedelta(
-                seconds=1
-            )
+            end_date = db.session.query(
+                func.max(EditHistory.added_at)
+            ).scalar() + timedelta(seconds=1)
 
         query = query.filter(EditHistory.added_at.between(start_date, end_date))
 
@@ -796,9 +875,7 @@ def history_edits_products():
     pagination = query.paginate(page=page, per_page=per_page, error_out=False)  # type: ignore [paginate is a method on sqlalchemy.orm.query.Query]
     results = pagination.items
 
-    identificador = (
-        f"historico-edicoes-produtos-{editado_por}-{start_date}-{end_date}-{session['user'].id}"
-    )
+    identificador = f"historico-edicoes-produtos-{editado_por}-{start_date}-{end_date}-{session['user'].id}"
     hashed_query = hashlib.sha256(identificador.encode("utf-8")).hexdigest()
     cache.set(hashed_query, {"identifier": identificador, "data": query.all()})
 
@@ -845,7 +922,9 @@ def history_edits_users():
         if start_date:
             start_date = datetime.strptime(start_date, "%d/%m/%Y")
         else:
-            start_date = db.session.query(func.min(EditHistory.added_at)).scalar()
+            start_date = db.session.query(
+                func.min(EditHistory.added_at)
+            ).scalar()
 
         if end_date:
             end_date = datetime.strptime(end_date, "%d/%m/%Y") + timedelta(
@@ -951,9 +1030,7 @@ def payments_history():
         ).all()
     }
 
-    identificador = (
-        f"historico-recargas-{recharge_type}-{allowed_by}-{allowed_for}-{start_date}-{end_date}"
-    )
+    identificador = f"historico-recargas-{recharge_type}-{allowed_by}-{allowed_for}-{start_date}-{end_date}"
     hashed_query = hashlib.sha256(identificador.encode("utf-8")).hexdigest()
     cache.set(
         hashed_query,

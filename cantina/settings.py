@@ -29,7 +29,7 @@ if not os.path.exists(UPLOAD_FOLDER):
 ALLOWED_EXTENSIONS = set(config["allowed_extensions"])
 """Allowed extensions for uploaded files"""
 
-SERIES = config["series"]
+SERIES: list[str] = config["series"]
 """Series of School"""
 
 
