@@ -23,7 +23,7 @@ def init_db():
         PaymentMethod(name="Cartão de Crédito", need_proof=False, is_payroll=False),
         PaymentMethod(name="Cartão de Debito", need_proof=False, is_payroll=False),
         PaymentMethod(name="Espécie", need_proof=False, is_payroll=False),
-        PaymentMethod(name="Folha de Pagamento", need_proof=True, is_payroll=True),
+        PaymentMethod(name="Folha de Pagamento", need_proof=False, is_payroll=True),
         PaymentMethod(name="System", need_proof=False, is_payroll=False, is_protected=True),
     ]
     db.session.add_all(payments_method)
