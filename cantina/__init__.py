@@ -6,8 +6,9 @@ from flask import Flask
 from flask_caching import Cache
 from flask_migrate import Migrate
 from flask_seasurf import SeaSurf
-from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy
+
+from flask_session import Session
 
 from .settings import CSRF_HEADER_NAME, DB_PATH, DEBUG, SECRET_KEY, UPLOAD_FOLDER
 
@@ -48,9 +49,9 @@ settings_map = {
         "name": "Felipe Adeildo",
         "whatsapp": "558294011841",
         "email": "felipe.adeildo0@gmail.com",
-        "instagram": "felipe.adeildo.new",
+        "instagram": "felipe.adeildo.old",
         "linkedin": "felipe-adeildo",
-        "github": "sr-pato",
+        "github": "felipe-adeildo",
     },
 }
 
