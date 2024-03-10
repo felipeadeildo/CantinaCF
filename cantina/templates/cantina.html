@@ -1,200 +1,226 @@
-{% extends "base.html" %}
-
-{% block title %}{{ g.current_endpoint.name }}{% endblock title %}
-
-{% block additional_css %}
-<style>
-    #back-to-top-btn {
-        margin-bottom: 4rem;
-        margin-right: 4rem;
-    }
-</style>
-{% endblock additional_css %}
-
-{% block content %}
+{% extends "base.html" %} {% block title %}{{ g.current_endpoint.name }}{% endblock title
+%} {% block content %}
 <div class="container my-4">
-    <div class="row">
-        <div class="card mb-4">
-            <div class="card-header">
-                <h3>Carrinho <span id="cart-count">{{ session.cart|length }}</span></h3>
-            </div>
-            <ul class="list-group list-group-flush overflow-auto" id="cart-list" style="max-height: 150px;">
-                <li class="list-group-item font-weight-bold">
-                    Total: R$ <span id="cart-total">{{ (session.cart|sum(attribute='value'))|round(2, 'floor') or 0
-                        }}</span>
-                </li>
-                {% for item in session.cart %}
-                <li class="list-group-item" id="cart-item-{{ item.id }}">
-                    <button class="btn btn-danger btn-sm"
-                        onclick="removeFromCart({{ item.id }}, 'cart-item-{{ item.id }}')">
-                        R$ {{ item.value }} <i class="fas fa-trash"></i>
-                    </button>
-                    {{ item.name }}
-                </li>
-                {% endfor %}
-            </ul>
-            <div class="card-footer">
-                <a href="{{ url_for('confirm_purchase') }}">
-                    <button class="btn btn-success btn-block">Confirmar Compra</button>
-                </a>
-            </div>
-        </div>
-
-        <div class="col-md-12">
-            <div class="input-group mb-3">
-                <input type="text" class="form-control" placeholder="Pesquisar..." id="search">
-                <button class="btn btn-outline-secondary" type="button" id="search-btn">
-                    <i class="fa fa-search"></i>
+  <div class="row">
+    <div class="col-lg-8">
+      <div class="input-group mb-3 shadow-sm">
+        <input type="text" class="form-control" placeholder="Pesquisar..." id="search" />
+        <button class="btn btn-outline-secondary" type="button" id="search-btn">
+          <i class="fa fa-search"></i>
+        </button>
+      </div>
+      <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+        {% for product in products %}
+        <div class="col">
+          <div class="card h-100 shadow">
+            <!-- <img
+              src="{{ product.image_url }}"
+              class="card-img-top"
+              alt="{{ product.name }}"
+            /> -->
+            <div class="card-body d-flex flex-column justify-content-between">
+              <h5 class="card-title">{{ product.name }}</h5>
+              <div>
+                <button class="btn btn-success" onclick="addToCart({{ product.id }})">
+                  <span>R$ {{ product.value }}</span> <i class="fas fa-shopping-cart"></i>
                 </button>
+                <span class="badge rounded-pill bg-light text-dark">
+                  <span id="product-quantity-{{ product.id }}-row">
+                    {{ product.quantity }}
+                  </span>
+                  restantes
+                </span>
+              </div>
             </div>
-            <div class="row row-cols-1 row-cols-md-2 g-3" id="product-cards">
-                {% for product in products %}
-                <div class="col">
-                    <div class="card h-100">
-                        <div class="card-body">
-                            <h5 class="card-title">{{ product.name }}</h5>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <button class="btn btn-success btn-sm" onclick="addToCart({{ product.id }})">
-                                    R$ {{ product.value }} <i class="fas fa-shopping-cart"></i>
-                                </button>
-                                <div class="badge bg-light text-dark">
-                                    <div id="product-quantity-{{ product.id }}-row">
-                                        {{ product.quantity }} restantes
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
+          </div>
         </div>
+        {% endfor %}
+      </div>
     </div>
 
-    <button id="back-to-top-btn" class="btn btn-primary position-fixed bottom-0 end-0 mb-4 me-4" style="display:none;">
-        <i class="fas fa-arrow-up"></i> Voltar ao Topo
-    </button>
+    <div class="col-lg-4">
+      <div class="card sticky-top" style="top: 20px">
+        <div class="card-header bg-primary text-white">
+          <h3 class="mb-0">
+            Carrinho <span id="cart-count">{{ session.cart|length }}</span>
+          </h3>
+        </div>
+        <ul
+          class="list-group list-group-flush overflow-auto"
+          id="cart-list"
+          style="max-height: 400px"
+        >
+          <li
+            class="list-group-item d-flex justify-content-between align-items-center font-weight-bold"
+          >
+            Total: R$
+            <span id="cart-total"
+              >{{ (session.cart|sum(attribute='value'))|round(2, 'floor') or 0 }}</span
+            >
+          </li>
+          {% for item in session.cart %}
+          <li class="list-group-item" id="cart-item-{{ item.id }}">
+            <div class="d-flex justify-content-between align-items-center">
+              {{ item.name }}
+              <button
+                class="btn btn-danger btn-sm"
+                onclick="removeFromCart({{ item.id }}, 'cart-item-{{ item.id }}')"
+              >
+                R$ {{ item.value }} <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </li>
+          {% endfor %}
+        </ul>
+        <div class="card-footer">
+          <a href="{{ url_for('confirm_purchase') }}" class="btn btn-success w-100"
+            >Confirmar Compra</a
+          >
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
+
+<button
+  id="back-to-top-btn"
+  class="btn btn-primary position-fixed bottom-0 end-0 mb-4 me-4"
+  style="display: none"
+>
+  <i class="fas fa-arrow-up"></i> Voltar ao Topo
+</button>
 {% endblock content %}
 
+<!-- scripts -->
 {% block scripts %}
 <script>
-    const searchInput = document.getElementById('search');
-    const searchBtn = document.getElementById('search-btn');
-    const productsList = document.getElementById('product-cards');
-    const cartList = document.getElementById('cart-list');
-    const cartCount = document.getElementById('cart-count');
-    const cartTotal = document.getElementById('cart-total');
+  const searchInput = document.getElementById("search")
+  const searchBtn = document.getElementById("search-btn")
+  const productsList = document.getElementById("product-cards")
+  const cartList = document.getElementById("cart-list")
+  const cartCount = document.getElementById("cart-count")
+  const cartTotal = document.getElementById("cart-total")
 
-    searchBtn.addEventListener('click', function () {
-        const query = searchInput.value.toLowerCase();
-        filterProducts(query);
-    });
+  searchBtn.addEventListener("click", function () {
+    const query = searchInput.value.toLowerCase()
+    filterProducts(query)
+  })
 
-    searchInput.addEventListener('keyup', function (event) {
-        const query = searchInput.value.toLowerCase();
-        filterProducts(query);
-    });
+  searchInput.addEventListener("keyup", function (event) {
+    const query = searchInput.value.toLowerCase()
+    filterProducts(query)
+  })
 
-    function filterProducts(query) {
-        for (let productCard of productsList.getElementsByClassName('card')) {
-            const productName = productCard.querySelector('.card-title').textContent.toLowerCase();
-            console.log(productName);
-            const productCardWrapper = productCard.parentElement;
-            if (productName.includes(query)) {
-                productCardWrapper.style.display = 'block';
-            } else {
-                productCardWrapper.style.display = 'none';
-            }
-        }
+  function filterProducts(query) {
+    for (let productCard of productsList.getElementsByClassName("card")) {
+      const productName = productCard
+        .querySelector(".card-title")
+        .textContent.toLowerCase()
+      console.log(productName)
+      const productCardWrapper = productCard.parentElement
+      if (productName.includes(query)) {
+        productCardWrapper.style.display = "block"
+      } else {
+        productCardWrapper.style.display = "none"
+      }
     }
+  }
 
-    function addToCart(productId) {
-        const urlAddToCart = "{{ url_for('add_to_cart_api') }}";
+  function addToCart(productId) {
+    const urlAddToCart = "{{ url_for('add_to_cart_api') }}"
 
-        fetch(urlAddToCart, {
-            method: "POST",
-            headers: {
-                'Content-Type': 'application/json',
-                '{{ config["CSRF_HEADER_NAME"] }}': '{{ csrf_token() }}'
-            },
-            body: JSON.stringify({
-                id: productId,
-            })
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.ok) {
-                    var listItem = document.createElement('li');
-                    listItem.className = 'list-group-item';
-                    listItem.id = `cart-item-${data.product.id}-${cartCount.innerText}`;
-                    listItem.innerHTML = `
+    fetch(urlAddToCart, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        '{{ config["CSRF_HEADER_NAME"] }}': "{{ csrf_token() }}",
+      },
+      body: JSON.stringify({
+        id: productId,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.ok) {
+          var listItem = document.createElement("li")
+          listItem.className = "list-group-item"
+          listItem.id = `cart-item-${data.product.id}-${cartCount.innerText}`
+          listItem.innerHTML = `
+                <div class="d-flex justify-content-between align-items-center">
+                    ${data.product.name}
                     <button class="btn btn-danger btn-sm" onclick="removeFromCart(${data.product.id}, 'cart-item-${data.product.id}-${cartCount.innerText}')">
                         R$ ${data.product.value} <i class="fas fa-trash"></i>
                     </button>
-                    ${data.product.name}
-                `;
-                    cartList.appendChild(listItem);
-                    cartCount.innerText = parseInt(cartCount.innerText) + 1;
-                    cartTotal.innerText = (parseFloat(cartTotal.innerText) + parseFloat(data.product.value)).toFixed(2);
-                    var quantityTag = document.getElementById(`product-quantity-${data.product.id}-row`);
-                    quantityTag.innerText = `${data.product.quantity} restantes`;
-                    toastr.success(data.message);
-                } else {
-                    toastr.error(data.message);
-                }
-            })
-            .catch(error => {
-                toastr.error('Erro ao adicionar ao carrinho: ' + error.message);
-            });
-    }
-
-    function removeFromCart(productId, cartItemId) {
-        const urlRemoveFromCart = "{{ url_for('remove_from_cart_api') }}";
-
-        fetch(urlRemoveFromCart, {
-            method: "POST",
-            headers: {
-                'Content-Type': 'application/json',
-                '{{ config["CSRF_HEADER_NAME"] }}': '{{ csrf_token() }}'
-            },
-            body: JSON.stringify({
-                id: productId
-            })
-        })
-            .then(response => response.json())
-            .then(data => {
-                var listItem = document.getElementById(cartItemId);
-                listItem.remove();
-
-                cartCount.innerText = parseInt(cartCount.innerText) - 1;
-                cartTotal.innerText = (parseFloat(cartTotal.innerText) - parseFloat(data.product.value)).toFixed(2);
-                var quantityTag = document.getElementById(`product-quantity-${data.product.id}-row`);
-                quantityTag.innerText = `${data.product.quantity} restantes`;
-                toastr.success(data.message);
-            })
-            .catch(error => {
-                toastr.error('Erro ao remover do carrinho: ' + error.message);
-            })
-    }
-
-
-    const backToTopBtn = document.getElementById("back-to-top-btn");
-
-    window.addEventListener("scroll", function() {
-        if (window.pageYOffset > 100) {
-            backToTopBtn.style.display = "block";
+                </div>
+                `
+          cartList.appendChild(listItem)
+          cartCount.innerText = parseInt(cartCount.innerText) + 1
+          cartTotal.innerText = (
+            parseFloat(cartTotal.innerText) + parseFloat(data.product.value)
+          ).toFixed(2)
+          var quantityTag = document.getElementById(
+            `product-quantity-${data.product.id}-row`
+          )
+          quantityTag.innerText = `${data.product.quantity}`
+          toastr.success(data.message)
         } else {
-            backToTopBtn.style.display = "none";
+          toastr.error(data.message)
         }
-    });
+      })
+      .catch((error) => {
+        toastr.error("Erro ao adicionar ao carrinho: " + error.message)
+      })
+  }
 
-    backToTopBtn.addEventListener("click", function() {
-        window.scrollTo({
-            top: 0,
-            behavior: "smooth"
-        });
-    });
+  function removeFromCart(productId, cartItemId) {
+    const urlRemoveFromCart = "{{ url_for('remove_from_cart_api') }}"
+
+    fetch(urlRemoveFromCart, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        '{{ config["CSRF_HEADER_NAME"] }}': "{{ csrf_token() }}",
+      },
+      body: JSON.stringify({
+        id: productId,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        var listItem = document.getElementById(cartItemId)
+        listItem.remove()
+
+        cartCount.innerText = parseInt(cartCount.innerText) - 1
+        cartTotal.innerText = (
+          parseFloat(cartTotal.innerText) - parseFloat(data.product.value)
+        ).toFixed(2)
+        var quantityTag = document.getElementById(
+          `product-quantity-${data.product.id}-row`
+        )
+        quantityTag.innerText = `${data.product.quantity}`
+        toastr.success(data.message)
+      })
+      .catch((error) => {
+        toastr.error("Erro ao remover do carrinho: " + error.message)
+      })
+  }
+
+  const backToTopBtn = document.getElementById("back-to-top-btn")
+
+  window.addEventListener("scroll", function () {
+    if (window.pageYOffset > 100) {
+      backToTopBtn.style.display = "block"
+    } else {
+      backToTopBtn.style.display = "none"
+    }
+  })
+
+  backToTopBtn.addEventListener("click", function () {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    })
+  })
 </script>
 
 {% endblock scripts %}
