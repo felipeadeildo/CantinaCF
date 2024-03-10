@@ -1,173 +1,225 @@
 <!DOCTYPE html>
 <html>
-
-<head>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/toastr.min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-datepicker.min.css') }}">
+  <head>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <link
+      href="{{ url_for('static', filename='css/bootstrap.min.css') }}"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/toastr.min.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/bootstrap-datepicker.min.css') }}"
+    />
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="shortcut icon" href="{{ url_for('static', filename='img/fantastico.ico') }}">
+    <link
+      rel="shortcut icon"
+      href="{{ url_for('static', filename='img/fantastico.ico') }}"
+    />
     <title>{% block title %}{% endblock %} - {{ config['SITE_NAME'] }}</title>
     <style>
-        /* Styles for footer */
-        footer {
-            background-color: #f0f0f0;
-            padding: 10px;
-            text-align: center;
-            color: #333;
-        }
+      /* Styles for footer */
+      footer {
+        background-color: #f0f0f0;
+        padding: 2px;
+        text-align: center;
+        color: #333;
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+      }
 
-        footer p {
-            margin: 0;
-        }
+      footer p {
+        margin: 0;
+      }
 
-        /* Styles for cards animation */
-        .card {
-            transition: transform 0.2s ease;
-        }
+      /* Styles for cards animation */
+      .card {
+        transition: transform 0.2s ease;
+      }
 
-        /* Styles for main */
-        main {
-            margin-bottom: 50px; /* Altura do footer + espaçamento */
-        }
+      /* Styles for main */
+      main {
+        margin-bottom: 50px; /* Altura do footer + espaçamento */
+      }
 
-        .logo-text {
-            font-weight: bold;
-        }
+      .logo-text {
+        font-weight: bold;
+      }
 
-        .social-links a {
-            color: #005cb2;
-            margin: 0 5px;
-        }
+      .social-links a {
+        color: #005cb2;
+        margin: 0 5px;
+      }
 
-        .custom-toast {
-            /* background-color: #333; */
-            /* color: #fff; */
-            border-radius: 10px;
-            padding: 1rem;
-        }
-
+      .custom-toast {
+        /* background-color: #333; */
+        /* color: #fff; */
+        border-radius: 10px;
+        padding: 1rem;
+      }
     </style>
 
     {% block additional_css %}{% endblock %}
-</head>
+  </head>
 
-<body>
+  <body>
     <header>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-            <div class="container-fluid">
-                <a class="navbar-brand" href="#">
-                    <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" class="logo"
-                        style="height: 44px; margin-right: 10px;">
-                    <span class="logo-text">{{ config['SITE_NAME'] }}</span>
+      <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="#">
+            <img
+              src="{{ url_for('static', filename='img/logo.png') }}"
+              alt="Logo"
+              class="logo"
+              style="height: 44px; margin-right: 10px"
+            />
+            <span class="logo-text">{{ config['SITE_NAME'] }}</span>
+          </a>
+          <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarNav"
+            aria-controls="navbarNav"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+              <li class="nav-item">
+                <span class="nav-link">
+                  Bem-vindo, {% if session.user_id == 'Guest' %} Visitante :D {% else %}
+                  {{ session.user.name }} {% endif %}
+                </span>
+              </li>
+              <li class="nav-item">
+                <a
+                  class="nav-link btn-floating btn-small waves-effect waves-light cyan darken-3 tooltipped"
+                  href="{{ url_for('index') }}"
+                  data-bs-placement="left"
+                  data-bs-toggle="tooltip"
+                  title="Home"
+                >
+                  <i class="fas fa-home"></i>
                 </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav ms-auto">
-                        <li class="nav-item">
-                            <span class="nav-link">
-                                Bem-vindo,
-                                {% if session.user_id == 'Guest' %} Visitante :D {% else %} {{ session.user.name }} {%
-                                endif %}
-                            </span>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link btn-floating btn-small waves-effect waves-light cyan darken-3 tooltipped"
-                                href="{{ url_for('index') }}" data-bs-placement="left" data-bs-toggle="tooltip"
-                                title="Home">
-                                <i class="fas fa-home"></i>
-                            </a>
-                        </li>
-                        {% for page in session["navbar_pages"] %}
-                        <li class="nav-item">
-                            <a class="nav-link tooltipped" href="{{ url_for(page.route.endpoint) }}"  data-bs-placement="bottom" data-bs-toggle="tooltip" title="{{ page.description }}">{{ page.title }}</a>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            </div>
-        </nav>
+              </li>
+              {% for page in session["navbar_pages"] %}
+              <li class="nav-item">
+                <a
+                  class="nav-link tooltipped"
+                  href="{{ url_for(page.route.endpoint) }}"
+                  data-bs-placement="bottom"
+                  data-bs-toggle="tooltip"
+                  title="{{ page.description }}"
+                  >{{ page.title }}</a
+                >
+              </li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      </nav>
     </header>
     <main>
-        {% with warning_messages = get_flashed_messages(category_filter=["warning"]) %}
-        {% if warning_messages %}
-        <div class="alert alert-warning alert-dismissible fade show" role="alert">
-            <strong>Aviso:</strong>
-            {% for message in warning_messages %}
-            {{ message }} <br>
-            {% endfor %}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-        {% endif %}
-        {% endwith %}
+      {% with warning_messages = get_flashed_messages(category_filter=["warning"]) %} {%
+      if warning_messages %}
+      <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <strong>Aviso:</strong>
+        {% for message in warning_messages %} {{ message }} <br />
+        {% endfor %}
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="alert"
+          aria-label="Close"
+        ></button>
+      </div>
+      {% endif %} {% endwith %} {% with success_messages =
+      get_flashed_messages(category_filter=["success"]) %} {% if success_messages %}
+      <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <strong>Sucesso:</strong>
+        {% for message in success_messages %} {{ message }} <br />
+        {% endfor %}
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="alert"
+          aria-label="Close"
+        ></button>
+      </div>
+      {% endif %} {% endwith %} {% with error_messages =
+      get_flashed_messages(category_filter=["error"]) %} {% if error_messages %}
+      <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <strong>Erro:</strong>
+        {% for message in error_messages %} {{ message }} <br />
+        {% endfor %}
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="alert"
+          aria-label="Close"
+        ></button>
+      </div>
+      {% endif %} {% endwith %}
 
-        {% with success_messages = get_flashed_messages(category_filter=["success"]) %}
-        {% if success_messages %}
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <strong>Sucesso:</strong>
-            {% for message in success_messages %}
-            {{ message }} <br>
-            {% endfor %}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      <div class="container">
+        <div class="row">
+          <div class="col-md-12">
+            <div class="toast-container"></div>
+            {% block content %}{% endblock %}
+          </div>
         </div>
-        {% endif %}
-        {% endwith %}
-
-        {% with error_messages = get_flashed_messages(category_filter=["error"]) %}
-        {% if error_messages %}
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <strong>Erro:</strong>
-            {% for message in error_messages %}
-            {{ message }} <br>
-            {% endfor %}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-        {% endif %}
-        {% endwith %}
-
-        <div class="container">
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="toast-container"></div>
-                    {% block content %}{% endblock %}
-                </div>
-            </div>
-        </div>
+      </div>
     </main>
     <footer class="page-footer cyan darken-4">
-        <div class="container">
-            <div class="row">
-                <div class="col-12 text-center">
-                    <p class="grey-text text-lighten-4">Desenvolvido com ❤️ por {{ config['AUTHOR'].name }}</p>
-                    <ul class="social-links list-inline">
-                        <li class="list-inline-item">
-                            <a class="grey-text text-lighten-3"
-                                href="https://api.whatsapp.com/send?phone={{ config['AUTHOR'].whatsapp }}"><i
-                                    class="fab fa-whatsapp"></i></a>
-                        </li>
-                        <li class="list-inline-item">
-                            <a class="grey-text text-lighten-3"
-                                href="https://instagram.com/{{ config['AUTHOR'].instagram }}"><i
-                                    class="fab fa-instagram"></i></a>
-                        </li>
-                        <li class="list-inline-item">
-                            <a class="grey-text text-lighten-3"
-                                href="https://www.linkedin.com/in/{{ config['AUTHOR'].linkedin }}"><i
-                                    class="fab fa-linkedin-in"></i></a>
-                        </li>
-                        <li class="list-inline-item">
-                            <a class="grey-text text-lighten-3"
-                                href="https://github.com/{{ config['AUTHOR'].github }}"><i class="fab fa-github"></i></a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
+      <div class="container">
+        <div class="row">
+          <div class="col-12 text-center">
+            <p class="grey-text text-lighten-4">
+              Desenvolvido com ❤️ por {{ config['AUTHOR'].name }}
+            </p>
+            <ul class="social-links list-inline">
+              <li class="list-inline-item">
+                <a href="mailto:{{ config['AUTHOR'].email }}">
+                  <i class="fa-solid fa-envelope"></i>
+                </a>
+                <a
+                  class="grey-text text-lighten-3"
+                  href="https://instagram.com/{{ config['AUTHOR'].instagram }}"
+                  ><i class="fab fa-instagram"></i
+                ></a>
+              </li>
+              <li class="list-inline-item">
+                <a
+                  class="grey-text text-lighten-3"
+                  href="https://www.linkedin.com/in/{{ config['AUTHOR'].linkedin }}"
+                  ><i class="fab fa-linkedin-in"></i
+                ></a>
+              </li>
+              <li class="list-inline-item">
+                <a
+                  class="grey-text text-lighten-3"
+                  href="https://github.com/{{ config['AUTHOR'].github }}"
+                  ><i class="fab fa-github"></i
+                ></a>
+              </li>
+            </ul>
+          </div>
         </div>
+      </div>
     </footer>
     <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/popper.min.js') }}"></script>
@@ -176,33 +228,31 @@
     <script src="{{ url_for('static', filename='js/toastr.min.js') }}"></script>
 
     <script>
-        // Inicialização dos tooltips do Bootstrap
-        $(document).ready(function () {
-            $('[data-bs-toggle="tooltip"]').tooltip();
-        });
+      // Inicialização dos tooltips do Bootstrap
+      $(document).ready(function () {
+        $('[data-bs-toggle="tooltip"]').tooltip()
+      })
 
-        // Inicialização dos datepickers para todas as inputs com a classe 'datepicker'
-        $(document).ready(function () {
-            $('.datepicker').datepicker({
-                format: 'dd/mm/yyyy',
-                autoclose: true,
-                todayHighlight: true
-            });
-        });
+      // Inicialização dos datepickers para todas as inputs com a classe 'datepicker'
+      $(document).ready(function () {
+        $(".datepicker").datepicker({
+          format: "dd/mm/yyyy",
+          autoclose: true,
+          todayHighlight: true,
+        })
+      })
 
-        // Inicialização do Toast
-        toastr.options = {
-            "positionClass": "toast-top-right",
-            "timeOut": "3000",
-            "extendedTimeOut": "1000",
-            "preventDuplicates": true,
-            "progressBar": true,
-            "toastClass": "custom-toast"
-        }
-
+      // Inicialização do Toast
+      toastr.options = {
+        positionClass: "toast-top-right",
+        timeOut: "3000",
+        extendedTimeOut: "1000",
+        preventDuplicates: true,
+        progressBar: true,
+        toastClass: "custom-toast",
+      }
     </script>
 
     {% block scripts %}{% endblock %}
-</body>
-
+  </body>
 </html>

@@ -47,7 +47,6 @@ settings_map = {
     "CACHE_DEFAULT_TIMEOUT": CACHE_DEFAULT_TIMEOUT,
     "AUTHOR": {
         "name": "Felipe Adeildo",
-        "whatsapp": "558294011841",
         "email": "felipe.adeildo0@gmail.com",
         "instagram": "felipe.adeildo.old",
         "linkedin": "felipe-adeildo",
