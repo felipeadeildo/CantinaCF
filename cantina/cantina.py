@@ -78,14 +78,15 @@ def process_purchase(form):
         )
         return
 
-    if not verify_password(password, user.password):
-        flash(
-            f"Identificação (matrícula, id ou username) e/ou Senha incorretos...",
-            "error",
-        )
+    if session["user"].role.id == 1:
+        password_verification = verify_password(password, session["user"].password)
+        flash("Verificação da senha foi feita pela senha do ADMIN", "warning")
+    else:
+        password_verification = verify_password(password, user.password)
+
+    if not password_verification:
+        flash("Identificação e/ou Senha incorretos...", "error")
         return
-    elif session["user"].role.id != 1 and not verify_password(password, session["user"].password):
-        flash("[ADMIN] Identificação (matrícula, id ou username) e/ou Senha incorretos...", "error")
 
     total_compra = sum(product.value for product in session["cart"])
     if user.balance < total_compra:
