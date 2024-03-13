@@ -36,7 +36,7 @@ def cantina():
         The rendered index.html template with the products as the context.
     """
     context = {
-        "products": Product.query.order_by(Product.quantity.desc(), Product.name.asc()).all()
+        "products": Product.query.order_by(Product.name.asc(), Product.quantity.desc()).all()
     }
     return render_template("cantina.html", **context)
 
