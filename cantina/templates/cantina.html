@@ -101,6 +101,32 @@
   const cartCount = document.getElementById("cart-count")
   const cartTotal = document.getElementById("cart-total")
 
+  const letterMap = {
+    á: "a",
+    à: "a",
+    ã: "a",
+    â: "a",
+    ä: "a",
+    é: "e",
+    è: "e",
+    ê: "e",
+    ë: "e",
+    í: "i",
+    ì: "i",
+    ó: "o",
+    ò: "o",
+    õ: "o",
+    ô: "o",
+    ö: "o",
+    ú: "u",
+    ù: "u",
+    û: "u",
+    ü: "u",
+    ç: "c",
+    Ç: "C",
+    ñ: "n",
+  }
+
   searchBtn.addEventListener("click", function () {
     const query = searchInput.value.toLowerCase()
     filterProducts(query)
@@ -112,11 +138,18 @@
   })
 
   function filterProducts(query) {
+    const parsedQuery = Array.from(query)
+      .map((letter) => letterMap[letter] || letter)
+      .join("")
+
     for (let productCard of productsList.getElementsByClassName("product-card")) {
       const productName = productCard
         .querySelector(".card-title")
         .textContent.toLowerCase()
-      if (productName.includes(query)) {
+      const parsedProductName = Array.from(productName)
+        .map((letter) => letterMap[letter] || letter)
+        .join("")
+      if (parsedProductName.includes(query)) {
         productCard.style.display = "block"
       } else {
         productCard.style.display = "none"
