@@ -1,43 +1,12 @@
-{% extends "base.html" %} {% block title %}{{ g.current_endpoint.name }}{% endblock title
-%} {% block content %}
+{% extends "base.html" %}
+
+<!-- title -->
+{% block title %}{{ g.current_endpoint.name }}{% endblock title %}
+
+<!-- content -->
+{% block content %}
 <div class="container my-4">
   <div class="row">
-    <div class="col-lg-8">
-      <div class="input-group mb-3 shadow-sm">
-        <input type="text" class="form-control" placeholder="Pesquisar..." id="search" />
-        <button class="btn btn-outline-secondary" type="button" id="search-btn">
-          <i class="fa fa-search"></i>
-        </button>
-      </div>
-      <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4" id="product-cards">
-        {% for product in products %}
-        <div class="col product-card">
-          <div class="card h-100 shadow">
-            <!-- <img
-              src="{{ product.image_url }}"
-              class="card-img-top"
-              alt="{{ product.name }}"
-            /> -->
-            <div class="card-body d-flex flex-column justify-content-between">
-              <h5 class="card-title">{{ product.name }}</h5>
-              <div>
-                <button class="btn btn-success" onclick="addToCart({{ product.id }})">
-                  <span>R$ {{ product.value }}</span> <i class="fas fa-shopping-cart"></i>
-                </button>
-                <span class="badge rounded-pill bg-light text-dark">
-                  <span id="product-quantity-{{ product.id }}-row">
-                    {{ product.quantity }}
-                  </span>
-                  restantes
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-        {% endfor %}
-      </div>
-    </div>
-
     <div class="col-lg-4">
       <div class="card sticky-top" style="top: 20px">
         <div class="card-header bg-primary text-white">
@@ -64,7 +33,8 @@
               {{ item.name }}
               <button
                 class="btn btn-danger btn-sm"
-                onclick="removeFromCart({{ item.id }}, 'cart-item-{{ item.id }}')"
+                onclick="removeFromCart(event)"
+                data-product-id="{{ item.id }}"
               >
                 R$ {{ item.value }} <i class="fas fa-trash"></i>
               </button>
@@ -77,6 +47,46 @@
             >Confirmar Compra</a
           >
         </div>
+      </div>
+    </div>
+
+    <div class="col-lg-8">
+      <div class="input-group mb-3 shadow-sm">
+        <input type="text" class="form-control" placeholder="Pesquisar..." id="search" />
+        <button class="btn btn-outline-secondary" type="button" id="search-btn">
+          <i class="fa fa-search"></i>
+        </button>
+      </div>
+      <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" id="product-cards">
+        {% for product in products %}
+        <div class="col product-card">
+          <div class="card h-100 shadow">
+            <!-- <img
+              src="{{ product.image_url }}"
+              class="card-img-top"
+              alt="{{ product.name }}"
+            /> -->
+            <div class="card-body d-flex flex-column justify-content-between">
+              <h5 class="card-title">{{ product.name }}</h5>
+              <div>
+                <button
+                  class="btn btn-success"
+                  onclick="addToCart(event)"
+                  data-product-id="{{ product.id }}"
+                >
+                  <span>R$ {{ product.value }}</span> <i class="fas fa-shopping-cart"></i>
+                </button>
+                <span class="badge rounded-pill bg-light text-dark">
+                  <span id="product-quantity-{{ product.id }}-row">
+                    {{ product.quantity }}
+                  </span>
+                  restantes
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
       </div>
     </div>
   </div>
@@ -157,7 +167,13 @@
     }
   }
 
-  function addToCart(productId) {
+  function addToCart(event) {
+    const productBtn =
+      event.target.localName === "button" ? event.target : event.target.parentElement
+    const productBtnBkp = productBtn.innerHTML
+    const productId = productBtn.dataset.productId
+    productBtn.disabled = true
+    productBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'
     const urlAddToCart = "{{ url_for('add_to_cart_api') }}"
 
     fetch(urlAddToCart, {
@@ -175,11 +191,11 @@
         if (data.ok) {
           var listItem = document.createElement("li")
           listItem.className = "list-group-item"
-          listItem.id = `cart-item-${data.product.id}-${cartCount.innerText}`
+          listItem.id = `cart-item-${data.product.id}`
           listItem.innerHTML = `
                 <div class="d-flex justify-content-between align-items-center">
                     ${data.product.name}
-                    <button class="btn btn-danger btn-sm" onclick="removeFromCart(${data.product.id}, 'cart-item-${data.product.id}-${cartCount.innerText}')">
+                    <button class="btn btn-danger btn-sm" onclick="removeFromCart(event)" data-product-id="${data.product.id}">
                         R$ ${data.product.value} <i class="fas fa-trash"></i>
                     </button>
                 </div>
@@ -197,14 +213,25 @@
         } else {
           toastr.error(data.message)
         }
+        productBtn.innerHTML = productBtnBkp
+        productBtn.disabled = false
       })
       .catch((error) => {
         toastr.error("Erro ao adicionar ao carrinho: " + error.message)
       })
   }
 
-  function removeFromCart(productId, cartItemId) {
+  function removeFromCart(event) {
     const urlRemoveFromCart = "{{ url_for('remove_from_cart_api') }}"
+
+    const removeBtn = event.target
+    const removeBtnBkp = removeBtn.innerHTML
+
+    removeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'
+    removeBtn.disabled = true
+
+    const productId = removeBtn.dataset.productId
+    const cartItemId = `cart-item-${productId}`
 
     fetch(urlRemoveFromCart, {
       method: "POST",
@@ -233,6 +260,10 @@
       })
       .catch((error) => {
         toastr.error("Erro ao remover do carrinho: " + error.message)
+      })
+      .finally(() => {
+        removeBtn.innerHTML = removeBtnBkp
+        removeBtn.disabled = false
       })
   }
 
