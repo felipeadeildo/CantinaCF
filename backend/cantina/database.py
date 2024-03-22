@@ -2,12 +2,10 @@ from getpass import getpass
 
 from werkzeug.security import generate_password_hash
 
-from . import app, db
 from .models import CategoryPage, Page, PaymentMethod, Role, Route, User
 
 
-@app.cli.command("initdb")
-def init_db():
+def init_db(db):
     """
     Initializes the database.
     """
@@ -417,8 +415,7 @@ def init_db():
     print("Already created.")
 
 
-@app.cli.command("createsuperuser")
-def create_superuser():
+def create_superuser(db):
     """
     Creates a superuser.
     """

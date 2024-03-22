@@ -1,9 +1,8 @@
 from datetime import datetime
 
+from cantina import db
 from flask import url_for
 from sqlalchemy import event
-
-from . import db
 
 
 class Route(db.Model):
@@ -69,7 +68,17 @@ class User(db.Model):
     role = db.relationship("Role", backref="users")
 
     def as_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+        data = {c.name: getattr(self, c.name) for c in self.__table__.columns}
+        data.update(
+            {
+                "balance": float(self.balance),
+                "balance_payroll": float(self.balance_payroll),
+                "added_at": self.added_at.strftime("%d/%m/%Y %H:%M"),
+                "updated_at": self.updated_at.strftime("%d/%m/%Y %H:%M"),
+            }
+        )
+        data.pop("password", None)
+        return data
 
     def as_friendly_dict(self):
         dict_info = {

@@ -1,18 +1,14 @@
 import tempfile
-import threading
 from datetime import timedelta
 
 from flask import Flask
 from flask_caching import Cache
+from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate
-from flask_seasurf import SeaSurf
+from flask_restful import Api
 from flask_sqlalchemy import SQLAlchemy
 
-from flask_session import Session
-
-from .settings import CSRF_HEADER_NAME, DB_PATH, DEBUG, SECRET_KEY, UPLOAD_FOLDER
-
-lock = threading.Lock()
+from .settings import DB_PATH, DEBUG, SECRET_KEY, UPLOAD_FOLDER
 
 SESSION_TYPE = "filesystem"
 SESSION_PERMANENT = True
@@ -25,10 +21,8 @@ CACHE_TYPE = "FileSystemCache"
 CACHE_DEFAULT_TIMEOUT = 60 * 3  # 3 minutes
 CACHE_DIR = tmp_dir
 
-CSRF_COOKIE_TIMEOUT = timedelta(days=30)
-CSRF_COOKIE_NAME = "csrf-token-topzera"
-
 settings_map = {
+    "JWT_SECRET_KEY": SECRET_KEY,  # TODO: use another key
     "SQLALCHEMY_DATABASE_URI": DB_PATH,
     "SQLALCHEMY_TRACK_MODIFICATIONS": False,
     "SECRET_KEY": SECRET_KEY,
@@ -38,10 +32,7 @@ settings_map = {
     "SESSION_PERMANENT": SESSION_PERMANENT,
     "SESSION_USE_SIGNER": SESSION_USE_SIGNER,
     "PERMANENT_SESSION_LIFETIME": PERMANENT_SESSION_LIFETIME,
-    "CSRF_COOKIE_NAME": CSRF_COOKIE_NAME,
-    "CSRF_COOKIE_TIMEOUT": CSRF_COOKIE_TIMEOUT,
-    "CSRF_HEADER_NAME": CSRF_HEADER_NAME,
-    "SITE_NAME": "CF Cantina",
+    "SITE_NAME": "CantinaCF",
     "CACHE_TYPE": CACHE_TYPE,
     "CACHE_DIR": CACHE_DIR,
     "CACHE_DEFAULT_TIMEOUT": CACHE_DEFAULT_TIMEOUT,
@@ -54,15 +45,50 @@ settings_map = {
     },
 }
 
+db = SQLAlchemy()
+cache = Cache()
+migrate = Migrate()
+jwt = JWTManager()
 
-app = Flask(__name__, template_folder="templates", static_folder="static")
+from .resources.api import api_bp
 
-app.config.from_mapping(settings_map)
+api = Api(api_bp)
 
-Session(app)
-SeaSurf(app)
-cache = Cache(app)
-db = SQLAlchemy(app)
-migrate = Migrate(app, db)
 
-from . import admin, api, auth, cantina, database, functionalities, tasks
+def create_app(settings_map=settings_map):
+    app = Flask(__name__, template_folder="templates", static_folder="static")
+
+    app.config.from_mapping(settings_map)
+
+    cache.init_app(app)
+    db.init_app(app)
+    migrate.init_app(app, db)
+    jwt.init_app(app)
+
+    app.register_blueprint(api_bp)
+
+    resources_list = [
+        ("UserResource", "/users"),
+        ("LoginResource", "/login"),
+        ("CartResource", "/cart"),
+    ]
+    from cantina import resources
+
+    for resource, url in resources_list:
+        api.add_resource(getattr(resources, resource), url)
+
+    register_cli_commands(app, db)
+
+    return app
+
+
+def register_cli_commands(app, db):
+    from .database import create_superuser, init_db
+
+    @app.cli.command("initdb")
+    def init_db_command():
+        init_db(db)
+
+    @app.cli.command("createsuperuser")
+    def create_superuser_command():
+        create_superuser(db)

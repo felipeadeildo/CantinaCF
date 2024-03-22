@@ -12,8 +12,6 @@ DEBUG = debug.lower() == "true"
 SECRET_KEY = "".join([chr(random.randint(97, 122)) for i in range(32)])
 """Flask APP Secret Key"""
 
-CSRF_HEADER_NAME = "".join([chr(random.randint(97, 122)) for i in range(32)])
-"""Random CSRF Header Name"""
 
 DB_PATH = "sqlite:///database.sqlite3"
 """Database URI"""
@@ -34,4 +32,4 @@ SERIES: list[str] = config["series"]
 
 
 CART_TIMEOUT = config["cart_timeout"]
-"""Tempo em segundos que determinado produto fica no carrinho de um usuário."""
+"""Time in seconds before the user cart expires"""
