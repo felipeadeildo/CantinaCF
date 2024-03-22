@@ -1,6 +1,7 @@
 "use client"
 
-import axios from "axios"
+import { getErrorMessage, getResponseErrorMessage } from "@/lib/utils"
+import axios, { AxiosError } from "axios"
 import { createContext, useContext, useEffect, useState } from "react"
 
 type TUser = {
@@ -13,21 +14,41 @@ type TAuthContext = {
   token: string | null
   setToken?: React.Dispatch<React.SetStateAction<string | null>>
   setUser?: React.Dispatch<React.SetStateAction<TUser | null>>
+  login: (username: string, password: string) => Promise<{ ok: boolean; error?: string }>
 }
 
 const AuthContext = createContext<TAuthContext>({
   user: null,
   token: null,
+  login: () => Promise.resolve({ ok: false }),
 })
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<TUser | null>(null)
   const [token, setToken] = useState<string | null>(null)
 
+  const login = async (username: string, password: string) => {
+    try {
+      const res = await axios.post("/api/login", {
+        username,
+        password,
+      })
+      if (res.status === 200) {
+        setToken(res.data.token)
+        localStorage.setItem("token", res.data.token)
+        return { ok: true }
+      }
+      return { ok: false, error: getResponseErrorMessage(res) }
+    } catch (e: AxiosError | any) {
+      return { ok: false, error: getErrorMessage(e) }
+    }
+  }
+
   useEffect(() => {
     const fetchUser = async () => {
+      if (!token) return
       try {
-        const res = await axios.get("/api/user", {
+        const res = await axios.get("/api/users", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -50,7 +71,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, [])
 
   return (
-    <AuthContext.Provider value={{ user, token, setToken, setUser }}>
+    <AuthContext.Provider value={{ user, token, setToken, setUser, login }}>
       {children}
     </AuthContext.Provider>
   )

@@ -15,10 +15,11 @@ import { LoginFormInputs, loginSchema } from "@/schemas/login"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 
+import { useToast } from "@/components/ui/use-toast"
 import { useAuth } from "@/contexts/auth"
 import { LoaderCircle, LogIn } from "lucide-react"
-import { useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { useEffect } from "react"
 
 const Login = () => {
   const form = useForm<LoginFormInputs>({
@@ -27,6 +28,7 @@ const Login = () => {
 
   const auth = useAuth()
   const router = useRouter()
+  const { toast } = useToast()
 
   useEffect(() => {
     if (auth.user) {
@@ -34,7 +36,18 @@ const Login = () => {
     }
   }, [auth, router])
 
-  const onSubmit = async (data: LoginFormInputs) => {}
+  const onSubmit = async (data: LoginFormInputs) => {
+    const { ok, error } = await auth.login(data.username, data.password)
+    if (ok) {
+      router.push("/")
+    } else {
+      toast({
+        title: "Falha no Login",
+        description: error,
+        variant: "destructive",
+      })
+    }
+  }
 
   return (
     <Card className="w-full max-w-sm mx-auto max-h-lg my-36">

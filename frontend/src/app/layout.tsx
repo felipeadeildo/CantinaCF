@@ -1,5 +1,6 @@
 import NavBar from "@/components/navbar"
 import { ThemeProvider } from "@/components/theme-provider"
+import { Toaster } from "@/components/ui/toaster"
 import { AuthProvider } from "@/contexts/auth"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
@@ -31,6 +32,7 @@ export default function RootLayout({
         >
           <AuthProvider>
             <NavBar />
+            <Toaster />
             {children}
           </AuthProvider>
         </ThemeProvider>
