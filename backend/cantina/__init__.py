@@ -23,6 +23,7 @@ CACHE_DIR = tmp_dir
 
 settings_map = {
     "JWT_SECRET_KEY": SECRET_KEY,  # TODO: use another key
+    "JWT_ACCESS_TOKEN_EXPIRES": timedelta(days=7),
     "SQLALCHEMY_DATABASE_URI": DB_PATH,
     "SQLALCHEMY_TRACK_MODIFICATIONS": False,
     "SECRET_KEY": SECRET_KEY,
@@ -68,7 +69,8 @@ def create_app(settings_map=settings_map):
     app.register_blueprint(api_bp)
 
     resources_list = [
-        ("UserResource", "/users"),
+        ("UserResource", "/user"),
+        ("UsersResource", "/users"),
         ("LoginResource", "/login"),
         ("CartResource", "/cart"),
     ]
