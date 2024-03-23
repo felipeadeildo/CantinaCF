@@ -18,11 +18,11 @@ export const LoginRequired = ({
     if (isLoading) return
 
     if (!user) {
-      return router.push("/auth/login")
-    }
-
-    if (!allowed_roles.includes(user.role_id)) {
-      router.push("/auth/login")
+      router.push(
+        "/auth/login?authToastMsg=Você precisa estar logado para acessar esta página!"
+      )
+    } else if (!allowed_roles.includes(user.role_id)) {
+      router.push("/?authToastMsg=Você não tem permissão para acessar esta página!")
     }
   }, [user, allowed_roles, router, isLoading])
 
