@@ -1,13 +1,9 @@
 "use client"
 
 import { getErrorMessage, getResponseErrorMessage } from "@/lib/utils"
+import { TUser } from "@/types/user"
 import axios, { AxiosError } from "axios"
 import { createContext, useContext, useEffect, useState } from "react"
-
-type TUser = {
-  id: number
-  username: string
-}
 
 type TAuthContext = {
   user: TUser | null
@@ -15,12 +11,14 @@ type TAuthContext = {
   setToken?: React.Dispatch<React.SetStateAction<string | null>>
   setUser?: React.Dispatch<React.SetStateAction<TUser | null>>
   login: (username: string, password: string) => Promise<{ ok: boolean; error?: string }>
+  logout: () => void
 }
 
 const AuthContext = createContext<TAuthContext>({
   user: null,
   token: null,
   login: () => Promise.resolve({ ok: false }),
+  logout: () => {},
 })
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -48,7 +46,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const fetchUser = async () => {
       if (!token) return
       try {
-        const res = await axios.get("/api/users", {
+        const res = await axios.get("/api/user", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -63,6 +61,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     fetchUser()
   }, [token])
 
+  const logout = () => {
+    setToken(null)
+    setUser(null)
+    localStorage.removeItem("token")
+  }
+
   useEffect(() => {
     const token = localStorage.getItem("token")
     if (token) {
@@ -71,7 +75,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, [])
 
   return (
-    <AuthContext.Provider value={{ user, token, setToken, setUser, login }}>
+    <AuthContext.Provider value={{ user, token, setToken, setUser, login, logout }}>
       {children}
     </AuthContext.Provider>
   )
