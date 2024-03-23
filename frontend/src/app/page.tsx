@@ -1,5 +1,6 @@
 "use client"
 
+import { LoginRequired } from "@/components/login-required"
 import { useAuth } from "@/contexts/auth"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
@@ -15,4 +16,12 @@ const Home = () => {
   return <>Hello World</>
 }
 
-export default Home
+export const ProtectedHome = () => {
+  return (
+    <LoginRequired>
+      <Home />
+    </LoginRequired>
+  )
+}
+
+export default ProtectedHome
