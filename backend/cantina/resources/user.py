@@ -4,6 +4,8 @@ from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_restful import Resource
 from sqlalchemy import or_
 
+from .. import db
+
 
 class UserResource(Resource):
     @jwt_required()
@@ -17,8 +19,6 @@ class UserResource(Resource):
             return {"message": "Usuário não encontrado."}, 404
 
         return {"user": user.as_dict()}
-
-    # TODO: CRUD
 
 
 class UsersResource(Resource):
@@ -40,3 +40,28 @@ class UsersResource(Resource):
         users = user_query.all()
 
         return {"users": [user.as_dict() for user in users]}
+
+    @jwt_required()
+    def post(self):
+        data = request.json
+        if not data:
+            return {"message": "Nenhum dado enviado."}, 400
+
+        user = User.query.filter_by(username=data.get("username")).first()
+        if user:
+            return {"message": f"Usuário {user.username} já existe."}, 400
+
+        if data.get("role_id") == "3":
+            user = User.query.filter_by(matricula=data.get("matricula")).first()
+            if user:
+                return {"message": f"Matrícula {user.matricula} já existe."}, 400
+
+        try:
+            user = User(**data)
+            db.session.add(user)
+            db.session.commit()
+        except Exception as e:
+            print(e)
+            return {"message": "Erro ao criar o usuário."}, 500
+
+        return {"message": f"Usuário {user.name} criado com sucesso.", "user": user.as_dict()}, 201

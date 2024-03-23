@@ -1,5 +1,7 @@
+import { getErrorMessage } from "@/lib/utils"
+import { SUser } from "@/schema/user"
 import { TUser } from "@/types/user"
-import axios from "axios"
+import axios, { AxiosError } from "axios"
 
 export const fetchUsers = async (
   token: string | null,
@@ -17,15 +19,36 @@ export const fetchUsers = async (
   return res.data.users
 }
 
-export const fetchUser = async (token: string | null, id: string): Promise<TUser> => {
-  const res = await axios.get(`/api/users`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-    params: {
-      id,
-    },
-  })
+export const fetchUser = async (token: string | null, id: string): Promise<{message?: string; user?: TUser}> => {
+  try {
+    const res = await axios.get(`/api/users`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      params: {
+        id,
+      },
+    })
+    return res.data.user
+  } catch (error: AxiosError | any) {
+    return {message: getErrorMessage(error)}
+  }
 
-  return res.data.user
+}
+
+export const createUser = async (
+  token: string | null,
+  user: SUser
+): Promise<{ message?: string; user?: TUser }> => {
+  try {
+    const res = await axios.post("/api/users", user, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    return res.data
+  } catch (e: AxiosError | any) {
+    const error = getErrorMessage(e)
+    return { message: error }
+  }
 }

@@ -1,7 +1,7 @@
 "use client"
 import { useUsers } from "@/hooks/users"
-import { CircleAlert, CirclePlus, Pencil, Search, User } from "lucide-react"
-import { useEffect, useState } from "react"
+import { CircleAlert, Pencil, Search, User } from "lucide-react"
+import { useRef, useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -22,20 +22,16 @@ import {
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
+import CreateUserDialog from "@/components/admin/users/create-user-dialog"
+import { LoginRequired } from "@/components/login-required"
 import { Input } from "@/components/ui/input"
 
 const Users = () => {
   const [query, setQuery] = useState("")
-  const [debounce, setDebounce] = useState("")
+  const searchRef = useRef<HTMLInputElement>(null)
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebounce(query)
-    }, 250)
-    return () => clearTimeout(timer)
-  }, [query])
+  const { data: users = [], isLoading, error } = useUsers(query)
 
-  const { data: users = [], isLoading, error } = useUsers(debounce)
   return (
     <>
       <h1 className="text-xl font-semibold text-center my-2">Usuários</h1>
@@ -44,9 +40,13 @@ const Users = () => {
         <div className="flex items-center gap-2">
           <Search size={15} />
           <Input
-            onChange={(e) => setQuery(e.target.value)}
-            value={query}
-            placeholder="Pesquisar..."
+            ref={searchRef}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                setQuery(searchRef.current?.value || "")
+              }
+            }}
+            placeholder="Digite e tecle Enter para pesquisar"
             className="my-2"
           />
         </div>
@@ -119,28 +119,25 @@ const Users = () => {
             <CircleAlert className="h-4 w-4" />
             <AlertTitle>Aviso</AlertTitle>
             <AlertDescription>
-              Nenhum resultado encontrado para &quot;{debounce}&quot;
+              Nenhum resultado encontrado para &quot;{query}&quot;
             </AlertDescription>
           </Alert>
         )}
 
         {isLoading && <p className="mt-4 text-center">Carregando...</p>}
 
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button className="mt-4 fixed right-5 bottom-5" size="icon">
-                <CirclePlus />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Criar Novo Usuário</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <CreateUserDialog />
       </div>
     </>
   )
 }
 
-export default Users
+const ProtectedUsers = () => {
+  return (
+    <LoginRequired allowed_roles={[1]}>
+      <Users />
+    </LoginRequired>
+  )
+}
+
+export default ProtectedUsers

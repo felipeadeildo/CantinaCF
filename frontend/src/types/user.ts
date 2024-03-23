@@ -1,3 +1,10 @@
+export const UserRoles = {
+  Admin: "1",
+  Funcionário: "2",
+  Aluno: "3",
+  Caixa: "4",
+} as const
+
 export type TUser = {
   id: number
   username: string
