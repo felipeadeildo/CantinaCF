@@ -114,7 +114,15 @@ class Product(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.now)
 
     def as_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+        data = {c.name: getattr(self, c.name) for c in self.__table__.columns}
+        data.update(
+            {
+                "value": float(self.value),
+                "added_at": self.added_at.strftime("%d/%m/%Y %H:%M"),
+                "updated_at": self.updated_at.strftime("%d/%m/%Y %H:%M"),
+            }
+        )
+        return data
 
 
 class ProductSale(db.Model):
@@ -365,6 +373,31 @@ class StockHistory(db.Model):
                 value = getattr(self, c.name)
             data[key] = value
         return data
+
+
+class Cart(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    product_id = db.Column(db.Integer, db.ForeignKey("product.id"))
+    quantity = db.Column(db.Integer, default=1)
+    added_at = db.Column(db.DateTime, default=datetime.now)
+
+    @property
+    def product(self):
+        return Product.query.get(self.product_id)
+
+    @property
+    def user(self):
+        return User.query.get(self.user_id)
+
+    def as_dict(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "product": self.product.as_dict(),
+            "quantity": self.quantity,
+            "added_at": self.added_at.strftime("%d/%m/%Y %H:%M"),
+        }
 
 
 class Task(db.Model):

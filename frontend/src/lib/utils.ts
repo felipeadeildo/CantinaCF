@@ -16,6 +16,7 @@ export function getResponseErrorMessage(response: AxiosResponse): string {
 }
 
 export function getErrorMessage(error: AxiosError): string {
+  if (!error) return "Um erro inesperado aconteceu."
   if (error.response) {
     return getResponseErrorMessage(error.response)
   } else if (error.request) {
@@ -23,4 +24,9 @@ export function getErrorMessage(error: AxiosError): string {
   } else {
     return error.message
   }
+}
+
+
+export const toReal = (value: number) => {
+  return value.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })
 }

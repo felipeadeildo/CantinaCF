@@ -1,4 +1,4 @@
-from cantina.models import Product, User
+from cantina.models import Cart, Product, User
 from flask import request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_restful import Resource
@@ -27,23 +27,58 @@ class CartResource(Resource):
         product.quantity -= 1
         db.session.commit()
 
-        # TODO: Add clanup task to remove this product from the cart after a certain amount of time
+        user_id = get_jwt_identity()
 
-        # TODO: Add the product to the user cart list (create the table to save this.)
+        cart = Cart.query.filter_by(user_id=user_id, product_id=product_id).first()
+        if cart:
+            cart.quantity += 1
+        else:
+            cart = Cart(user_id=user_id, product_id=product_id, quantity=1)
+            db.session.add(cart)
+
+        db.session.commit()
 
         return {"message": f"Produto {product.name} adicionado ao carrinho."}, 200
 
     @jwt_required()
     def get(self):
-        current_username = get_jwt_identity()
-        user = User.query.filter_by(username=current_username).first()
-        if user is None:
-            return {"message": "Usuário não encontrado."}, 404
 
-        # TODO: this must be a list of products on the cart
-        return []
-    
+        user_id = get_jwt_identity()
+        carts = Cart.query.filter_by(user_id=user_id).all()
+
+        return [cart.as_dict() for cart in carts]
+
     @jwt_required()
     def delete(self):
-        # TODO: delete a product from the user's cart
-        ...
+        data = request.args
+        if not data:
+            return {"message": "Nenhum dado enviado."}, 400
+
+        product_id = data.get("product_id")
+        if product_id is None:
+            return {"message": "ID do produto deve ser especificado."}, 400
+
+        user_id = get_jwt_identity()
+
+        cart = Cart.query.filter_by(user_id=user_id, product_id=product_id).first()
+        if not cart or cart.quantity < 1:
+            return {"message": "Carrinho vazio."}, 404
+
+        cart.quantity -= 1
+        cart.product.quantity += 1
+        db.session.commit()
+        return {"message": "Item removido do carrinho."}, 200
+
+
+class ProductsResource(Resource):
+    @jwt_required()
+    def get(self):
+        product_query = Product.query.order_by(Product.name.asc())
+
+        # TODO: Replace "á" with "a" in the query and things like this from the pt-br
+
+        if query := request.args.get("query"):
+            product_query = product_query.filter(Product.name.contains(query))
+
+        products = product_query.all()
+        return {"products": [product.as_dict() for product in products]}
