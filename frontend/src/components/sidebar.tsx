@@ -18,10 +18,12 @@ import {
 import { SIDEBAR_PAGES, SIDEBAR_PAGES_CATEGORIES } from "@/constants/pages"
 import { AlignLeftIcon, LogOut, LogOutIcon } from "lucide-react"
 import Link from "next/link"
+import { useState } from "react"
 
 export const SideBar = () => {
+  const [open, setOpen] = useState(false)
   return (
-    <Sheet>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <Button variant="outline" size="icon">
           <AlignLeftIcon size={18} />
@@ -50,6 +52,7 @@ export const SideBar = () => {
                         key={page.path}
                         href={page.path}
                         className="px-4 py-2 text-sm  rounded-md"
+                        onClick={() => setOpen(false)}
                       >
                         {page.name}
                       </Link>
@@ -65,6 +68,7 @@ export const SideBar = () => {
           <Link
             href="/auth/logout"
             className="w-full flex gap-1 justify-center items-center text-destructive hover:text-destructive/80"
+            onClick={() => setOpen(false)}
           >
             <LogOutIcon size={18} />
             Sair
