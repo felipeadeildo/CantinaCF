@@ -9,7 +9,7 @@ type TAuthContext = {
   user: TUser | null
   token: string | null
   isLoading: boolean
-  login: (username: string, password: string) => Promise<void>
+  login: (username: string, password: string) => Promise<{ ok: boolean; error?: string }>
   logout: () => void
 }
 
@@ -47,7 +47,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [fetchUser])
 
-  const login = async (username: string, password: string): Promise<void> => {
+  const login = async (
+    username: string,
+    password: string
+  ): Promise<{ ok: boolean; error?: string }> => {
     setIsLoading(true)
     try {
       const res = await axios.post("/api/login", { username, password })
@@ -55,14 +58,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setToken(res.data.token)
         localStorage.setItem("token", res.data.token)
         await fetchUser(res.data.token)
+        setIsLoading(false)
+        return { ok: true }
       } else {
-        throw new Error("Token não recebido")
+        setIsLoading(false)
+        throw { ok: false, error: "Nenhum token recebido do servidor" }
       }
     } catch (error) {
-      console.error("Erro de login:", getErrorMessage(error as AxiosError))
-      throw error
-    } finally {
       setIsLoading(false)
+      return { ok: false, error: getErrorMessage(error as AxiosError) }
     }
   }
 
