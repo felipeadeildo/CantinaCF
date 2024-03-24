@@ -51,7 +51,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const fetchUser = async () => {
       setIsLoading(true)
-      if (!token) return
+      if (!token) return setIsLoading(false)
       try {
         const res = await axios.get("/api/user", {
           headers: {
@@ -61,7 +61,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         setUser(res.data.user)
       } catch (e) {
-        console.log(e)
+        // console.log(e)
       } finally {
         setIsLoading(false)
       }
@@ -84,7 +84,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, [])
 
   return (
-    <AuthContext.Provider value={{ user, token, setToken, setUser, login, logout, isLoading }}>
+    <AuthContext.Provider
+      value={{ user, token, setToken, setUser, login, logout, isLoading }}
+    >
       {children}
     </AuthContext.Provider>
   )

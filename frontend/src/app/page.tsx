@@ -16,7 +16,7 @@ const Home = () => {
   return <>Hello World</>
 }
 
-export const ProtectedHome = () => {
+const ProtectedHome = () => {
   return (
     <LoginRequired>
       <Home />
