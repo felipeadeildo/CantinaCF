@@ -1,5 +1,5 @@
 import { useAuth } from "@/contexts/auth"
-import { SUser } from "@/schema/user"
+import { SUser } from "@/schemas/user"
 import { createUser, fetchUser, fetchUsers } from "@/services/users"
 import { TUser } from "@/types/user"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"

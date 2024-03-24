@@ -19,7 +19,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { useToast } from "@/components/ui/use-toast"
 import { useUsersMutations } from "@/hooks/users"
-import { SUser, userSchema } from "@/schema/user"
+import { SUser, userSchema } from "@/schemas/user"
 import { UserRoles } from "@/types/user"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"

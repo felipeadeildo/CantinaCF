@@ -11,9 +11,10 @@ import { useToast } from "../ui/use-toast"
 type ProductCardProps = {
   product: TProduct
   cart: TCart | null
+  size?: "default" | "sm"
 }
 
-export const ProductCard = ({ product, cart }: ProductCardProps) => {
+export const ProductCard = ({ product, cart, size = "default" }: ProductCardProps) => {
   const { addProductToCartMutation, removeProductFromCartMutation } =
     useProductsMutation()
   const { toast } = useToast()
@@ -35,11 +36,12 @@ export const ProductCard = ({ product, cart }: ProductCardProps) => {
 
   return (
     <Card>
-      <CardHeader className="my-0 py-2">
+      <CardHeader className={cn("my-0 py-2", size === "sm" && "py-1")}>
         <CardTitle
           className={cn(
             "text-base flex gap-2 items-center justify-center",
-            cartQuantity > 0 && "text-emerald-300"
+            cartQuantity > 0 && "text-emerald-300",
+            size === "sm" && "text-sm"
           )}
         >
           {product.name}
@@ -50,13 +52,15 @@ export const ProductCard = ({ product, cart }: ProductCardProps) => {
           )}
         </CardTitle>
       </CardHeader>
-      <CardFooter className="justify-between">
+
+      <CardFooter className={cn("justify-between", size === "sm" && "py-0")}>
         <Badge variant={product.quantity === 0 ? "destructive" : "secondary"}>
           {product.quantity} restantes
         </Badge>
 
-        <p className="text-base font-semibold">
-          {toReal(product.value)}</p>
+        <p className={cn("text-base font-semibold", size === "sm" && "text-sm")}>
+          {toReal(product.value)}
+        </p>
 
         <div className="flex gap-2 items-center justify-center">
           <Button
@@ -65,7 +69,11 @@ export const ProductCard = ({ product, cart }: ProductCardProps) => {
             disabled={cartQuantity === 0 || removeProductFromCartMutation.isPending}
             onClick={() => handleClick("remove")}
           >
-            {removeProductFromCartMutation.isPending ? <LoaderCircle /> : <Minus />}
+            {removeProductFromCartMutation.isPending ? (
+              <LoaderCircle className="animate-spin" />
+            ) : (
+              <Minus />
+            )}
           </Button>
 
           <span>{cartQuantity}</span>
@@ -76,7 +84,11 @@ export const ProductCard = ({ product, cart }: ProductCardProps) => {
             disabled={product.quantity === 0 || addProductToCartMutation.isPending}
             onClick={() => handleClick("add")}
           >
-            {addProductToCartMutation.isPending ? <LoaderCircle /> : <Plus />}
+            {addProductToCartMutation.isPending ? (
+              <LoaderCircle className="animate-spin" />
+            ) : (
+              <Plus />
+            )}
           </Button>
         </div>
       </CardFooter>

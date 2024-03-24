@@ -1,5 +1,5 @@
 import { getErrorMessage } from "@/lib/utils"
-import { SUser } from "@/schema/user"
+import { SUser } from "@/schemas/user"
 import { TUser } from "@/types/user"
 import axios, { AxiosError } from "axios"
 

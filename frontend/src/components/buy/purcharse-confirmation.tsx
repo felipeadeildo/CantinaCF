@@ -1,3 +1,7 @@
+import { Button } from "@/components/ui/button"
+import { TCart } from "@/types/cart"
+import { ShoppingBag } from "lucide-react"
+
 import {
   Dialog,
   DialogContent,
@@ -6,65 +10,74 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { toReal } from "@/lib/utils"
-import { TCart } from "@/types/cart"
-import { ShoppingBag } from "lucide-react"
-import { Button } from "../ui/button"
+import { useEffect, useState } from "react"
+import { BuyForm } from "./buy-form"
+import { CartStats } from "./cart-stats"
+import { ProductCard } from "./product-card"
 
 type Props = {
   cart: TCart[]
+  quantityProductsInCart: number
+  totalPrice: number
 }
 
-export const PurchaseConfirmation = ({ cart }: Props) => {
-  const quantityProductsInCart = cart.reduce((a, b) => a + b.quantity, 0)
+export const PurcharseConfirmation = ({
+  cart,
+  quantityProductsInCart,
+  totalPrice,
+}: Props) => {
+  const [open, setOpen] = useState(false)
+
+  useEffect(() => {
+    const hasCart = cart.some((c) => c.quantity > 0)
+    if (!hasCart) return setOpen(false)
+
+    // se o usuário ficar sem alterar o carrinho por alguns segundos, ele pode confirmar
+    const timer = setTimeout(() => setOpen(cart.some((c) => c.quantity > 0)), 60000)
+
+    return () => clearTimeout(timer)
+  }, [cart])
+
   return (
-    <Dialog>
-      <DialogTrigger>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
         <Button
-          variant={quantityProductsInCart > 0 ? "default" : "destructive"}
-          size="icon"
-          className="fixed right-4 bottom-10"
+          className="ml-4 font-bold"
+          variant={quantityProductsInCart === 0 ? "ghost" : "default"}
           disabled={quantityProductsInCart === 0}
         >
-          <ShoppingBag />
+          <ShoppingBag className="mr-2" /> Confirmar Compra
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Confirmação de Compra</DialogTitle>
+          <DialogTitle>Confirmar Compra</DialogTitle>
           <DialogDescription>
-            Confira os produtos que estão no carrinho, preencha seu login e senha e efetue
-            a compra S2!
+            Confira os Produtos, preencha suas credenciais e confirme a compra.
           </DialogDescription>
+
+          <CartStats
+            quantityProductsInCart={quantityProductsInCart}
+            totalPrice={totalPrice}
+          />
+
+          <div className="overflow-y-auto max-h-[300px] flex flex-col gap-1">
+            {cart.map((item) => {
+              return (
+                item.quantity > 0 && (
+                  <ProductCard
+                    product={item.product}
+                    cart={item}
+                    key={item.product.id}
+                    size="sm"
+                  />
+                )
+              )
+            })}
+          </div>
+
+          <BuyForm />
         </DialogHeader>
-
-        <h1 className="text-xl">
-          Carrinho - {quantityProductsInCart} produtos - Total:{" "}
-          {toReal(cart.reduce((a, b) => a + b.product.value * b.quantity, 0))}
-        </h1>
-
-        {cart.map((item) => {
-          return (
-            item.quantity > 0 && (
-              <div key={item.id}>
-                <p>
-                  <strong>Nome:</strong> {item.product.name}
-                </p>
-                <p>
-                  <strong>Valor:</strong> {toReal(item.product.value)}
-                </p>
-                <p>
-                  <strong>Quantidade:</strong> {item.quantity}
-                </p>
-                <p>
-                  <strong>Total:</strong> {toReal(item.product.value * item.quantity)}
-                </p>
-              </div>
-            )
-          )
-        })}
-
-        <Button>Comprar!</Button>
       </DialogContent>
     </Dialog>
   )
