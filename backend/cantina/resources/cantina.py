@@ -1,4 +1,7 @@
-from cantina.models import Cart, Product, User
+from functools import reduce
+
+from cantina.models import Cart, Product, ProductSale, User
+from cantina.utils import verify_password
 from flask import request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_restful import Resource
@@ -82,3 +85,69 @@ class ProductsResource(Resource):
 
         products = product_query.all()
         return {"products": [product.as_dict() for product in products]}
+
+
+class PurchaseResource(Resource):
+    @jwt_required()
+    def post(self):
+        target_user_data = request.json
+        if not target_user_data:
+            return {"message": "Nenhum dado enviado."}, 400
+
+        requester_id = get_jwt_identity()
+
+        requester_user = User.query.filter_by(id=requester_id).first()
+        if not requester_user:
+            return {"message": "Matrix error: requester not found."}, 400
+
+        target_user = User.query.filter_by(username=target_user_data.get("username")).first()
+        if not target_user:
+            return {"message": f"Usuário {target_user_data.get('username')} não encontrado."}, 404
+
+        is_admin_purchase = requester_user.role.id == 1
+        if is_admin_purchase:
+            target_hashed_password = requester_user.password
+        else:
+            target_hashed_password = target_user.password
+
+        if not verify_password(target_user_data.get("password"), target_hashed_password):
+            return {"message": f"{'(ADMIN) ' if is_admin_purchase else ''}Senha incorreta."}, 400
+
+        cart_list = Cart.query.filter_by(user_id=requester_id).all()
+        if not cart_list:
+            return {"message": "Carrinho de compras vazio."}, 400
+
+        total_price = reduce(
+            lambda acc, cart: acc + cart.product.value * cart.quantity, cart_list, 0
+        )
+
+        if total_price > requester_user.balance:
+            return {
+                "message": f"{target_user.username} tem somente R$ {target_user.balance:.2f} de saldo (insuficiente)."
+            }, 400
+
+        requester_user.balance -= total_price
+
+        sales = []
+        for cart_item in cart_list:
+            product_sale = ProductSale(
+                product_id=cart_item.product.id,
+                value=cart_item.product.value,
+                sold_by=requester_user.id,
+                sold_to=target_user.id,
+                status="to dispatch",
+            )
+            sales.append(product_sale)
+            cart_item.quantity = 0
+            db.session.commit()
+
+        db.session.add_all(sales)
+        db.session.commit()
+
+        return {
+            "message": (
+                "Tudo Certo, pode ir lá pegar!"
+                if not is_admin_purchase
+                else f"Tudo certo, {requester_user.username}, pode mandar o cliente {target_user.username} pegar o que comprou"
+            )
+        }, 200

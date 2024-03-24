@@ -95,7 +95,7 @@ const Login = () => {
             <Button type="submit" disabled={form.formState.isSubmitting}>
               {form.formState.isSubmitting ? (
                 <>
-                  <LoaderCircle className="mr-2 h-4 w-4" />
+                  <LoaderCircle className="animate-spin mr-2 h-4 w-4" />
                   Entrando...
                 </>
               ) : (

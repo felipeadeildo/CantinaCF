@@ -1,4 +1,5 @@
 import { getErrorMessage } from "@/lib/utils"
+import { LoginFormInputs } from "@/schemas/login"
 import { TProduct } from "@/types/products"
 import axios, { Axios, AxiosError } from "axios"
 
@@ -63,5 +64,22 @@ export const removeProductFromCart = async (
     return { message: res.data.message }
   } catch (e) {
     return { message: getErrorMessage(e as AxiosError) }
+  }
+}
+
+export const confirmPurchase = async (
+  token: string | null,
+  credentials: LoginFormInputs
+): Promise<string> => {
+  try {
+    const res = await axios.post("/api/purchase", credentials, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+
+    return res.data.message
+  } catch (e) {
+    throw Error(getErrorMessage(e as AxiosError))
   }
 }

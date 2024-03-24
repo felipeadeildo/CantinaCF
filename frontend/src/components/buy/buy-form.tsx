@@ -1,8 +1,10 @@
 import { useAuth } from "@/contexts/auth"
+import { usePurchaseMutation } from "@/hooks/purcharse"
 import { LoginFormInputs, loginSchema } from "@/schemas/login"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { LoaderCircle, LogIn } from "lucide-react"
+import { LoaderCircle, LogIn, ShieldAlert } from "lucide-react"
 import { useForm } from "react-hook-form"
+import { Alert, AlertDescription } from "../ui/alert"
 import { Button } from "../ui/button"
 import {
   Form,
@@ -13,6 +15,7 @@ import {
   FormMessage,
 } from "../ui/form"
 import { Input } from "../ui/input"
+import { useToast } from "../ui/use-toast"
 
 export const BuyForm = () => {
   const { user } = useAuth()
@@ -25,13 +28,29 @@ export const BuyForm = () => {
     },
   })
 
+  const { toast } = useToast()
+
+  const { mutateAsync, isPending, isError, error } = usePurchaseMutation()
   const onSubmit = async (data: LoginFormInputs) => {
-    // TODO: Implement purchase here :D
-    console.log(data)
+    try {
+      const message = await mutateAsync(data)
+      toast({
+        description: message,
+      })
+    } catch (error) {
+      // erro vai ser tratado pelo tanstack
+    }
   }
 
   return (
     <Form {...form}>
+      {isError && (
+        <Alert variant="destructive">
+          <AlertDescription className="flex items-center gap-2 justify-center">
+            <ShieldAlert /> {error.message}
+          </AlertDescription>
+        </Alert>
+      )}
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <FormField
           control={form.control}
@@ -40,7 +59,7 @@ export const BuyForm = () => {
             <FormItem>
               <FormLabel>Usuário</FormLabel>
               <FormControl>
-                <Input {...field} disabled={form.formState.isSubmitting} />
+                <Input {...field} disabled={form.formState.isSubmitting || isPending} />
               </FormControl>
 
               <FormMessage />
@@ -58,7 +77,7 @@ export const BuyForm = () => {
                 <Input
                   {...field}
                   type="password"
-                  disabled={form.formState.isSubmitting}
+                  disabled={form.formState.isSubmitting || isPending}
                 />
               </FormControl>
 
@@ -69,11 +88,11 @@ export const BuyForm = () => {
 
         <Button
           type="submit"
-          disabled={form.formState.isSubmitting}
+          disabled={form.formState.isSubmitting || isPending}
           size="sm"
           className="w-full mt-3"
         >
-          {form.formState.isSubmitting ? (
+          {form.formState.isSubmitting || isPending ? (
             <>
               <LoaderCircle className="animate-spin mr-2 h-4 w-4" />
               Confirmando Compra...

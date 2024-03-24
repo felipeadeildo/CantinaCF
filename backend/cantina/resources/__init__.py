@@ -1,5 +1,12 @@
 from .auth import LoginResource
-from .cantina import CartResource, ProductsResource
+from .cantina import CartResource, ProductsResource, PurchaseResource
 from .user import UserResource, UsersResource
 
-__all__ = ["LoginResource", "CartResource", "UserResource", "UsersResource", "ProductsResource"]
+__all__ = [
+    "ProductsResource",
+    "PurchaseResource",
+    "LoginResource",
+    "UsersResource",
+    "CartResource",
+    "UserResource",
+]
