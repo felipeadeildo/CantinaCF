@@ -38,5 +38,8 @@ parser.add_argument(
 parser.add_argument("-D", "--debug", action="store_true", help="Iniciar servidor em modo debug.")
 args = parser.parse_args()
 
-cantina.tasks.TaskManager().run()
-cantina.app.run(host=args.host, port=args.port, debug=args.debug)
+# cantina.tasks.TaskManager().run()
+
+app = cantina.create_app()
+# app.run(host=args.host, port=args.port, debug=args.debug)
+cantina.socketio.run(app, host=args.host, port=args.port, debug=args.debug)  # type: ignore

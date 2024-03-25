@@ -162,17 +162,18 @@ class ProductSale(db.Model):
     def as_friendly_dict(self):
         data = {}
         for c in self.__table__.columns:
-            key = c.info.get("label", c.name)
-            if c.name in ("sold_by", "sold_to", "dispatched_by"):
-                value = get_user_name_and_id(getattr(self, c.name))
-            elif c.name in ("product_id",):
-                value = get_product_name_and_id(getattr(self, c.name))
-            elif c.name in ("added_at", "dispatched_at"):
-                value = get_friendly_datetime(getattr(self, c.name))
-            elif c.name in ("value",):
-                value = float(getattr(self, c.name))
+            key = c.name
+            if key in ("sold_by", "sold_to", "dispatched_by"):
+                value = user.as_dict() if (user := getattr(self, f"{key}_user")) else None
+            elif key in ("product_id",):
+                key = "product"
+                value = getattr(self, "product").as_dict()
+            elif key in ("added_at", "dispatched_at"):
+                value = get_friendly_datetime(getattr(self, key)) if getattr(self, key) else ""
+            elif key in ("value",):
+                value = float(getattr(self, key))
             else:
-                value = getattr(self, c.name)
+                value = getattr(self, key)
             data[key] = value
         return data
 

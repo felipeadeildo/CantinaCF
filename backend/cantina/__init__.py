@@ -3,9 +3,11 @@ from datetime import timedelta
 
 from flask import Flask
 from flask_caching import Cache
+from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate
 from flask_restful import Api
+from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy
 
 from .settings import DB_PATH, DEBUG, SECRET_KEY, UPLOAD_FOLDER
@@ -50,6 +52,8 @@ db = SQLAlchemy()
 cache = Cache()
 migrate = Migrate()
 jwt = JWTManager()
+cors = CORS()
+socketio = SocketIO()
 
 from .resources.api import api_bp
 
@@ -65,6 +69,8 @@ def create_app(settings_map=settings_map):
     db.init_app(app)
     migrate.init_app(app, db)
     jwt.init_app(app)
+    cors.init_app(app, resources={r"/*": {"origins": "*"}})
+    socketio.init_app(app, cors_allowed_origins="*")
 
     app.register_blueprint(api_bp)
 
@@ -82,6 +88,8 @@ def create_app(settings_map=settings_map):
         api.add_resource(getattr(resources, resource), url)
 
     register_cli_commands(app, db)
+
+    from cantina import websockets
 
     return app
 
