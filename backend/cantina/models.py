@@ -5,39 +5,9 @@ from flask import url_for
 from sqlalchemy import event
 
 
-class Route(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), unique=True, nullable=False)
-    description = db.Column(db.Text, nullable=True)
-    endpoint = db.Column(db.Text, nullable=False)
-    updated_at = db.Column(db.DateTime, default=datetime.now)
-    block_recurring_access = db.Column(db.Boolean, default=False)
-
-
-class CategoryPage(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), unique=True, nullable=False)
-    description = db.Column(db.Text, nullable=True)
-    updated_at = db.Column(db.DateTime, default=datetime.now)
-
-
-class Page(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.Text, nullable=False)
-    description = db.Column(db.Text, nullable=False, default="")
-    route_id = db.Column(db.Integer, db.ForeignKey("route.id"), nullable=False)
-    category_page_id = db.Column(db.Integer, db.ForeignKey("category_page.id"), nullable=False)
-    updated_at = db.Column(db.DateTime, default=datetime.now)
-    appear_navbar = db.Column(db.Boolean, default=False)
-
-    route = db.relationship("Route", backref="pages")
-    category_page = db.relationship("CategoryPage", backref="pages")
-
-
 class Role(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), unique=True, nullable=False)
-    allowed_routes = db.Column(db.Text, nullable=True)
     description = db.Column(db.Text, nullable=True)
     added_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, default=datetime.now)
@@ -292,9 +262,6 @@ class EditHistory(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     role_id = db.Column(db.Integer, db.ForeignKey("role.id"))
     payment_method_id = db.Column(db.Integer, db.ForeignKey("payment_method.id"))
-    route_id = db.Column(db.Integer, db.ForeignKey("route.id"))
-    category_page_id = db.Column(db.Integer, db.ForeignKey("category_page.id"))
-    page_id = db.Column(db.Integer, db.ForeignKey("page.id"))
 
     def __repr__(self):
         return (
@@ -431,7 +398,7 @@ def setup_updated_at_listener(classe):
         classe.updated_at = datetime.now()
 
 
-models_can_be_updated = (PaymentMethod, Page, Product, User, Role, Route, CategoryPage)
+models_can_be_updated = (PaymentMethod, Product, User, Role)
 for model in models_can_be_updated:
     setup_updated_at_listener(model)
 
