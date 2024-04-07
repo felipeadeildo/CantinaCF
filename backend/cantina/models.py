@@ -20,10 +20,14 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     matricula = db.Column(db.String(15), nullable=True, info={"label": "Matrícula"})
     name = db.Column(db.Text, nullable=False, info={"label": "Nome"})
-    username = db.Column(db.Text, unique=True, nullable=False, info={"label": "Usuário"})
+    username = db.Column(
+        db.Text, unique=True, nullable=False, info={"label": "Usuário"}
+    )
     role_id = db.Column(db.Integer, db.ForeignKey("role.id"), nullable=False)
     password = db.Column(db.Text, nullable=False)
-    balance = db.Column(db.DECIMAL(10, 2), nullable=False, default=0, info={"label": "Saldo"})
+    balance = db.Column(
+        db.DECIMAL(10, 2), nullable=False, default=0, info={"label": "Saldo"}
+    )
     balance_payroll = db.Column(
         db.DECIMAL(10, 2), nullable=False, default=0, info={"label": "Saldo Devedor"}
     )
@@ -32,8 +36,12 @@ class User(db.Model):
     telephone = db.Column(db.Text, info={"label": "Telefone"})
     cpf = db.Column(db.Text, info={"label": "CPF"})
     email = db.Column(db.Text, info={"label": "E-mail"})
-    added_at = db.Column(db.DateTime, default=datetime.now, info={"label": "Data de cadastro"})
-    updated_at = db.Column(db.DateTime, default=datetime.now, info={"label": "Data de atualização"})
+    added_at = db.Column(
+        db.DateTime, default=datetime.now, info={"label": "Data de cadastro"}
+    )
+    updated_at = db.Column(
+        db.DateTime, default=datetime.now, info={"label": "Data de atualização"}
+    )
 
     role = db.relationship("Role", backref="users")
 
@@ -61,9 +69,9 @@ class User(db.Model):
                 User.added_at.info.get("label", "added_at"): self.added_at.strftime(
                     "%d/%m/%Y às %H:%M"
                 ),
-                User.updated_at.info.get("label", "updated_at"): self.updated_at.strftime(
-                    "%d/%m/%Y às %H:%M"
-                ),
+                User.updated_at.info.get(
+                    "label", "updated_at"
+                ): self.updated_at.strftime("%d/%m/%Y às %H:%M"),
                 User.balance.info.get("label", "balance"): float(self.balance),
                 User.balance_payroll.info.get("label", "balance_payroll"): float(
                     self.balance_payroll
@@ -97,11 +105,19 @@ class Product(db.Model):
 
 class ProductSale(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    product_id = db.Column(db.Integer, db.ForeignKey("product.id"), info={"label": "Produto ID"})
+    product_id = db.Column(
+        db.Integer, db.ForeignKey("product.id"), info={"label": "Produto ID"}
+    )
     value = db.Column(db.DECIMAL(10, 2), nullable=False, info={"label": "Valor (R$)"})
-    sold_by = db.Column(db.Integer, db.ForeignKey("user.id"), info={"label": "Vendido Por"})
-    sold_to = db.Column(db.Integer, db.ForeignKey("user.id"), info={"label": "Vendido Para"})
-    added_at = db.Column(db.DateTime, default=datetime.now, info={"label": "Vendido em"})
+    sold_by = db.Column(
+        db.Integer, db.ForeignKey("user.id"), info={"label": "Vendido Por"}
+    )
+    sold_to = db.Column(
+        db.Integer, db.ForeignKey("user.id"), info={"label": "Vendido Para"}
+    )
+    added_at = db.Column(
+        db.DateTime, default=datetime.now, info={"label": "Vendido em"}
+    )
     dispatched_by = db.Column(
         db.Integer, db.ForeignKey("user.id"), info={"label": "Despachado Por"}
     )
@@ -134,12 +150,18 @@ class ProductSale(db.Model):
         for c in self.__table__.columns:
             key = c.name
             if key in ("sold_by", "sold_to", "dispatched_by"):
-                value = user.as_dict() if (user := getattr(self, f"{key}_user")) else None
+                value = (
+                    user.as_dict() if (user := getattr(self, f"{key}_user")) else None
+                )
             elif key in ("product_id",):
                 key = "product"
                 value = getattr(self, "product").as_dict()
             elif key in ("added_at", "dispatched_at"):
-                value = get_friendly_datetime(getattr(self, key)) if getattr(self, key) else ""
+                value = (
+                    get_friendly_datetime(getattr(self, key))
+                    if getattr(self, key)
+                    else ""
+                )
             elif key in ("value",):
                 value = float(getattr(self, key))
             else:
@@ -161,16 +183,22 @@ class PaymentMethod(db.Model):
 class Payment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     payment_method_id = db.Column(
-        db.Integer, db.ForeignKey("payment_method.id"), info={"label": "Método de Pagamento"}
+        db.Integer,
+        db.ForeignKey("payment_method.id"),
+        info={"label": "Método de Pagamento"},
     )
     observations = db.Column(db.Text, info={"label": "Observações"})
     value = db.Column(db.DECIMAL(10, 2), nullable=False, info={"label": "Valor (R$)"})
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), info={"label": "Usuário"})
     allowed_by = db.Column(
-        db.Integer, db.ForeignKey("user.id"), info={"label": "Permitido / Rejeitado por"}
+        db.Integer,
+        db.ForeignKey("user.id"),
+        info={"label": "Permitido / Rejeitado por"},
     )
     proof_path = db.Column(db.Text, info={"label": "Comprovante"})
-    added_at = db.Column(db.DateTime, default=datetime.now, info={"label": "Data de cadastro"})
+    added_at = db.Column(
+        db.DateTime, default=datetime.now, info={"label": "Data de cadastro"}
+    )
     is_payroll = db.Column(
         db.Boolean, default=False, info={"label": "Recarga via Folha de Pagamento?"}
     )
@@ -223,8 +251,12 @@ class Affiliation(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     affiliated_id = db.Column(db.Integer, db.ForeignKey("user.id"))  # afiliado
     affiliator_id = db.Column(db.Integer, db.ForeignKey("user.id"))  # afiliador
-    affiliated = db.relationship("User", foreign_keys=[affiliated_id], backref="affiliations")
-    affiliator = db.relationship("User", foreign_keys=[affiliator_id], backref="affiliated_users")
+    affiliated = db.relationship(
+        "User", foreign_keys=[affiliated_id], backref="affiliations"
+    )
+    affiliator = db.relationship(
+        "User", foreign_keys=[affiliator_id], backref="affiliated_users"
+    )
 
     added_at = db.Column(db.DateTime, default=datetime.now)
 
@@ -250,7 +282,9 @@ class Payroll(db.Model):
 class EditHistory(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     added_at = db.Column(db.DateTime, default=datetime.now, info={"label": "Criado em"})
-    edited_by = db.Column(db.Integer, db.ForeignKey("user.id"), info={"label": "Editado por"})
+    edited_by = db.Column(
+        db.Integer, db.ForeignKey("user.id"), info={"label": "Editado por"}
+    )
     key = db.Column(db.Text, info={"label": "Chave"})
     old_value = db.Column(db.Text, info={"label": "Valor anterior"})
     new_value = db.Column(db.Text, info={"label": "Novo valor"})
@@ -264,9 +298,7 @@ class EditHistory(db.Model):
     payment_method_id = db.Column(db.Integer, db.ForeignKey("payment_method.id"))
 
     def __repr__(self):
-        return (
-            f"<EditHistory {self.object_type} ({self.key}) [{self.old_value} -> {self.new_value}]>"
-        )
+        return f"<EditHistory {self.object_type} ({self.key}) [{self.old_value} -> {self.new_value}]>"
 
     @property
     def edited_by_user(self):
@@ -456,7 +488,11 @@ def get_payment_method_name_and_id(payment_method_id):
         str: The name and ID of the payment_method in the format "{name} ({id})".
     """
     payment_method = PaymentMethod.query.filter_by(id=payment_method_id).first()
-    return f"{payment_method.name} ({payment_method.id})" if payment_method else payment_method_id
+    return (
+        f"{payment_method.name} ({payment_method.id})"
+        if payment_method
+        else payment_method_id
+    )
 
 
 def get_friendly_datetime(dtime):
