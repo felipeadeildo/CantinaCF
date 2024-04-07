@@ -18,8 +18,8 @@ const rechargeSchemaBase = z.object({
     z.literal(PaymentMethods.CASH),
     z.literal(PaymentMethods.PAYROLL),
   ]),
-  observations: z.string().min(1, "Por favor, insira as observações.").optional(),
-  targetUserId: z.string().optional(),
+  observations: z.string().optional(),
+  targetUserId: z.string(),
 })
 
 const proof = z.object({

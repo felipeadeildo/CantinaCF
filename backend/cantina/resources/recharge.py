@@ -15,7 +15,6 @@ class RechargeResource(Resource):
     @jwt_required()
     def post(self):
         data = request.form
-        print(data, request.files)
         if not data:
             return {"message": "Nenhum dado enviado."}, 400
 

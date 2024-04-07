@@ -23,10 +23,11 @@ import {
   SelectValue,
 } from "../ui/select"
 
-import { useToast } from "../ui/use-toast"
+import { useRechargeMutation } from "@/hooks/recharge"
+import { CreditCard, Loader } from "lucide-react"
 
 export const RechargeForm = () => {
-  const { user, token } = useAuth()
+  const { user } = useAuth()
 
   const form = useForm<TRechargeSchema>({
     resolver: zodResolver(rechargeSchema),
@@ -38,10 +39,9 @@ export const RechargeForm = () => {
       observations: undefined,
     },
   })
-
-  const { toast } = useToast()
-
   const proofRef = form.register("proof")
+
+  const rechargeMutation = useRechargeMutation()
 
   const onSubmit = async (data: TRechargeSchema) => {
     const formData = new FormData()
@@ -51,14 +51,9 @@ export const RechargeForm = () => {
     formData.append("rechargeValue", data.value.toString())
     formData.append("paymentMethod", data.paymentMethod)
     formData.append("targetUserId", data.targetUserId?.toString() || "")
+    formData.append("observations", data.observations || "")
 
-    const res = await fetch("/api/recharge", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      body: formData,
-    })
+    await rechargeMutation.mutateAsync(formData)
   }
   return (
     <Form {...form}>
@@ -81,6 +76,7 @@ export const RechargeForm = () => {
                     field.onChange(e)
                   }}
                   defaultValue="0,00"
+                  disabled={form.formState.isSubmitting}
                 />
               </FormControl>
               <FormMessage />
@@ -94,13 +90,14 @@ export const RechargeForm = () => {
           render={({ field }) => (
             <FormItem className="space-y-0">
               <FormLabel>Forma de Pagamento</FormLabel>
-              <Select onValueChange={field.onChange}>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={PaymentMethods.PIX}
+                disabled={form.formState.isSubmitting}
+              >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue
-                      placeholder="Selecione uma forma de pagamento"
-                      defaultValue="1"
-                    />
+                    <SelectValue placeholder="Selecione uma forma de pagamento" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
@@ -125,7 +122,7 @@ export const RechargeForm = () => {
             <FormItem className="space-y-0">
               <FormLabel>Observações</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} disabled={form.formState.isSubmitting} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -140,7 +137,11 @@ export const RechargeForm = () => {
               <FormItem className="space-y-0">
                 <FormLabel>Comprovante</FormLabel>
                 <FormControl>
-                  <Input type="file" {...proofRef} />
+                  <Input
+                    type="file"
+                    {...proofRef}
+                    disabled={form.formState.isSubmitting}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -156,7 +157,7 @@ export const RechargeForm = () => {
               <FormItem className="space-y-0">
                 <FormLabel>Alvo da Recarga (ID do Usuário)</FormLabel>
                 <FormControl>
-                  <Input {...field} defaultValue={user?.id} />
+                  <Input {...field} disabled={form.formState.isSubmitting} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -166,7 +167,20 @@ export const RechargeForm = () => {
           <input type="hidden" {...form.register("targetUserId")} value={user?.id} />
         )}
 
-        <Button type="submit">Recarregar</Button>
+        <Button
+          type="submit"
+          className="flex gap-1 w-full"
+          disabled={form.formState.isSubmitting}
+        >
+          {form.formState.isSubmitting ? (
+            <Loader className="animate-spin" />
+          ) : (
+            <>
+              <CreditCard />
+              Recarregar
+            </>
+          )}
+        </Button>
       </form>
     </Form>
   )
