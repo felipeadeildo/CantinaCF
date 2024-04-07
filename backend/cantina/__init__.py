@@ -81,6 +81,7 @@ def create_app(settings_map=settings_map):
         ("CartResource", "/cart"),
         ("ProductsResource", "/products"),
         ("PurchaseResource", "/purchase"),
+        ("RechargeResource", "/recharge"),
     ]
     from cantina import resources
 

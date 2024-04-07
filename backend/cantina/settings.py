@@ -1,6 +1,7 @@
 import json
 import os
 import random
+from pathlib import Path
 
 config = json.load(open("config.json", encoding="utf-8"))
 
@@ -17,7 +18,7 @@ DB_PATH = "sqlite:///database.sqlite3"
 """Database URI"""
 
 # static/uploads
-UPLOAD_FOLDER = os.path.join(os.getcwd(), "cantina", "static", "uploads")
+UPLOAD_FOLDER = Path(os.getcwd()) / "cantina" / "static" / "uploads"
 """Upload folder to save uploaded files with proof of recharge"""
 
 if not os.path.exists(UPLOAD_FOLDER):
