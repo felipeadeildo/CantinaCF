@@ -1,4 +1,5 @@
 import { PAYMENT_METHODS_LABELS } from "@/constants/translations"
+import { useAuth } from "@/contexts/auth"
 import { maskMoney } from "@/lib/masks"
 import { rechargeSchema, TRechargeSchema } from "@/schemas/recharge"
 import { PaymentMethods } from "@/types/recharge"
@@ -22,33 +23,63 @@ import {
   SelectValue,
 } from "../ui/select"
 
+import { useToast } from "../ui/use-toast"
+
 export const RechargeForm = () => {
+  const { user, token } = useAuth()
+
   const form = useForm<TRechargeSchema>({
     resolver: zodResolver(rechargeSchema),
+    defaultValues: {
+      value: undefined,
+      paymentMethod: PaymentMethods.PIX,
+      targetUserId: user?.id.toString() || "",
+      proof: undefined,
+      observations: undefined,
+    },
   })
+
+  const { toast } = useToast()
 
   const proofRef = form.register("proof")
 
   const onSubmit = async (data: TRechargeSchema) => {
-    console.log(data)
+    const formData = new FormData()
+    if (data.paymentMethod === PaymentMethods.PIX && data["proof"]) {
+      formData.append("proof", data["proof"])
+    }
+    formData.append("rechargeValue", data.value.toString())
+    formData.append("paymentMethod", data.paymentMethod)
+    formData.append("targetUserId", data.targetUserId?.toString() || "")
+
+    const res = await fetch("/api/recharge", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+    })
   }
   return (
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-4"
+        className="space-y-2"
         autoComplete="off"
       >
         <FormField
           control={form.control}
           name="value"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="space-y-0">
               <FormLabel>Valor (R$)</FormLabel>
               <FormControl>
                 <Input
                   {...field}
-                  onChange={(e) => (e.target.value = maskMoney(e.target.value))}
+                  onChange={(e: any) => {
+                    e.target.value = maskMoney(e.target.value)
+                    field.onChange(e)
+                  }}
                   defaultValue="0,00"
                 />
               </FormControl>
@@ -61,7 +92,7 @@ export const RechargeForm = () => {
           control={form.control}
           name="paymentMethod"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="space-y-0">
               <FormLabel>Forma de Pagamento</FormLabel>
               <Select onValueChange={field.onChange}>
                 <FormControl>
@@ -91,7 +122,7 @@ export const RechargeForm = () => {
           control={form.control}
           name="observations"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="space-y-0">
               <FormLabel>Observações</FormLabel>
               <FormControl>
                 <Input {...field} />
@@ -106,7 +137,7 @@ export const RechargeForm = () => {
             control={form.control}
             name="proof"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="space-y-0">
                 <FormLabel>Comprovante</FormLabel>
                 <FormControl>
                   <Input type="file" {...proofRef} />
@@ -115,6 +146,24 @@ export const RechargeForm = () => {
               </FormItem>
             )}
           />
+        )}
+
+        {user?.role_id === 1 ? (
+          <FormField
+            control={form.control}
+            name="targetUserId"
+            render={({ field }) => (
+              <FormItem className="space-y-0">
+                <FormLabel>Alvo da Recarga (ID do Usuário)</FormLabel>
+                <FormControl>
+                  <Input {...field} defaultValue={user?.id} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        ) : (
+          <input type="hidden" {...form.register("targetUserId")} value={user?.id} />
         )}
 
         <Button type="submit">Recarregar</Button>

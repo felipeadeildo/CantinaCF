@@ -16,8 +16,8 @@ const Recharge = () => {
   return (
     <div className="flex justify-center items-center h-[80dvh]">
       <Card>
-        <CardHeader>
-          <CardTitle>Recarregar Saldo</CardTitle>
+        <CardHeader className="py-1">
+          <CardTitle className="text-center">Recarregar Saldo</CardTitle>
           <CardDescription>
             Recarregue seu saldo na cantina para poder comprar lanches!
           </CardDescription>
