@@ -24,7 +24,7 @@ class RechargeResource(Resource):
         if not requester_user:
             return {"message": "Usuário não encontrado."}, 404
 
-        target_user_id = data.get("targetUserId")
+        target_user_id = data.get("targetUserId", -1, type=int)
 
         if requester_user.role.id != 1 and target_user_id != requester_user_id:
             return {
