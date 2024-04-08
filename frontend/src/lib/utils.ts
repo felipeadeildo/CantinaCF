@@ -1,3 +1,4 @@
+import { TUser, UserRoles } from "@/types/user"
 import { AxiosError, AxiosResponse } from "axios"
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
@@ -26,7 +27,10 @@ export function getErrorMessage(error: AxiosError): string {
   }
 }
 
-
 export const toReal = (value: number) => {
-  return value.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })
+  return value.toLocaleString("pt-br", { style: "currency", currency: "BRL" })
+}
+
+export const isUserAdmin = (user: TUser) => {
+  return user.role_id.toString() === UserRoles.Admin
 }

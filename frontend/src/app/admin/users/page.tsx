@@ -25,6 +25,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import CreateUserDialog from "@/components/admin/users/create-user-dialog"
 import { LoginRequired } from "@/components/login-required"
 import { Input } from "@/components/ui/input"
+import Link from "next/link"
 
 const Users = () => {
   const [query, setQuery] = useState("")
@@ -92,7 +93,9 @@ const Users = () => {
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Button variant="secondary" size="icon">
-                          <User />
+                          <Link href={`/profile?userId=${user.id}`}>
+                            <User />
+                          </Link>
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent>

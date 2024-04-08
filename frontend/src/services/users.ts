@@ -19,9 +19,12 @@ export const fetchUsers = async (
   return res.data.users
 }
 
-export const fetchUser = async (token: string | null, id: string): Promise<{message?: string; user?: TUser}> => {
+export const fetchUser = async (
+  token: string | null,
+  id: string
+): Promise<{ message?: string; user?: TUser }> => {
   try {
-    const res = await axios.get(`/api/users`, {
+    const res = await axios.get(`/api/user`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -29,11 +32,10 @@ export const fetchUser = async (token: string | null, id: string): Promise<{mess
         id,
       },
     })
-    return res.data.user
+    return { user: res.data.user }
   } catch (error: AxiosError | any) {
-    return {message: getErrorMessage(error)}
+    return { message: getErrorMessage(error) }
   }
-
 }
 
 export const createUser = async (
