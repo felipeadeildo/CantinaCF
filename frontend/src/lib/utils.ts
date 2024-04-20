@@ -34,3 +34,7 @@ export const toReal = (value: number) => {
 export const isUserAdmin = (user: TUser) => {
   return user.role_id.toString() === UserRoles.Admin
 }
+
+export const getBackendUrl = (): string => {
+  return process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000"
+}

@@ -55,7 +55,8 @@ jwt = JWTManager()
 cors = CORS()
 socketio = SocketIO()
 
-from .resources.api import api_bp
+# ImportError: Cannot import name 'db' from partially initialized module 'cantina'
+from .resources.api import api_bp  # noqa: E402
 
 api = Api(api_bp)
 
@@ -71,6 +72,10 @@ def create_app(settings_map=settings_map):
     jwt.init_app(app)
     cors.init_app(app, resources={r"/*": {"origins": "*"}})
     socketio.init_app(app, cors_allowed_origins="*")
+
+    from cantina.websockets import init_websockets
+
+    init_websockets(app, socketio)
 
     app.register_blueprint(api_bp)
 
@@ -89,8 +94,6 @@ def create_app(settings_map=settings_map):
         api.add_resource(getattr(resources, resource), url)
 
     register_cli_commands(app, db)
-
-    from cantina import websockets
 
     return app
 

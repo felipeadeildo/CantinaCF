@@ -45,7 +45,6 @@ class CartResource(Resource):
 
     @jwt_required()
     def get(self):
-
         user_id = get_jwt_identity()
         carts = Cart.query.filter_by(user_id=user_id).all()
 
@@ -100,9 +99,13 @@ class PurchaseResource(Resource):
         if not requester_user:
             return {"message": "Matrix error: requester not found."}, 400
 
-        target_user = User.query.filter_by(username=target_user_data.get("username")).first()
+        target_user = User.query.filter_by(
+            username=target_user_data.get("username")
+        ).first()
         if not target_user:
-            return {"message": f"Usuário {target_user_data.get('username')} não encontrado."}, 404
+            return {
+                "message": f"Usuário {target_user_data.get('username')} não encontrado."
+            }, 404
 
         is_admin_purchase = requester_user.role.id == 1
         if is_admin_purchase:
@@ -110,10 +113,16 @@ class PurchaseResource(Resource):
         else:
             target_hashed_password = target_user.password
 
-        if not verify_password(target_user_data.get("password"), target_hashed_password):
-            return {"message": f"{'(ADMIN) ' if is_admin_purchase else ''}Senha incorreta."}, 400
+        if not verify_password(
+            target_user_data.get("password"), target_hashed_password
+        ):
+            return {
+                "message": f"{'(ADMIN) ' if is_admin_purchase else ''}Senha incorreta."
+            }, 400
 
-        cart_list = Cart.query.filter_by(user_id=requester_id).all()
+        cart_list = Cart.query.filter(
+            Cart.user_id == requester_id, Cart.quantity > 0
+        ).all()
         if not cart_list:
             return {"message": "Carrinho de compras vazio."}, 400
 
@@ -130,14 +139,15 @@ class PurchaseResource(Resource):
 
         sales = []
         for cart_item in cart_list:
-            product_sale = ProductSale(
-                product_id=cart_item.product.id,
-                value=cart_item.product.value,
-                sold_by=requester_user.id,
-                sold_to=target_user.id,
-                status="to dispatch",
-            )
-            sales.append(product_sale)
+            for _ in range(cart_item.quantity):
+                product_sale = ProductSale(
+                    product_id=cart_item.product.id,
+                    value=cart_item.product.value,
+                    sold_by=requester_user.id,
+                    sold_to=target_user.id,
+                    status="to dispatch",
+                )
+                sales.append(product_sale)
             cart_item.quantity = 0
             db.session.commit()
 
