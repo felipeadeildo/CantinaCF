@@ -8,9 +8,11 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function getResponseErrorMessage(response: AxiosResponse): string {
-  const data = response.data as { message?: string }
+  const data = response.data as { message?: string; msg?: string }
   if (data && data.message) {
     return data.message
+  } else if (data && data.msg) {
+    return data.msg
   } else {
     return "Um erro inesperado aconteceu."
   }

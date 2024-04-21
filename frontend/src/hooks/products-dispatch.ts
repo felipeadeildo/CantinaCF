@@ -1,10 +1,19 @@
+import { useAuth } from "@/contexts/auth"
 import { getBackendUrl } from "@/lib/utils"
+import { dispatchProductSales } from "@/services/products-dispatch"
 import { TProductSale } from "@/types/products"
+import { TUser } from "@/types/user"
+import { useMutation } from "@tanstack/react-query"
 import { useEffect, useState } from "react"
 import { Socket, io } from "socket.io-client"
 
+type TUserProductSalesGrouped = {
+  user: TUser
+  products: [number, TProductSale[]][]
+}
+
 export const useProductDispatch = () => {
-  const [productSales, setProductSales] = useState<TProductSale[]>([])
+  const [productSales, setProductSales] = useState<TUserProductSalesGrouped[]>([])
   const [isLoading, setIsLoading] = useState<boolean>(true)
 
   useEffect(() => {
@@ -28,4 +37,15 @@ export const useProductDispatch = () => {
     productSales,
     isLoading,
   }
+}
+
+export const useProductSalesDispatchMutation = () => {
+  const { token } = useAuth()
+
+  const productSalesDispatch = useMutation({
+    mutationFn: (userId: number) => dispatchProductSales(token, userId),
+    mutationKey: ["products_dispatch"],
+  })
+
+  return { productSalesDispatch }
 }
