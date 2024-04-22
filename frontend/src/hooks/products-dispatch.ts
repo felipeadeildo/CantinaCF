@@ -35,7 +35,7 @@ export const useProductDispatch = () => {
     return () => {
       socket.disconnect()
     }
-  }, [])
+  }, [token])
 
   return {
     productSales,

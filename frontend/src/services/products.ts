@@ -1,7 +1,7 @@
 import { getErrorMessage } from "@/lib/utils"
 import { LoginFormInputs } from "@/schemas/login"
 import { TProduct } from "@/types/products"
-import axios, { Axios, AxiosError } from "axios"
+import axios, { AxiosError } from "axios"
 
 export const fetchProducts = async (
   token: string | null,
