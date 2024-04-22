@@ -15,11 +15,15 @@ type TUserProductSalesGrouped = {
 export const useProductDispatch = () => {
   const [productSales, setProductSales] = useState<TUserProductSalesGrouped[]>([])
   const [isLoading, setIsLoading] = useState<boolean>(true)
+  const { token } = useAuth()
 
   useEffect(() => {
     setIsLoading(true)
     const socket: Socket = io(getBackendUrl() + "/products_dispatch", {
       transports: ["websocket"],
+      query: {
+        jwt: token,
+      },
     })
     socket.connect()
 

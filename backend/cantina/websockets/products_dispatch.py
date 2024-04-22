@@ -1,10 +1,12 @@
 from itertools import groupby
 from random import randint
 
+from flask import Flask
+from flask_jwt_extended import jwt_required
+from flask_socketio import Namespace, emit  # type: ignore
+
 from cantina import socketio
 from cantina.models import ProductSale
-from flask import Flask
-from flask_socketio import Namespace, emit  # type: ignore
 
 
 class ProductsDispatch(Namespace):
@@ -43,6 +45,11 @@ class ProductsDispatch(Namespace):
                 )
                 socketio.sleep(randint(1, 5))
 
+    @jwt_required(locations=["query_string"])
     def on_connect(self):
         self.should_run = True
         socketio.start_background_task(self.__load_products)
+
+    @jwt_required(locations=["query_string"])
+    def on_disconnect(self):
+        self.should_run = False
