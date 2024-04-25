@@ -2,15 +2,7 @@ import hashlib
 import os
 from datetime import datetime, timedelta
 
-from flask import (
-    abort,
-    flash,
-    redirect,
-    render_template,
-    request,
-    session,
-    url_for,
-)
+from flask import abort, flash, redirect, render_template, request, session, url_for
 from sqlalchemy import func, or_
 from sqlalchemy.orm import aliased
 from werkzeug.security import generate_password_hash
@@ -74,7 +66,7 @@ def users():
                 return redirect(url_for("users"))
             try:
                 serie = SERIES[int(serie)]  # type: ignore
-            except:
+            except:  # noqa: E722
                 if is_aluno:
                     flash("A série especificada não existe!", category="error")
                     return redirect(url_for("users"))
@@ -971,6 +963,7 @@ def payments_history():
     end_date = request.args.get("end_date", "")
     order_mode = request.args.get("order_mode", "ASC")
     order_by = request.args.get("order_by", "added_at")
+    user_role = request.args.get("user_role", "")
 
     allowed_by_user = aliased(User)
     allowed_for_user = aliased(User)
@@ -980,6 +973,9 @@ def payments_history():
         .join(allowed_by_user, Payment.allowed_by == allowed_by_user.id)
         .join(allowed_for_user, Payment.user_id == allowed_for_user.id)
     )
+
+    if user_role:
+        query = query.filter(allowed_for_user.role_id == user_role)
 
     if recharge_type:
         query = query.filter(Payment.payment_method_id == recharge_type)
@@ -1040,6 +1036,8 @@ def payments_history():
         },
     )
 
+    roles = Role.query.all()
+
     context = {
         "results": results,
         "pagination": pagination,
@@ -1047,6 +1045,7 @@ def payments_history():
         "per_page": per_page,
         "payment_types": payment_types,
         "result_id": hashed_query,
+        "roles": roles
     }
 
     return render_template("payments-history.html", **context)
