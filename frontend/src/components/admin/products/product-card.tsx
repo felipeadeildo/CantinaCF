@@ -8,13 +8,13 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
-import { useToast } from "@/components/ui/use-toast"
 import { useProductsMutation } from "@/hooks/products"
 import { maskMoney } from "@/lib/masks"
 import { cn } from "@/lib/utils"
 import { TProduct } from "@/types/products"
 import { Edit, Loader, Pencil, Save, ShoppingCart, X } from "lucide-react"
 import { useState } from "react"
+import { ProductStockModal } from "./product-stock-modal"
 
 type Props = {
   product: TProduct
@@ -79,10 +79,7 @@ export const ProductCard = ({ product }: Props) => {
       </CardContent>
 
       <CardFooter className="flex justify-end items-center">
-        <Button variant="outline" size="sm" className="gap-1">
-          Adicionar Estoque
-          <Edit size={18} />
-        </Button>
+        <ProductStockModal product={product} />
       </CardFooter>
     </Card>
   )

@@ -1,10 +1,10 @@
 import { useToast } from "@/components/ui/use-toast"
 import { useAuth } from "@/contexts/auth"
-import { NewProductFormInputs } from "@/schemas/product"
+import { ProductStockInput } from "@/schemas/product"
 import { fetchCart } from "@/services/cart"
 import {
+  addProductStock,
   addProductToCart,
-  createProduct,
   fetchProducts,
   removeProductFromCart,
   renameProduct,
@@ -172,8 +172,8 @@ export const useProductsMutation = () => {
     },
   })
 
-  const createProductMutation = useMutation({
-    mutationFn: (product: NewProductFormInputs) => createProduct(token, product),
+  const productStockMutation = useMutation({
+    mutationFn: (product: ProductStockInput) => addProductStock(token, product),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["products"] })
       toast({
@@ -194,6 +194,6 @@ export const useProductsMutation = () => {
     addProductToCartMutation,
     removeProductFromCartMutation,
     renameProductMutation,
-    createProductMutation,
+    productStockMutation,
   }
 }

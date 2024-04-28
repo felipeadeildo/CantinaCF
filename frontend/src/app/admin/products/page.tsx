@@ -1,6 +1,6 @@
 "use client"
 
-import { CreateProductModal } from "@/components/admin/products/create-product-modal"
+import { ProductStockModal } from "@/components/admin/products/product-stock-modal"
 import { ProductsTable } from "@/components/admin/products/products-table"
 import { LoginRequired } from "@/components/login-required"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -52,7 +52,7 @@ const Products = () => {
         </Alert>
       )}
 
-      <CreateProductModal />
+      <ProductStockModal />
     </>
   )
 }

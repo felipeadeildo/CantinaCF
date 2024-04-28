@@ -1,6 +1,6 @@
 import { getErrorMessage } from "@/lib/utils"
 import { LoginFormInputs } from "@/schemas/login"
-import { NewProductFormInputs } from "@/schemas/product"
+import { ProductStockInput } from "@/schemas/product"
 import { TProduct } from "@/types/products"
 import axios, { AxiosError } from "axios"
 
@@ -106,9 +106,9 @@ export const renameProduct = async (
   }
 }
 
-export const createProduct = async (
+export const addProductStock = async (
   token: string | null,
-  product: NewProductFormInputs
+  product: ProductStockInput
 ): Promise<{ message?: string; product?: TProduct }> => {
   try {
     const res = await axios.post("/api/products", product, {
