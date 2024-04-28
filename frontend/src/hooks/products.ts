@@ -1,8 +1,10 @@
 import { useToast } from "@/components/ui/use-toast"
 import { useAuth } from "@/contexts/auth"
+import { NewProductFormInputs } from "@/schemas/product"
 import { fetchCart } from "@/services/cart"
 import {
   addProductToCart,
+  createProduct,
   fetchProducts,
   removeProductFromCart,
   renameProduct,
@@ -170,9 +172,28 @@ export const useProductsMutation = () => {
     },
   })
 
+  const createProductMutation = useMutation({
+    mutationFn: (product: NewProductFormInputs) => createProduct(token, product),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["products"] })
+      toast({
+        title: "Sucesso",
+        description: data.message,
+      })
+    },
+    onError: (error) => {
+      toast({
+        title: "Erro",
+        description: error.message,
+        variant: "destructive",
+      })
+    },
+  })
+
   return {
     addProductToCartMutation,
     removeProductFromCartMutation,
     renameProductMutation,
+    createProductMutation,
   }
 }

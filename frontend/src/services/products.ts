@@ -1,5 +1,6 @@
 import { getErrorMessage } from "@/lib/utils"
 import { LoginFormInputs } from "@/schemas/login"
+import { NewProductFormInputs } from "@/schemas/product"
 import { TProduct } from "@/types/products"
 import axios, { AxiosError } from "axios"
 
@@ -102,5 +103,21 @@ export const renameProduct = async (
     return res.data
   } catch (e) {
     throw Error(getErrorMessage(e as AxiosError))
+  }
+}
+
+export const createProduct = async (
+  token: string | null,
+  product: NewProductFormInputs
+): Promise<{ message?: string; product?: TProduct }> => {
+  try {
+    const res = await axios.post("/api/products", product, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    return res.data
+  } catch (e: AxiosError | any) {
+    throw Error(getErrorMessage(e))
   }
 }

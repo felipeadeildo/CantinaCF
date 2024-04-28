@@ -9,6 +9,7 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import { useProductsMutation } from "@/hooks/products"
 import { maskMoney } from "@/lib/masks"
 import { NewProductFormInputs, newProductSchema } from "@/schemas/product"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -20,8 +21,10 @@ export const CreateProductForm = () => {
     resolver: zodResolver(newProductSchema),
   })
 
-  const onSubmit = async (data: NewProductFormInputs) => {
-    console.log(data)
+  const { createProductMutation } = useProductsMutation()
+
+  const onSubmit = (data: NewProductFormInputs) => {
+    createProductMutation.mutate(data)
   }
 
   return (
