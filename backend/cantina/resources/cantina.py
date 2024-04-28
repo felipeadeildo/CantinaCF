@@ -1,10 +1,11 @@
 from functools import reduce
 
-from cantina.models import Cart, Product, ProductSale, User
-from cantina.utils import verify_password
 from flask import request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_restful import Resource
+
+from cantina.models import Cart, Product, ProductSale, StockHistory, User
+from cantina.utils import verify_password
 
 from .. import db
 
@@ -84,6 +85,56 @@ class ProductsResource(Resource):
 
         products = product_query.all()
         return {"products": [product.as_dict() for product in products]}
+
+    @jwt_required()
+    def post(self):
+        user_id = get_jwt_identity()
+        user = User.query.filter_by(id=user_id).first()
+
+        if user.role_id not in [1, 2]:
+            return {"message": "Apenas administradores podem criar produtos."}, 403
+
+        data = request.json
+        if not data:
+            return {"message": "Nenhum dado enviado."}, 400
+
+        if not data.get("name"):
+            return {"message": "Nome do produto deve ser especificado."}, 400
+
+        product_fields = ["name", "value", "quantity", "ammountPaid"]
+        if any(map(lambda field: not data.get(field), product_fields)):
+            return {
+                "message": "Todos os campos do produto devem ser especificados."
+            }, 400
+
+        data.update(
+            {
+                "ammountPaid": float(data["ammountPaid"]),
+                "value": float(data["value"]),
+                "quantity": int(data["quantity"]),
+            }
+        )
+
+        product = Product(
+            name=data["name"],
+            value=data["value"],
+            quantity=data["quantity"],
+        )
+        db.session.add(product)
+        db.session.commit()
+
+        stock_history = StockHistory(
+            product_id=product.id,
+            received_by=user_id,
+            purchase_price=data["ammountPaid"],
+            sale_value=data["value"],
+            quantity=data["quantity"],
+        )
+
+        db.session.add(stock_history)
+        db.session.commit()
+
+        return {"message": f"Produto {product.name} criado com sucesso."}, 200
 
     @jwt_required()
     def put(self):

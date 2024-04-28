@@ -5,4 +5,4 @@ __pycache__/
 */__pycache__
 uploads/
 instance/
-migrations/
+# migrations/

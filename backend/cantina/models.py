@@ -84,9 +84,7 @@ class User(db.Model):
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Text, nullable=False, info={"label": "Nome"})
-    description = db.Column(db.Text, nullable=True, info={"label": "Descrição"})
     value = db.Column(db.DECIMAL(10, 2), nullable=False, info={"label": "Valor (R$)"})
-    type = db.Column(db.Text, nullable=False, info={"label": "Tipo"})
     quantity = db.Column(db.Integer, nullable=False, info={"label": "Quantidade"})
     added_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, default=datetime.now)
