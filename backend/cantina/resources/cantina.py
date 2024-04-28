@@ -92,16 +92,26 @@ class ProductsResource(Resource):
         user = User.query.filter_by(id=user_id).first()
 
         if user.role_id not in [1, 2]:
-            return {"message": "Apenas administradores podem criar produtos."}, 403
+            return {
+                "message": "Apenas administradores podem adicionar produtos no estoque."
+            }, 403
 
         data = request.json
         if not data:
             return {"message": "Nenhum dado enviado."}, 400
 
-        if not data.get("name"):
-            return {"message": "Nome do produto deve ser especificado."}, 400
+        product = None
+        if product_id := data.get("id"):
+            product = Product.query.filter_by(id=product_id).first()
+            if product is None:
+                return {"message": "Produto não encontrado."}, 404
 
-        product_fields = ["name", "value", "quantity", "ammountPaid"]
+        product_fields = (
+            ["name", "value", "quantity", "ammountPaid"]
+            if product is None
+            else ["quantity", "ammountPaid"]
+        )
+
         if any(map(lambda field: not data.get(field), product_fields)):
             return {
                 "message": "Todos os campos do produto devem ser especificados."
@@ -110,17 +120,21 @@ class ProductsResource(Resource):
         data.update(
             {
                 "ammountPaid": float(data["ammountPaid"]),
-                "value": float(data["value"]),
+                "value": float(data["value"]) if product is None else product.value,
                 "quantity": int(data["quantity"]),
             }
         )
 
-        product = Product(
-            name=data["name"],
-            value=data["value"],
-            quantity=data["quantity"],
-        )
-        db.session.add(product)
+        if product is None:
+            product = Product(
+                name=data["name"],
+                value=data["value"],
+                quantity=data["quantity"],
+            )
+            db.session.add(product)
+        else:
+            product.quantity += data["quantity"]
+
         db.session.commit()
 
         stock_history = StockHistory(
