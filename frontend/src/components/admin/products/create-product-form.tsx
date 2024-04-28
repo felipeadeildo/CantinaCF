@@ -53,7 +53,7 @@ export const CreateProductForm = () => {
           render={({ field: { onChange, ...props } }) => (
             <FormItem>
               <FormLabel className="flex justify-between">
-                Valor do Produto (R$)
+                Valor do Produto
                 <FormDescription className="text-xs">por unidade</FormDescription>
               </FormLabel>
               <FormControl>
@@ -91,7 +91,7 @@ export const CreateProductForm = () => {
           name="ammountPaid"
           render={({ field: { onChange, ...props } }) => (
             <FormItem>
-              <FormLabel>Valor Pago (R$)</FormLabel>
+              <FormLabel>Valor Pago</FormLabel>
               <FormControl>
                 <Input
                   onChange={(e) => {

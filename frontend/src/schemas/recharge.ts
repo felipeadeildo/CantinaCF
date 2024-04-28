@@ -1,3 +1,4 @@
+import { sanitizeFMoney } from "@/lib/masks"
 import { PaymentMethods } from "@/types/recharge"
 import { z } from "zod"
 
@@ -5,7 +6,7 @@ const rechargeSchemaBase = z.object({
   value: z.preprocess(
     (value) =>
       typeof value === "string"
-        ? parseFloat(value.replace(".", ".").replace(",", "."))
+        ? parseFloat(sanitizeFMoney(value))
         : value,
     z
       .number({ required_error: "Por favor, insira o valor." })

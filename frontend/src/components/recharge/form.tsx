@@ -67,7 +67,7 @@ export const RechargeForm = () => {
           name="value"
           render={({ field }) => (
             <FormItem className="space-y-0">
-              <FormLabel>Valor (R$)</FormLabel>
+              <FormLabel>Valor</FormLabel>
               <FormControl>
                 <Input
                   {...field}

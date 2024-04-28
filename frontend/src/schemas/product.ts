@@ -1,3 +1,4 @@
+import { sanitizeFMoney } from "@/lib/masks"
 import { z } from "zod"
 
 export const newProductSchema = z.object({
@@ -5,7 +6,7 @@ export const newProductSchema = z.object({
   // description: z.string({ required_error: "Por favor, insira a descrição do produto." }),
   value: z.preprocess((v) => {
     if (typeof v === "string") {
-      return parseFloat(v.replace(".", "").replace(",", "."))
+      return parseFloat(sanitizeFMoney(v))
     }
     return v
   }, z.number({ required_error: "Por favor, insira o valor do produto." }).min(0.01)),
@@ -17,7 +18,7 @@ export const newProductSchema = z.object({
   }, z.number({ required_error: "Por favor, insira a quantidade de produtos." }).min(1)),
   ammountPaid: z.preprocess((v) => {
     if (typeof v === "string") {
-      return parseFloat(v.replace(".", "").replace(",", "."))
+      return parseFloat(sanitizeFMoney(v))
     }
     return v
   }, z.number({ required_error: "Por favor, insira o valor pago sobre o produto." }).min(0.01)),

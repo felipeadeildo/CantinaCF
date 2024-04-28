@@ -25,6 +25,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import CreateUserDialog from "@/components/admin/users/create-user-dialog"
 import { LoginRequired } from "@/components/login-required"
 import { Input } from "@/components/ui/input"
+import { maskMoney } from "@/lib/masks"
 import Link from "next/link"
 
 const Users = () => {
@@ -60,11 +61,11 @@ const Users = () => {
               <TableHead className="text-center">Username</TableHead>
               <TableHead className="text-center">Matrícula</TableHead>
               <TableHead className="text-center">Saldo / Saldo Devedor</TableHead>
-              <TableHead className="text-center">Açoes</TableHead>
+              <TableHead className="text-center">Ações</TableHead>
             </TableRow>
           </TableHeader>
 
-          <TableBody className="text-center h-3/4  max-h-screen overflow-y-auto">
+          <TableBody className="text-center">
             {users.map((user) => (
               <TableRow key={user.id}>
                 <TableCell>{user.id}</TableCell>
@@ -72,15 +73,22 @@ const Users = () => {
                 <TableCell>{user.username}</TableCell>
                 <TableCell>{user.matricula || "Sem Matrícula"}</TableCell>
                 <TableCell>
-                  <span className="text-green-500">R$ {user.balance}</span> /{" "}
-                  <span className="text-red-500">R$ {user.balance_payroll}</span>
+                  <div className="flex justify-center gap-1">
+                    <span className="text-green-500">
+                      {maskMoney(user.balance.toString())}
+                    </span>
+                    <span>/</span>
+                    <span className="text-red-500">
+                      {maskMoney(user.balance_payroll.toString())}
+                    </span>
+                  </div>
                 </TableCell>
                 <TableCell className="flex justify-center gap-1">
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <Button variant="outline" size="icon">
-                          <Pencil />
+                        <Button variant="outline" size="sm">
+                          <Pencil size={16} />
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent>
@@ -92,9 +100,9 @@ const Users = () => {
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <Button variant="secondary" size="icon">
+                        <Button variant="secondary" size="sm">
                           <Link href={`/profile?userId=${user.id}`}>
-                            <User />
+                            <User size={16} />
                           </Link>
                         </Button>
                       </TooltipTrigger>

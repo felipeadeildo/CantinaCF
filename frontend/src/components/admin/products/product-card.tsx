@@ -7,8 +7,11 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import { Separator } from "@/components/ui/separator"
 import { useToast } from "@/components/ui/use-toast"
 import { useProductsMutation } from "@/hooks/products"
+import { maskMoney } from "@/lib/masks"
+import { cn } from "@/lib/utils"
 import { TProduct } from "@/types/products"
 import { Edit, Loader, Pencil, Save, ShoppingCart, X } from "lucide-react"
 import { useState } from "react"
@@ -30,7 +33,11 @@ export const ProductCard = ({ product }: Props) => {
           {!isEditing && (
             <>
               <span>{product.name}</span>
-              <Button size="sm" variant="secondary" onClick={() => setIsEditing((prev) => !prev)}>
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={() => setIsEditing((prev) => !prev)}
+              >
                 <Pencil size={16} />
               </Button>
             </>
@@ -56,15 +63,17 @@ export const ProductCard = ({ product }: Props) => {
         </CardTitle>
       </CardHeader>
 
-      <CardContent className="flex justify-end">
-        <div className="flex items-center gap-1">
+      <CardContent className="flex justify-end gap-2">
+        <span className="font-semibold">{maskMoney(product.value.toString())}</span>
+        <Separator orientation="vertical" className="h-5 bg-primary" />
+        <div className={cn("flex items-center gap-1", product.quantity === 0 && "text-red-500")}>
           <ShoppingCart size={18} />
           <X size={18} />
           {product.quantity}
         </div>
       </CardContent>
 
-      <CardFooter className="flex justify-end">
+      <CardFooter className="flex justify-end items-center">
         <Button variant="outline" size="sm" className="gap-1">
           Adicionar Estoque
           <Edit size={18} />
