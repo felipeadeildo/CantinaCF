@@ -85,6 +85,34 @@ class ProductsResource(Resource):
         products = product_query.all()
         return {"products": [product.as_dict() for product in products]}
 
+    @jwt_required()
+    def put(self):
+        user_id = get_jwt_identity()
+        user = User.query.filter_by(id=user_id).first()
+
+        if user.role_id not in [1, 2]:
+            return {"message": "Apenas administradores podem editar produtos."}, 403
+
+        data = request.json
+        if not data:
+            return {"message": "Nenhum dado enviado."}, 400
+
+        if not data.get("name"):
+            return {"message": "Nome do produto deve ser especificado."}, 400
+
+        product_id = data.get("id")
+        if product_id is None:
+            return {"message": "ID do produto deve ser especificado."}, 400
+
+        product = Product.query.filter_by(id=product_id).first()
+        if product is None:
+            return {"message": "Produto não encontrado."}, 404
+
+        product.name = data["name"]
+        db.session.commit()
+
+        return {"message": f"Nome do produto alterado para {product.name}."}, 200
+
 
 class PurchaseResource(Resource):
     @jwt_required()

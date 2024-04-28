@@ -83,3 +83,24 @@ export const confirmPurchase = async (
     throw Error(getErrorMessage(e as AxiosError))
   }
 }
+
+export const renameProduct = async (
+  token: string | null,
+  productId: number,
+  name: string
+): Promise<{ message: string }> => {
+  try {
+    const res = await axios.put(
+      "/api/products",
+      { id: productId, name },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    )
+    return res.data
+  } catch (e) {
+    throw Error(getErrorMessage(e as AxiosError))
+  }
+}

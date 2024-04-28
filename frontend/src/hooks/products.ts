@@ -1,9 +1,11 @@
+import { useToast } from "@/components/ui/use-toast"
 import { useAuth } from "@/contexts/auth"
 import { fetchCart } from "@/services/cart"
 import {
   addProductToCart,
   fetchProducts,
   removeProductFromCart,
+  renameProduct,
 } from "@/services/products"
 import { TCart } from "@/types/cart"
 import { TProduct } from "@/types/products"
@@ -32,6 +34,7 @@ export const useCart = () => {
 export const useProductsMutation = () => {
   const { token } = useAuth()
   const queryClient = useQueryClient()
+  const { toast } = useToast()
 
   const addProductToCartMutation = useMutation({
     mutationFn: (productId: number) => addProductToCart(token, productId),
@@ -147,5 +150,29 @@ export const useProductsMutation = () => {
     },
   })
 
-  return { addProductToCartMutation, removeProductFromCartMutation }
+  const renameProductMutation = useMutation({
+    mutationFn: ({ productId, name }: { productId: number; name: string }) =>
+      renameProduct(token, productId, name),
+    // TODO: On Mutate get the products data and update it
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["products"] })
+      toast({
+        title: "Sucesso",
+        description: "Produto renomeado com sucesso!",
+      })
+    },
+    onError: (error) => {
+      toast({
+        title: "Erro",
+        description: error.message,
+        variant: "destructive",
+      })
+    },
+  })
+
+  return {
+    addProductToCartMutation,
+    removeProductFromCartMutation,
+    renameProductMutation,
+  }
 }

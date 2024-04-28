@@ -1,5 +1,6 @@
 "use client"
 
+import { CreateProductModal } from "@/components/admin/products/create-product-modal"
 import { ProductsTable } from "@/components/admin/products/products-table"
 import { LoginRequired } from "@/components/login-required"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -23,12 +24,15 @@ const Products = () => {
     <>
       <h1 className="text-xl font-semibold text-center">Produtos da Cantina</h1>
 
-      <Input
-        className="my-4"
-        placeholder="Pesquisar produtos..."
-        onChange={(e) => setQuery(e.target.value)}
-        value={query}
-      />
+      <div className="flex justify-center items-center">
+        <div className="w-3/5 my-4">
+          <Input
+            placeholder="Pesquisar produtos..."
+            onChange={(e) => setQuery(e.target.value)}
+            value={query}
+          />
+        </div>
+      </div>
 
       {isLoading ? (
         <div className="mt-32 text-xl flex justify-center items-center">
@@ -36,7 +40,9 @@ const Products = () => {
           Carregando...
         </div>
       ) : (
-        <ProductsTable products={products || []} />
+        <div className="container mx-auto">
+          <ProductsTable products={products || []} />
+        </div>
       )}
 
       {message && (
@@ -45,6 +51,8 @@ const Products = () => {
           <AlertDescription>{message}</AlertDescription>
         </Alert>
       )}
+
+      <CreateProductModal />
     </>
   )
 }
