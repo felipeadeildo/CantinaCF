@@ -74,12 +74,10 @@ const Users = () => {
                 <TableCell>{user.matricula || "Sem Matrícula"}</TableCell>
                 <TableCell>
                   <div className="flex justify-center gap-1">
-                    <span className="text-green-500">
-                      {maskMoney(user.balance.toString())}
-                    </span>
+                    <span className="text-green-500">{maskMoney(user.balance)}</span>
                     <span>/</span>
                     <span className="text-red-500">
-                      {maskMoney(user.balance_payroll.toString())}
+                      {maskMoney(user.balance_payroll)}
                     </span>
                   </div>
                 </TableCell>

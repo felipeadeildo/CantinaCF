@@ -64,9 +64,14 @@ export const ProductCard = ({ product }: Props) => {
       </CardHeader>
 
       <CardContent className="flex justify-end gap-2">
-        <span className="font-semibold">{maskMoney(product.value.toString())}</span>
+        <span className="font-semibold">{maskMoney(product.value)}</span>
         <Separator orientation="vertical" className="h-5 bg-primary" />
-        <div className={cn("flex items-center gap-1", product.quantity === 0 && "text-red-500")}>
+        <div
+          className={cn(
+            "flex items-center gap-1",
+            product.quantity === 0 && "text-red-500"
+          )}
+        >
           <ShoppingCart size={18} />
           <X size={18} />
           {product.quantity}

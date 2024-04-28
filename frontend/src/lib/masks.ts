@@ -1,4 +1,4 @@
-export const maskMoney = (money: string) =>
+export const maskMoney = (money: string | number) =>
   Intl.NumberFormat("pt-BR", {
     currency: "BRL",
     currencyDisplay: "symbol",
@@ -6,7 +6,7 @@ export const maskMoney = (money: string) =>
     style: "currency",
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  }).format(Number(money.replace(/\D/g, "")) / 100)
+  }).format(typeof money === "string" ? Number(money.replace(/\D/g, "")) / 100 : money)
 
 export const sanitizeFMoney = (money: string) => {
   return money.replace("R$", "").replace(".", ".").replace(",", ".").trim()
