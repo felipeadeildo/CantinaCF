@@ -29,8 +29,7 @@ class DispatchResource(Resource):
         for product_sale in product_sales:
             product_sale.status = "dispatched"
             product_sale.dispatched_by = requester_user_id
-            product_sale.dispatched_by = 1
             product_sale.dispatched_at = datetime.now()
             db.session.commit()
 
-        return {"message": "Produtos despachados com sucesso."}, 200
+        return {"message": f"{len(product_sales)} produtos despachados com sucesso."}, 200

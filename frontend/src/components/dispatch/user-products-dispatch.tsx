@@ -8,7 +8,6 @@ import {
 } from "@/components/ui/card"
 import { TProductSale } from "@/types/products"
 import { TUser } from "@/types/user"
-import { Separator } from "../ui/separator"
 import { DispatchConfirmation } from "./dispatch-confirmation"
 import { ProductsRepresentation } from "./products-representation"
 

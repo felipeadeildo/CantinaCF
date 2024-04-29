@@ -22,7 +22,7 @@ class ProductsDispatch(Namespace):
                 products_sales = ProductSale.query.filter_by(status="to dispatch").all()
                 products_sales_grouped_by_user = groupby(
                     [p.as_friendly_dict() for p in products_sales],
-                    key=lambda p: p["sold_by"],
+                    key=lambda p: p["sold_to"],
                 )
                 products_sales_grouped_by_user_and_product = []
                 for user, products in products_sales_grouped_by_user:
