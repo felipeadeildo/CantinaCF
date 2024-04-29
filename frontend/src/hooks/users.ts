@@ -4,11 +4,15 @@ import { createUser, fetchUser, fetchUsers } from "@/services/users"
 import { TUser } from "@/types/user"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
-export const useUsers = (query: string) => {
+export const useUsers = (
+  query: string,
+  onlyBalance?: boolean,
+  onlyBalancePayroll?: boolean
+) => {
   const { token } = useAuth()
   return useQuery<TUser[]>({
-    queryKey: ["users", query],
-    queryFn: () => fetchUsers(token, query),
+    queryKey: ["users", query, onlyBalance, onlyBalancePayroll],
+    queryFn: () => fetchUsers(token, query, onlyBalance, onlyBalancePayroll),
     enabled: !!token,
   })
 }

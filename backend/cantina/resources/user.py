@@ -26,6 +26,8 @@ class UsersResource(Resource):
     def get(self):
         data = request.args or dict()
         query = data.get("query")
+        only_balance = data.get("onlyBalance") == "true"
+        only_balance_payroll = data.get("onlyBalancePayroll") == "true"
         user_query = User.query
         if query:
             user_query = user_query.filter(
@@ -36,6 +38,12 @@ class UsersResource(Resource):
                     User.id == query,
                 )
             )
+
+        if only_balance:
+            user_query = user_query.filter(User.balance > 0)
+
+        if only_balance_payroll:
+            user_query = user_query.filter(User.balance_payroll > 0)
 
         users = user_query.all()
 
@@ -64,4 +72,7 @@ class UsersResource(Resource):
             print(e)
             return {"message": "Erro ao criar o usuário."}, 500
 
-        return {"message": f"Usuário {user.name} criado com sucesso.", "user": user.as_dict()}, 201
+        return {
+            "message": f"Usuário {user.name} criado com sucesso.",
+            "user": user.as_dict(),
+        }, 201

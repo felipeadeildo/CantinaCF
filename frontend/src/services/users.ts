@@ -5,7 +5,9 @@ import axios, { AxiosError } from "axios"
 
 export const fetchUsers = async (
   token: string | null,
-  query: string
+  query: string,
+  onlyBalance?: boolean,
+  onlyBalancePayroll?: boolean
 ): Promise<TUser[]> => {
   const res = await axios.get("/api/users", {
     headers: {
@@ -13,6 +15,8 @@ export const fetchUsers = async (
     },
     params: {
       query,
+      onlyBalance,
+      onlyBalancePayroll,
     },
   })
 

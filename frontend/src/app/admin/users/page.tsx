@@ -24,33 +24,73 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 import CreateUserDialog from "@/components/admin/users/create-user-dialog"
 import { LoginRequired } from "@/components/login-required"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { maskMoney } from "@/lib/masks"
 import Link from "next/link"
 
 const Users = () => {
   const [query, setQuery] = useState("")
+  const [onlyBalance, setOnlyBalance] = useState(false)
+  const [onlyBalancePayroll, setOnlyBalancePayroll] = useState(false)
   const searchRef = useRef<HTMLInputElement>(null)
 
-  const { data: users = [], isLoading, error } = useUsers(query)
+  const {
+    data: users = [],
+    isLoading,
+    error,
+  } = useUsers(query, onlyBalance, onlyBalancePayroll)
 
   return (
     <>
       <h1 className="text-xl font-semibold text-center my-2">Usuários</h1>
 
       <div className="container mx-auto">
-        <div className="flex items-center gap-2">
-          <Search size={15} />
-          <Input
-            ref={searchRef}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                setQuery(searchRef.current?.value || "")
-              }
-            }}
-            placeholder="Digite e tecle Enter para pesquisar"
-            className="my-2"
-          />
+        <div className="flex flex-col items-center">
+          <div className="flex items-center gap-2">
+            <Search size={15} />
+            <Input
+              ref={searchRef}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  setQuery(searchRef.current?.value || "")
+                }
+              }}
+              placeholder="Digite e tecle Enter para pesquisar"
+              className="my-2"
+            />
+          </div>
+
+          <div className="flex gap-2">
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="only_balance"
+                checked={onlyBalance}
+                onCheckedChange={() => {
+                  console.log("chegou aqui")
+                  setOnlyBalance((prev) => !prev)
+                }}
+              />
+              <label htmlFor="only_balance">
+                <span className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  Saldo positivo
+                </span>
+              </label>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="only_balance_payroll"
+                checked={onlyBalancePayroll}
+                onCheckedChange={() => setOnlyBalancePayroll((prev) => !prev)}
+              />
+              <label htmlFor="only_balance_payroll">
+                <span className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  Saldo devedor
+                </span>
+              </label>
+            </div>
+          </div>
         </div>
 
         <Table>
