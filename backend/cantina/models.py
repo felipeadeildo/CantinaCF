@@ -3,6 +3,7 @@ from datetime import datetime
 from cantina import db
 from flask import url_for
 from sqlalchemy import event
+from werkzeug.security import generate_password_hash
 
 
 class Role(db.Model):
@@ -79,6 +80,10 @@ class User(db.Model):
             }
         )
         return dict_info
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.password = generate_password_hash(self.password)
 
 
 class Product(db.Model):
