@@ -1,5 +1,5 @@
 import { getErrorMessage } from "@/lib/utils"
-import { SUser } from "@/schemas/user"
+import { SUser, SUserWithoutPassword } from "@/schemas/user"
 import { TUser } from "@/types/user"
 import axios, { AxiosError } from "axios"
 
@@ -47,7 +47,24 @@ export const createUser = async (
   user: SUser
 ): Promise<{ message?: string; user?: TUser }> => {
   try {
-    const res = await axios.post("/api/users", user, {
+    const res = await axios.post("/api/user", user, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    return res.data
+  } catch (e: AxiosError | any) {
+    const error = getErrorMessage(e)
+    return { message: error }
+  }
+}
+
+export const updateUser = async (
+  token: string | null,
+  user: SUserWithoutPassword
+): Promise<{ message?: string; user?: TUser }> => {
+  try {
+    const res = await axios.put("/api/user", user, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

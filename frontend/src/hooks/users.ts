@@ -1,6 +1,6 @@
 import { useAuth } from "@/contexts/auth"
-import { SUser } from "@/schemas/user"
-import { createUser, fetchUser, fetchUsers } from "@/services/users"
+import { SUser, SUserWithoutPassword } from "@/schemas/user"
+import { createUser, fetchUser, fetchUsers, updateUser } from "@/services/users"
 import { TUser } from "@/types/user"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
@@ -26,7 +26,7 @@ export const useUser = (id: string) => {
   })
 }
 
-export const useUsersMutations = () => {
+export const useUserMutation = () => {
   const { token } = useAuth()
   const queryClient = useQueryClient()
 
@@ -35,5 +35,13 @@ export const useUsersMutations = () => {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["users"] }),
   })
 
-  return { createUserMutation }
+  const updateUserMutation = useMutation({
+    mutationFn: (user: SUserWithoutPassword) => updateUser(token, user),
+    onSuccess: ({ user }) => {
+      queryClient.invalidateQueries({ queryKey: ["user", user?.id] })
+      queryClient.invalidateQueries({ queryKey: ["users"] })
+    },
+  })
+
+  return { createUserMutation, updateUserMutation }
 }

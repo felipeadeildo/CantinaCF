@@ -18,7 +18,7 @@ import {
 
 import { Input } from "@/components/ui/input"
 import { useToast } from "@/components/ui/use-toast"
-import { useUsersMutations } from "@/hooks/users"
+import { useUserMutation } from "@/hooks/users"
 import { SUser, userSchema } from "@/schemas/user"
 import { UserRoles } from "@/types/user"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -31,7 +31,7 @@ const CreateUserForm = () => {
 
   const { toast } = useToast()
 
-  const { createUserMutation } = useUsersMutations()
+  const { createUserMutation } = useUserMutation()
 
   const onSubmit = async (data: SUser) => {
     const res = await createUserMutation.mutateAsync(data)
