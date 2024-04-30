@@ -1,13 +1,14 @@
+import locale
 from functools import reduce
-
+from cantina.models import Cart, Product, ProductSale, StockHistory, User
+from cantina.utils import verify_password
 from flask import request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_restful import Resource
 
-from cantina.models import Cart, Product, ProductSale, StockHistory, User
-from cantina.utils import verify_password
-
 from .. import db
+
+locale.setlocale(locale.LC_ALL, "pt_BR.UTF-8")
 
 
 class CartResource(Resource):
@@ -165,6 +166,9 @@ class ProductsResource(Resource):
         if not data.get("name"):
             return {"message": "Nome do produto deve ser especificado."}, 400
 
+        if not data.get("value"):
+            return {"message": "Valor do produto deve ser especificado."}, 400
+
         product_id = data.get("id")
         if product_id is None:
             return {"message": "ID do produto deve ser especificado."}, 400
@@ -173,10 +177,22 @@ class ProductsResource(Resource):
         if product is None:
             return {"message": "Produto não encontrado."}, 404
 
+        try:
+            value = float(data["value"])
+        except ValueError:
+            return {"message": "O valor do produto deve ser um número."}, 400
+
+        message = ""
+        if product.name != data["name"]:
+            message = f"{message} Nome do Produto alterado de {product.name} para {data['name']}."
+        if float(product.value) != value:
+            message = f"{message} Valor alterado de {locale.currency(product.value, grouping=True)} para {locale.currency(value, grouping=True)}."
+
+        product.value = value
         product.name = data["name"]
         db.session.commit()
 
-        return {"message": f"Nome do produto alterado para {product.name}."}, 200
+        return {"message": message.strip() or "Sem alteração! Ok :P"}, 200
 
 
 class PurchaseResource(Resource):

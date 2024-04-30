@@ -7,7 +7,7 @@ import {
   addProductToCart,
   fetchProducts,
   removeProductFromCart,
-  renameProduct,
+  updateProduct,
 } from "@/services/products"
 import { TCart } from "@/types/cart"
 import { TProduct } from "@/types/products"
@@ -152,15 +152,22 @@ export const useProductsMutation = () => {
     },
   })
 
-  const renameProductMutation = useMutation({
-    mutationFn: ({ productId, name }: { productId: number; name: string }) =>
-      renameProduct(token, productId, name),
+  const updateProductMutation = useMutation({
+    mutationFn: ({
+      productId,
+      name,
+      value,
+    }: {
+      productId: number
+      name: string
+      value: number
+    }) => updateProduct(token, productId, name, value),
     // TODO: On Mutate get the products data and update it
-    onSuccess: () => {
+    onSuccess: ({ message }) => {
       queryClient.invalidateQueries({ queryKey: ["products"] })
       toast({
         title: "Sucesso",
-        description: "Produto renomeado com sucesso!",
+        description: message,
       })
     },
     onError: (error) => {
@@ -193,7 +200,7 @@ export const useProductsMutation = () => {
   return {
     addProductToCartMutation,
     removeProductFromCartMutation,
-    renameProductMutation,
+    updateProductMutation,
     productStockMutation,
   }
 }

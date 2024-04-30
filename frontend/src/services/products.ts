@@ -85,15 +85,16 @@ export const confirmPurchase = async (
   }
 }
 
-export const renameProduct = async (
+export const updateProduct = async (
   token: string | null,
   productId: number,
-  name: string
+  name: string,
+  value: number
 ): Promise<{ message: string }> => {
   try {
     const res = await axios.put(
       "/api/products",
-      { id: productId, name },
+      { id: productId, name, value },
       {
         headers: {
           Authorization: `Bearer ${token}`,
