@@ -53,7 +53,7 @@ export const ProductCard = ({ product, cart, size = "default" }: ProductCardProp
         </CardTitle>
       </CardHeader>
 
-      <CardFooter className={cn("justify-between", size === "sm" && "py-0")}>
+      <CardFooter className={cn("justify-between px-1.5", size === "sm" && "py-0.5")}>
         <Badge variant={product.quantity === 0 ? "destructive" : "secondary"}>
           {product.quantity} restantes
         </Badge>

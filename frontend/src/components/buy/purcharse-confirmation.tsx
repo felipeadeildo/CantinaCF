@@ -42,7 +42,7 @@ export const PurcharseConfirmation = ({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button
-          className="ml-4 font-bold"
+          className="ml-1.5 font-bold"
           variant={quantityProductsInCart === 0 ? "ghost" : "default"}
           disabled={quantityProductsInCart === 0}
         >
