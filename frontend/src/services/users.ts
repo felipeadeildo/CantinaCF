@@ -1,6 +1,6 @@
 import { getErrorMessage } from "@/lib/utils"
 import { SUser, SUserWithoutPassword } from "@/schemas/user"
-import { TUser } from "@/types/user"
+import { TUser, TUserUpdatePassword } from "@/types/user"
 import axios, { AxiosError } from "axios"
 
 export const fetchUsers = async (
@@ -61,10 +61,11 @@ export const createUser = async (
 
 export const updateUser = async (
   token: string | null,
-  user: SUserWithoutPassword
+  user: SUserWithoutPassword | TUserUpdatePassword,
+  updateType: "info" | "password"
 ): Promise<{ message?: string; user?: TUser }> => {
   try {
-    const res = await axios.put("/api/user", user, {
+    const res = await axios.put(`/api/user?type=${updateType}`, user, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

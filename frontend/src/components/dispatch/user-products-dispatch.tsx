@@ -24,7 +24,7 @@ export const UserProductsDispatch = ({ user, products }: UserProductsDispatchPro
       <CardHeader>
         <CardTitle className="text-center">{user.name}</CardTitle>
         <CardDescription className="text-center">
-          Matrícula: {user.matricula} | Username: {user.username} | ID: {user.id}
+          Matrícula: {user.matricula || "-"} | Username: {user.username} | ID: {user.id}
         </CardDescription>
       </CardHeader>
 

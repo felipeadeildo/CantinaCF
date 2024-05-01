@@ -48,7 +48,7 @@ export const UserInfos = ({ user }: Props) => {
       {user.serie && (
         <div className="flex gap-1">
           <School size={18} /> <span className="font-semibold">Série (Turma):</span>
-          {user.serie} ({user.turm.toUpperCase()})
+          {user.serie} ({user.turm?.toUpperCase()})
         </div>
       )}
 

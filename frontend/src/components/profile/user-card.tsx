@@ -23,7 +23,7 @@ export const UserCard = ({ user }: Props) => {
       <CardHeader>
         <CardTitle className="text-center">{user.name}</CardTitle>
         <CardDescription className="text-center">
-          Matrícula: {user.matricula} | Username: {user.username} | ID: {user.id}
+          Matrícula: {user.matricula || "-"} | Username: {user.username} | ID: {user.id}
         </CardDescription>
       </CardHeader>
       <CardContent className="grid gap-2 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">

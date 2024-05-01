@@ -1,8 +1,8 @@
-from cantina.models import User
-from cantina.utils import verify_password
 from flask import request
 from flask_jwt_extended import create_access_token
 from flask_restful import Resource
+
+from cantina.models import User
 
 
 class LoginResource(Resource):
@@ -13,11 +13,16 @@ class LoginResource(Resource):
         username = request.json.get("username", None)
         password = request.json.get("password", None)
 
-        user = User.query.filter((User.username == username) | (User.matricula == username)).first()
-        if user is None or not verify_password(password, user.password):
+        user = User.query.filter(
+            (User.username == username) | (User.matricula == username)
+        ).first()
+        if user is None or not user.verify_password(password):
             return {"message": "Usuário e/ou Senha incorretos."}, 400
         else:
             access_token = create_access_token(
                 identity=user.id, additional_claims={"role": user.role.name}
             )
-            return {"token": access_token, "message": "Login efetuado com sucesso."}, 200
+            return {
+                "token": access_token,
+                "message": "Login efetuado com sucesso.",
+            }, 200

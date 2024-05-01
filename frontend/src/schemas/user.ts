@@ -47,6 +47,7 @@ export const userWithoutPasswordSchema = z.lazy(() =>
     userSchemaBase
       .extend({
         role_id: z.literal(UserRoles.Aluno),
+        id: z.number()
       })
       .merge(studentSchema)
       .omit({ password: true }),
@@ -57,6 +58,7 @@ export const userWithoutPasswordSchema = z.lazy(() =>
           z.literal(UserRoles.Funcionário),
           z.literal(UserRoles.Caixa),
         ]),
+        id: z.number(),
       })
       .omit({ password: true }),
   ])

@@ -39,10 +39,11 @@ export const EditUserForm = ({ user }: Props) => {
   const form = useForm<SUserWithoutPassword>({
     resolver: zodResolver(userWithoutPasswordSchema),
     defaultValues: {
+      id: user.id,
       name: user.name,
       username: user.username,
       role_id: user.role_id.toString() as "1" | "2" | "3" | "4",
-      matricula: user.matricula.toString(),
+      matricula: user.matricula,
       serie: user.serie,
       turm: user.turm,
     },
@@ -70,7 +71,8 @@ export const EditUserForm = ({ user }: Props) => {
           quando estiver tudo ok.
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-2">
+      <CardContent className="space-y-0.5">
+        <input type="hidden" {...form.register("id")} />
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField

@@ -1,9 +1,11 @@
 from datetime import datetime
 
-from cantina import db
 from flask import url_for
 from sqlalchemy import event
 from werkzeug.security import generate_password_hash
+
+from cantina import db
+from cantina.utils import verify_password
 
 
 class Role(db.Model):
@@ -83,7 +85,13 @@ class User(db.Model):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.password = generate_password_hash(self.password)
+        self.set_password(self.password)
+
+    def set_password(self, password: str):
+        self.password = generate_password_hash(password)
+
+    def verify_password(self, password: str):
+        return verify_password(password, self.password)
 
 
 class Product(db.Model):

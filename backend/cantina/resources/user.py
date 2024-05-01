@@ -49,20 +49,74 @@ class UserResource(Resource):
             "user": user.as_dict(),
         }, 201
 
-    @jwt_required()
-    def put(self):
-        data = request.json
-        if not data:
-            return {"message": "Nenhum dado enviado."}, 400
-        user = User.query.filter_by(id=data.get("id")).first()
-        if user is None:
-            return {"message": "Usuário não encontrado."}, 404
+    def __update_info(self, user: User, data: dict, current_user: User):
+        if current_user.id != user.id and not current_user.role_id == 1:
+            return {
+                "message": "Tentando alterar informação de outro usuário sem permissão. Este incidente será reportado (sudo lol)."
+            }, 400
+
+        # TODO: Remove some infos when the user isnt admin, foe example, the role cant be changed to admin from a non admin
 
         for key, value in data.items():
             # TODO: make it more secure (password can be set directly?!)
             setattr(user, key, value)
         db.session.commit()
         return {"message": "Usuário atualizado com sucesso.", "user": user.as_dict()}
+
+    def __update_password(self, user: User, data: dict, current_user: User):
+        if current_user.id != user.id and not current_user.role_id == 1:
+            return {
+                "message": "Tentando alterar senha de outro usuário sem permissão. Este incidente será reportado (sudo lol)."
+            }, 400
+
+        requires_old_password = (
+            user.id != current_user.id or not current_user.role_id == 1
+        )
+        old_password = data.get("oldPassword")
+        new_password = data.get("newPassword")
+
+        if requires_old_password and not old_password:
+            return {"message": "Senha antiga deve ser especificada."}, 400
+
+        if requires_old_password and not current_user.verify_password(
+            str(old_password)
+        ):
+            return {"message": "Senha antiga não confere."}, 400
+
+        if not new_password:
+            return {"message": "Nova senha deve ser especificada."}, 400
+
+        user.set_password(new_password)
+        db.session.commit()
+        return {"message": "Senha atualizada com sucesso."}
+
+    @jwt_required()
+    def put(self):
+        data = request.json
+        query = request.args
+
+        update_type = query.get("type", "info")
+        methods = {
+            "info": self.__update_info,
+            "password": self.__update_password,
+        }
+        fn = methods.get(update_type)
+
+        if not fn:
+            return {"message": "Tipo de atualização inválido."}, 400
+
+        user_id = get_jwt_identity()
+        current_user = User.query.filter_by(id=user_id).first()
+        if not current_user:
+            return {"message": "Você não foi encontrado. Faça login novamente."}, 404
+
+        if not data:
+            return {"message": "Nenhum dado enviado."}, 400
+        user = User.query.filter_by(id=data.get("id")).first()
+        if user is None:
+            return {"message": "Usuário não encontrado."}, 404
+
+        return fn(user, data, current_user)
 
 
 class UsersResource(Resource):
