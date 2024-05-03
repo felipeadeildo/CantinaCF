@@ -9,6 +9,10 @@ const nextConfig = {
       {
         source: "/",
         destination: "/cantina/buy",
+      },
+      {
+        source: "/static/:path*",
+        destination: process.env.NEXT_PUBLIC_BACKEND_URL + "/static/:path*",
       }
     ];
   }

@@ -6,6 +6,11 @@ export const SIDEBAR_PAGES = [
   { name: "Usuários", path: "/admin/users", category: "Administração" },
   { name: "Produtos", path: "/admin/products", category: "Administração" },
   { name: "Despachar Produtos", path: "/cantina/dispatch", category: "Administração" },
+  {
+    name: "Pagamentos",
+    path: "/admin/payments",
+    category: "Administração",
+  },
 ]
 
 export const SIDEBAR_PAGES_CATEGORIES = ["Páginas", "Administração"]

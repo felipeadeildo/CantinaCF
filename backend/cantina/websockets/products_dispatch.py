@@ -3,7 +3,7 @@ from random import randint
 
 from flask import Flask
 from flask_jwt_extended import jwt_required
-from flask_socketio import Namespace, emit  # type: ignore
+from flask_socketio import Namespace # type: ignore
 
 from cantina import socketio
 from cantina.models import ProductSale
@@ -13,7 +13,6 @@ class ProductsDispatch(Namespace):
     def __init__(self, namespace: str, app: Flask):
         self.should_run = True
         super().__init__(namespace)
-        self.emit = emit
         self.app = app
 
     def __load_products(self):

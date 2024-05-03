@@ -1,3 +1,5 @@
+import { TUser } from "./user"
+
 export type TPaymentMethod = {
   id: number
   name: string
@@ -8,7 +10,7 @@ export type TPaymentMethod = {
   is_protected: boolean
 }
 
-export type Payment = {
+export type TPayment = {
   id: number
   payment_method_id: number
   observations: string
@@ -30,3 +32,9 @@ export const PaymentMethods = {
   PAYROLL: "5",
   SYSTEM: "6",
 } as const
+
+export type TPaymentRequest = Omit<TPayment, "allowed_by" | "user_id" | "payment_method_id"> & {
+  user: TUser
+  allowed_by_user: TUser | null,
+  payment_method: string
+}

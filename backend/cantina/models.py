@@ -1,11 +1,10 @@
 from datetime import datetime
 
+from cantina import db
+from cantina.utils import verify_password
 from flask import url_for
 from sqlalchemy import event
 from werkzeug.security import generate_password_hash
-
-from cantina import db
-from cantina.utils import verify_password
 
 
 class Role(db.Model):
@@ -243,17 +242,22 @@ class Payment(db.Model):
     def as_friendly_dict(self):
         data = {}
         for c in self.__table__.columns:
-            key = c.info.get("label", c.name)
-            if c.name in ("user_id", "allowed_by"):
-                value = get_user_name_and_id(getattr(self, c.name))
-            elif c.name in ("added_at",):
-                value = get_friendly_datetime(getattr(self, c.name))
-            elif c.name in ("payment_method_id",):
-                value = get_payment_method_name_and_id(getattr(self, c.name))
-            elif c.name in ("value",):
-                value = float(getattr(self, c.name))
+            key = c.name
+            if key in ("user_id",):
+                key = "user"
+                value = self.user.as_dict()
+            elif key in ("allowed_by",):
+                key = "allowed_by_user"
+                value = self.allowed_by_user.as_dict() if self.allowed_by else None
+            elif key in ("added_at",):
+                value = get_friendly_datetime(getattr(self, key))
+            elif key in ("payment_method_id",):
+                key = "payment_method"
+                value = self.payment_method.name
+            elif key in ("value",):
+                value = float(getattr(self, key))
             else:
-                value = getattr(self, c.name)
+                value = getattr(self, key)
             data[key] = value
         return data
 
