@@ -33,7 +33,8 @@ export const toReal = (value: number) => {
   return value.toLocaleString("pt-br", { style: "currency", currency: "BRL" })
 }
 
-export const isUserAdmin = (user: TUser) => {
+export const isUserAdmin = (user: TUser | null) => {
+  if (!user) return false
   return user.role_id.toString() === UserRoles.Admin
 }
 
