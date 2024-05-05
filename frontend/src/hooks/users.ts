@@ -2,7 +2,7 @@ import { useAuth } from "@/contexts/auth"
 import { SUser, SUserWithoutPassword } from "@/schemas/user"
 import { createUser, fetchUser, fetchUsers, updateUser } from "@/services/users"
 import { TUser, TUserUpdatePassword } from "@/types/user"
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 export const useUsers = (
   query: string,
@@ -10,9 +10,11 @@ export const useUsers = (
   onlyBalancePayroll?: boolean
 ) => {
   const { token } = useAuth()
-  return useQuery<TUser[]>({
+  return useInfiniteQuery({
     queryKey: ["users", query, onlyBalance, onlyBalancePayroll],
-    queryFn: () => fetchUsers(token, query, onlyBalance, onlyBalancePayroll),
+    queryFn: ({ pageParam }) => fetchUsers(token, query, onlyBalance, onlyBalancePayroll, pageParam),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => lastPage.nextPage,
     enabled: !!token,
   })
 }

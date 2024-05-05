@@ -3,12 +3,18 @@ import { SUser, SUserWithoutPassword } from "@/schemas/user"
 import { TUser, TUserUpdatePassword } from "@/types/user"
 import axios, { AxiosError } from "axios"
 
+type Page = {
+  users: TUser[],
+  nextPage: number | null
+}
+
 export const fetchUsers = async (
   token: string | null,
   query: string,
   onlyBalance?: boolean,
-  onlyBalancePayroll?: boolean
-): Promise<TUser[]> => {
+  onlyBalancePayroll?: boolean,
+  page?: number
+): Promise<Page> => {
   const res = await axios.get("/api/users", {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -17,10 +23,11 @@ export const fetchUsers = async (
       query,
       onlyBalance,
       onlyBalancePayroll,
+      page,
     },
   })
 
-  return res.data.users
+  return res.data
 }
 
 export const fetchUser = async (

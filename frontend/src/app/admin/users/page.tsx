@@ -1,7 +1,7 @@
 "use client"
 import { useUsers } from "@/hooks/users"
-import { CircleAlert, Pencil, Search, User } from "lucide-react"
-import { useRef, useState } from "react"
+import { ArrowDownCircle, CircleAlert, Loader, Pencil, Search, User } from "lucide-react"
+import { useEffect, useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -24,6 +24,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 import CreateUserDialog from "@/components/admin/users/create-user-dialog"
 import { LoginRequired } from "@/components/login-required"
+import { EditUserDialog } from "@/components/profile/edit-user-dialog"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { maskMoney } from "@/lib/masks"
@@ -31,32 +32,38 @@ import Link from "next/link"
 
 const Users = () => {
   const [query, setQuery] = useState("")
+  const [debouncedQuery, setDebouncedQuery] = useState("")
   const [onlyBalance, setOnlyBalance] = useState(false)
   const [onlyBalancePayroll, setOnlyBalancePayroll] = useState(false)
-  const searchRef = useRef<HTMLInputElement>(null)
-
   const {
-    data: users = [],
+    data,
     isLoading,
+    isError,
     error,
-  } = useUsers(query, onlyBalance, onlyBalancePayroll)
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+  } = useUsers(debouncedQuery, onlyBalance, onlyBalancePayroll)
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedQuery(query)
+    }, 500)
+
+    return () => clearTimeout(timer)
+  }, [query])
 
   return (
     <>
       <h1 className="text-xl font-semibold text-center my-2">Usuários</h1>
-
       <div className="container mx-auto">
         <div className="flex flex-col items-center">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 max-w-lg w-full">
             <Search size={15} />
             <Input
-              ref={searchRef}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  setQuery(searchRef.current?.value || "")
-                }
-              }}
-              placeholder="Digite e tecle Enter para pesquisar"
+              onChange={(e) => setQuery(e.target.value)}
+              value={query}
+              placeholder="Pesquise por algum usuário..."
               className="my-2"
             />
           </div>
@@ -67,7 +74,6 @@ const Users = () => {
                 id="only_balance"
                 checked={onlyBalance}
                 onCheckedChange={() => {
-                  console.log("chegou aqui")
                   setOnlyBalance((prev) => !prev)
                 }}
               />
@@ -106,56 +112,79 @@ const Users = () => {
           </TableHeader>
 
           <TableBody className="text-center">
-            {users.map((user) => (
-              <TableRow key={user.id}>
-                <TableCell>{user.id}</TableCell>
-                <TableCell>{user.name}</TableCell>
-                <TableCell>{user.username}</TableCell>
-                <TableCell>{user.matricula || "Sem Matrícula"}</TableCell>
-                <TableCell>
-                  <div className="flex justify-center gap-1">
-                    <span className="text-green-500">{maskMoney(user.balance)}</span>
-                    <span>/</span>
-                    <span className="text-red-500">
-                      {maskMoney(user.balance_payroll)}
-                    </span>
-                  </div>
-                </TableCell>
-                <TableCell className="flex justify-center gap-1">
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button variant="outline" size="sm">
-                          <Pencil size={16} />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Editar</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
+            {data?.pages.map((page) =>
+              page.users.map((user) => (
+                <TableRow key={user.id}>
+                  <TableCell>{user.id}</TableCell>
+                  <TableCell>{user.name}</TableCell>
+                  <TableCell>{user.username}</TableCell>
+                  <TableCell>{user.matricula || "Sem Matrícula"}</TableCell>
+                  <TableCell>
+                    <div className="flex justify-center gap-1">
+                      <span className="text-green-500">{maskMoney(user.balance)}</span>
+                      <span>/</span>
+                      <span className="text-red-500">
+                        {maskMoney(user.balance_payroll)}
+                      </span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="flex justify-center gap-1">
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <EditUserDialog user={user}>
+                            <Button variant="outline" size="sm">
+                              <Pencil size={16} />
+                            </Button>
+                          </EditUserDialog>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Editar</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
 
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button variant="secondary" size="sm">
-                          <Link href={`/profile?userId=${user.id}`}>
-                            <User size={16} />
-                          </Link>
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Perfil</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </TableCell>
-              </TableRow>
-            ))}
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button variant="secondary" size="sm">
+                            <Link href={`/profile?userId=${user.id}`}>
+                              <User size={16} />
+                            </Link>
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Perfil</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
 
-        {error && (
+        {hasNextPage && (
+          <div className="flex justify-center items-center my-4">
+            <Button
+              onClick={() => fetchNextPage()}
+              disabled={!hasNextPage || isFetchingNextPage}
+              className="mt-4"
+            >
+              {isFetchingNextPage ? (
+                <Loader className="animate-spin" />
+              ) : (
+                <div className="flex items-center gap-2">
+                  <ArrowDownCircle />
+                  Carregar mais
+                </div>
+              )}
+            </Button>
+          </div>
+        )}
+
+        {isError && (
           <Alert variant="destructive" className="mt-4">
             <CircleAlert className="h-4 w-4" />
             <AlertTitle>Erro</AlertTitle>
@@ -163,7 +192,7 @@ const Users = () => {
           </Alert>
         )}
 
-        {users.length === 0 && !isLoading && (
+        {data?.pages[0].users.length === 0 && !isLoading && (
           <Alert variant="destructive" className="mt-4">
             <CircleAlert className="h-4 w-4" />
             <AlertTitle>Aviso</AlertTitle>

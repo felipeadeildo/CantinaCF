@@ -1,8 +1,9 @@
-from cantina.models import User
 from flask import request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_restful import Resource
 from sqlalchemy import or_
+
+from cantina.models import User
 
 from .. import db
 
@@ -126,6 +127,7 @@ class UsersResource(Resource):
         query = data.get("query")
         only_balance = data.get("onlyBalance") == "true"
         only_balance_payroll = data.get("onlyBalancePayroll") == "true"
+        page = int(data.get("page", 1))
         user_query = User.query
         if query:
             user_query = user_query.filter(
@@ -143,6 +145,7 @@ class UsersResource(Resource):
         if only_balance_payroll:
             user_query = user_query.filter(User.balance_payroll > 0)
 
-        users = user_query.all()
+        pagination = user_query.paginate(page=page, per_page=10, error_out=False)
+        users = [user.as_dict() for user in pagination.items]
 
-        return {"users": [user.as_dict() for user in users]}
+        return {"users": users, "nextPage": page + 1 if pagination.has_next else None}
