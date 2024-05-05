@@ -23,7 +23,7 @@ type Props = {
 
 export const EditUserPasswordForm = ({ user }: Props) => {
   const { user: currentUser } = useAuth()
-  const requireOldPassword = currentUser?.id !== user.id || !isUserAdmin(currentUser)
+  const requireOldPassword = currentUser?.id !== user.id && !isUserAdmin(currentUser)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const [form, setForm] = useState<TUserUpdatePassword>({

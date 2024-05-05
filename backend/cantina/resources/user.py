@@ -70,7 +70,7 @@ class UserResource(Resource):
             }, 400
 
         requires_old_password = (
-            user.id != current_user.id or not current_user.role_id == 1
+            user.id != current_user.id and not current_user.role_id == 1
         )
         old_password = data.get("oldPassword")
         new_password = data.get("newPassword")

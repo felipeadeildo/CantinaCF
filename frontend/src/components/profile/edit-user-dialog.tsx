@@ -7,15 +7,18 @@ import { EditUserCard } from "./edit-user-card"
 
 type Props = {
   user: TUser
+  children?: React.ReactNode
 }
 
-export const EditUserDialog = ({ user }: Props) => {
+export const EditUserDialog = ({ user, children }: Props) => {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="secondary">
-          <Pen className="mr-1 h-5 w-5" /> Editar
-        </Button>
+        {children || (
+          <Button variant="secondary">
+            <Pen className="mr-1 h-5 w-5" /> Editar
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <EditUserCard user={user} />
