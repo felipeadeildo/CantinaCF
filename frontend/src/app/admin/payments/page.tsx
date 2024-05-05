@@ -2,6 +2,7 @@
 
 import { LoginRequired } from "@/components/login-required"
 import { PaymentRequest } from "@/components/payments/payment-request"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { usePayments } from "@/hooks/payments"
 import { Loader2 } from "lucide-react"
 
@@ -23,6 +24,14 @@ const Payments = () => {
           <PaymentRequest key={payment.id} payment={payment} />
         ))}
       </div>
+
+      {payments.length === 0 && (
+        <Alert className="w-8/12 mx-auto">
+          <AlertDescription className="text-center">
+            Nenhum pedido de pagamento até o momento!
+          </AlertDescription>
+        </Alert>
+      )}
     </div>
   )
 }

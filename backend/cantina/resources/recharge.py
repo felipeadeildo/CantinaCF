@@ -1,12 +1,13 @@
 from datetime import datetime
 
-from cantina.models import Payment, PaymentMethod, User
-from cantina.settings import UPLOAD_FOLDER
-from cantina.utils import allowed_file
 from flask import request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_restful import Resource
 from werkzeug.utils import secure_filename
+
+from cantina.models import Affiliation, Payment, PaymentMethod, User
+from cantina.settings import UPLOAD_FOLDER
+from cantina.utils import allowed_file
 
 from .. import db
 
@@ -62,6 +63,21 @@ class RechargeResource(Resource):
             user_id=target_user.id,
             status="to allow",
         )
+
+        if payment_method.is_payroll:
+            # target user is employee
+            if target_user.role.id in (1, 2, 4):
+                new_payment.payroll_receiver_id = target_user_id
+            # target user is affiliated
+            else:
+                affiliation = Affiliation.query.filter_by(
+                    affiliated_id=target_user_id
+                ).first()
+                if not affiliation:
+                    return {
+                        "message": "Você não está afiliado à nenhum funcionário."
+                    }, 400
+                new_payment.payroll_receiver_id = affiliation.affiliator_id
 
         if payment_method.need_proof:
             file = request.files.get("proof")

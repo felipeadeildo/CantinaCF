@@ -42,7 +42,7 @@ Use `-H` for help.
 
 ## Database Models
 
-The project includes various models such as `User`, `Product`, `PaymentMethod`, `Affiliation`, `Payroll`, `EditHistory`, `StockHistory`, and more. Check the code for detailed structure and relationships.
+The project includes various models such as `User`, `Product`, `PaymentMethod`, `Affiliation`, `EditHistory`, `StockHistory`, and more. Check the code for detailed structure and relationships.
 
 ## Routes, Pages, and Default Settings
 

@@ -19,7 +19,7 @@ export type TPayment = {
   allowed_by: number
   proof_path: string
   added_at: string
-  is_payroll: boolean
+  payroll_receiver_id: number
   is_paypayroll: boolean
   status: string
 }
@@ -33,8 +33,12 @@ export const PaymentMethods = {
   SYSTEM: "6",
 } as const
 
-export type TPaymentRequest = Omit<TPayment, "allowed_by" | "user_id" | "payment_method_id"> & {
+export type TPaymentRequest = Omit<
+  TPayment,
+  "allowed_by" | "user_id" | "payment_method_id" | "payroll_receiver_id"
+> & {
   user: TUser
-  allowed_by_user: TUser | null,
+  allowed_by_user: TUser | null
   payment_method: string
+  payroll_receiver: TUser | null
 }

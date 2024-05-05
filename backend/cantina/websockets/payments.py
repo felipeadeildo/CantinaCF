@@ -1,11 +1,11 @@
-import time
 from random import randint
 
-from cantina import socketio
-from cantina.models import Payment
 from flask import Flask
 from flask_jwt_extended import jwt_required
 from flask_socketio import Namespace, emit  # type: ignore
+
+from cantina import socketio
+from cantina.models import Payment
 
 
 class Payments(Namespace):
@@ -16,11 +16,7 @@ class Payments(Namespace):
 
     def __load_payments(self):
         with self.app.app_context():
-            start_time = time.time()
             while True:
-                if time.time() - start_time > 30:
-                    break
-
                 payments = Payment.query.filter_by(status="to allow").all()
 
                 socketio.emit(
@@ -30,7 +26,7 @@ class Payments(Namespace):
                 )
                 socketio.sleep(randint(1, 5))
 
-    # @jwt_required(locations=["query_string"])
+    @jwt_required(locations=["query_string"])
     def on_connect(self):
         socketio.start_background_task(self.__load_payments)
 

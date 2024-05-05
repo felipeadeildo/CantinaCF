@@ -1,3 +1,5 @@
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
@@ -9,8 +11,7 @@ import {
 import { cn, getAttachUrl, toReal } from "@/lib/utils"
 import { TPaymentRequest } from "@/types/recharge"
 import { FileText, Unlock, XCircle } from "lucide-react"
-import { Badge } from "../ui/badge"
-import { Button } from "../ui/button"
+import Link from "next/link"
 
 export const PaymentRequest = ({ payment }: { payment: TPaymentRequest }) => {
   const { user } = payment
@@ -29,6 +30,17 @@ export const PaymentRequest = ({ payment }: { payment: TPaymentRequest }) => {
         <Badge className="font-bold text-sm">
           {toReal(payment.value)} ({payment.payment_method})
         </Badge>
+
+        {payment.payroll_receiver && (
+          <div className="flex gap-2">
+            <span className="text-sm">Devedor:</span>
+            <Badge variant="destructive">
+              <Link href={`/profile?userId=${payment.payroll_receiver.id}`}>
+                {payment.payroll_receiver.name}
+              </Link>
+            </Badge>
+          </div>
+        )}
         {payment.observations && (
           <span className="text-sm text-center">
             <p className="font-bold">Observação do Usuário:</p>

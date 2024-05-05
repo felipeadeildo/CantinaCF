@@ -209,8 +209,11 @@ class Payment(db.Model):
     added_at = db.Column(
         db.DateTime, default=datetime.now, info={"label": "Data de cadastro"}
     )
-    is_payroll = db.Column(
-        db.Boolean, default=False, info={"label": "Recarga via Folha de Pagamento?"}
+    payroll_receiver_id = db.Column(
+        db.Integer,
+        db.ForeignKey("user.id"),
+        nullable=True,
+        info={"label": "Recebedor da Cobrança"},
     )
     is_paypayroll = db.Column(
         db.Boolean, default=False, info={"label": "Pagamento de Folha de Pagamento?"}
@@ -218,6 +221,9 @@ class Payment(db.Model):
     status = db.Column(db.String(20), info={"label": "Status"})
 
     payment_method = db.relationship("PaymentMethod", backref="payments")
+    payroll_receiver = db.relationship(
+        "User", foreign_keys=[payroll_receiver_id], backref="payroll_receivers"
+    )
 
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
@@ -256,6 +262,11 @@ class Payment(db.Model):
                 value = self.payment_method.name
             elif key in ("value",):
                 value = float(getattr(self, key))
+            elif key in ("payroll_receiver_id",):
+                key = "payroll_receiver"
+                value = (
+                    self.payroll_receiver.as_dict() if self.payroll_receiver else None
+                )
             else:
                 value = getattr(self, key)
             data[key] = value
@@ -277,21 +288,6 @@ class Affiliation(db.Model):
 
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
-
-
-class Payroll(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    value = db.Column(db.DECIMAL(10, 2), nullable=False)
-    affiliation_id = db.Column(db.Integer, db.ForeignKey("affiliation.id"))
-    added_at = db.Column(db.DateTime, default=datetime.now)
-    allowed_by = db.Column(db.Integer, db.ForeignKey("user.id"))
-    status = db.Column(db.String(20))
-
-    affiliation = db.relationship("Affiliation", backref="payrolls")
-
-    @property
-    def allowed_by_user(self):
-        return User.query.get(self.allowed_by)
 
 
 class EditHistory(db.Model):
