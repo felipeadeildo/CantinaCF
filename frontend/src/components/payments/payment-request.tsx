@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { usePaymentMutation } from "@/hooks/payments"
 import { cn, getAttachUrl, toReal } from "@/lib/utils"
 import { TPaymentRequest } from "@/types/recharge"
 import { FileText, Unlock, XCircle } from "lucide-react"
@@ -15,6 +16,7 @@ import Link from "next/link"
 
 export const PaymentRequest = ({ payment }: { payment: TPaymentRequest }) => {
   const { user } = payment
+  const { acceptOrDenyPaymentMutation } = usePaymentMutation()
   return (
     <Card>
       <CardHeader>
@@ -68,11 +70,20 @@ export const PaymentRequest = ({ payment }: { payment: TPaymentRequest }) => {
           </a>
         </Button>
 
-        <Button className="gap-1">
+        <Button
+          className="gap-1"
+          onClick={() => acceptOrDenyPaymentMutation.mutate({ payment, accept: true })}
+          disabled={acceptOrDenyPaymentMutation.isPending}
+        >
           <Unlock size={18} />
           Liberar Saldo
         </Button>
-        <Button variant="destructive" className="gap-1">
+        <Button
+          variant="destructive"
+          className="gap-1"
+          onClick={() => acceptOrDenyPaymentMutation.mutate({ payment, accept: false })}
+          disabled={acceptOrDenyPaymentMutation.isPending}
+        >
           <XCircle size={18} />
           Cancelar Pagamento
         </Button>

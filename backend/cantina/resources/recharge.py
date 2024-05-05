@@ -1,13 +1,12 @@
 from datetime import datetime
 
+from cantina.models import Affiliation, Payment, PaymentMethod, User
+from cantina.settings import UPLOAD_FOLDER
+from cantina.utils import allowed_file
 from flask import request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_restful import Resource
 from werkzeug.utils import secure_filename
-
-from cantina.models import Affiliation, Payment, PaymentMethod, User
-from cantina.settings import UPLOAD_FOLDER
-from cantina.utils import allowed_file
 
 from .. import db
 
@@ -97,3 +96,46 @@ class RechargeResource(Resource):
         db.session.commit()
 
         return {"message": "Recarga registrada com sucesso."}, 201
+
+    @jwt_required()
+    def put(self):
+        data = request.json
+        if not data:
+            return {"message": "Nenhum dado enviado."}, 400
+
+        requester_user_id = get_jwt_identity()
+        requester_user = User.query.filter_by(id=requester_user_id).first()
+
+        if requester_user.role.id != 1:
+            return {"message": "Você precisa ser admin para fazer isso."}, 403
+
+        payment_id = data.get("id")
+        if payment_id is None:
+            return {"message": "ID de pagamento inválido."}, 400
+
+        payment = Payment.query.filter_by(id=payment_id).first()
+        if not payment:
+            return {"message": "Pagamento não encontrado."}, 404
+
+        if payment.status != "to allow":
+            return {
+                "message": "Esta recarga não pode ser editada uma vez que ela já foi aprovada/rejeitada (Espere site atualizar a lista de recargas)."
+            }, 400
+
+        accept = data.get("accept")
+        if not isinstance(accept, bool):
+            return {"message": "Aceitar recarga inválido."}, 400
+
+        payment.status = "accepted" if accept else "rejected"
+        payment.allowed_by = requester_user_id
+
+        if payment.payroll_receiver:
+            payment.payroll_receiver.balance_payroll += payment.value
+
+        payment.user.balance += payment.value
+
+        db.session.commit()
+
+        return {
+            "message": f"Recarga de R$ {payment.value} para {payment.user.name} foi {'ACEITADA' if accept else 'REJEITADA'} com sucesso!"
+        }, 200
