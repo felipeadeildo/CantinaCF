@@ -61,11 +61,18 @@ const Login = () => {
             <FormField
               control={form.control}
               name="username"
-              render={({ field }) => (
+              render={({ field: { onChange, ...field } }) => (
                 <FormItem>
                   <FormLabel>Usuário</FormLabel>
                   <FormControl>
-                    <Input {...field} disabled={form.formState.isSubmitting} />
+                    <Input
+                      onChange={(e) => {
+                        e.target.value = e.target.value.toLowerCase()
+                        onChange(e)
+                      }}
+                      {...field}
+                      disabled={form.formState.isSubmitting}
+                    />
                   </FormControl>
 
                   <FormMessage />

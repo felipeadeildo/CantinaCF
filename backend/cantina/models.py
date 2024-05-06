@@ -85,6 +85,7 @@ class User(db.Model):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.set_password(self.password)
+        self.username = self.username.lower()
 
     def set_password(self, password: str):
         self.password = generate_password_hash(password)
