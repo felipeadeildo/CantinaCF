@@ -38,10 +38,6 @@ export const isUserAdmin = (user: TUser | null) => {
   return user.role_id.toString() === UserRoles.Admin
 }
 
-export const getBackendUrl = (): string => {
-  return process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000"
-}
-
 export const getAttachUrl = (attachPath: string) => {
   return `/static/uploads/${attachPath}`
 }

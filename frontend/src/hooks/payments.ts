@@ -1,6 +1,5 @@
 import { useToast } from "@/components/ui/use-toast"
 import { useAuth } from "@/contexts/auth"
-import { getBackendUrl } from "@/lib/utils"
 import { acceptOrDenyPayment } from "@/services/payment"
 import { TPaymentRequest } from "@/types/recharge"
 import { useMutation } from "@tanstack/react-query"
@@ -15,7 +14,7 @@ export const usePayments = () => {
 
   useEffect(() => {
     setIsLoading(true)
-    const socket: Socket = io(getBackendUrl() + "/payments", {
+    const socket: Socket = io("/payments", {
       transports: ["websocket"],
       query: {
         jwt: token,
@@ -42,7 +41,7 @@ export const usePaymentMutation = () => {
   const { toast } = useToast()
 
   const acceptOrDenyPaymentMutation = useMutation({
-    mutationFn: ({ payment, accept }: {payment: TPaymentRequest, accept: boolean}) =>
+    mutationFn: ({ payment, accept }: { payment: TPaymentRequest; accept: boolean }) =>
       acceptOrDenyPayment(token, payment.id, accept),
     onSuccess: (data) =>
       toast({

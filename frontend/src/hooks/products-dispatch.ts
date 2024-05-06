@@ -1,5 +1,4 @@
 import { useAuth } from "@/contexts/auth"
-import { getBackendUrl } from "@/lib/utils"
 import { dispatchProductSales } from "@/services/products-dispatch"
 import { TProductSale } from "@/types/products"
 import { TUser } from "@/types/user"
@@ -19,7 +18,7 @@ export const useProductDispatch = () => {
 
   useEffect(() => {
     setIsLoading(true)
-    const socket: Socket = io(getBackendUrl() + "/products_dispatch", {
+    const socket: Socket = io("/products_dispatch", {
       transports: ["websocket"],
       query: {
         jwt: token,
