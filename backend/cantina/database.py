@@ -1,3 +1,5 @@
+import random
+import string
 from getpass import getpass
 
 from werkzeug.security import generate_password_hash
@@ -22,7 +24,9 @@ def init_db(db):
         PaymentMethod(name="Cartão de Debito", need_proof=False, is_payroll=False),
         PaymentMethod(name="Espécie", need_proof=False, is_payroll=False),
         PaymentMethod(name="Folha de Pagamento", need_proof=False, is_payroll=True),
-        PaymentMethod(name="System", need_proof=False, is_payroll=False, is_protected=True),
+        PaymentMethod(
+            name="System", need_proof=False, is_payroll=False, is_protected=True
+        ),
     ]
     db.session.add_all(payments_method)
     db.session.commit()
@@ -51,18 +55,9 @@ def create_superuser(db):
     """
     print("Creating superuser...")
     role = Role.query.get(1)  # admin :D // Role.query.filter_by(name="Admin").first()
-    print("Insert the username and password for superuser: ")
-    username = input("Username: ")
-    while True:
-        password = getpass("Password: ")
-        if password == "":
-            print("Password cannot be empty.")
-            continue
-        confimation_password = getpass("Confirm password: ")
-        if password != confimation_password:
-            print("Passwords do not match.")
-            continue
-        break
+    username = "admin"
+    password = "".join(random.choices(string.ascii_uppercase + string.digits, k=8))
+
     superuser = User(
         name=username.capitalize(),
         username=username,
@@ -72,3 +67,5 @@ def create_superuser(db):
     db.session.add(superuser)
     db.session.commit()
     print("Superuser created.")
+    print("Username: " + username)
+    print("Password: " + password)

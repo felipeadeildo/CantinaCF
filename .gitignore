@@ -6,3 +6,5 @@ __pycache__/
 uploads/
 instance/
 # migrations/
+.env
+nginx_data/
