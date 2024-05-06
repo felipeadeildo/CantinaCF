@@ -61,7 +61,7 @@ export const UserInfos = ({ user }: Props) => {
 
       <div className="flex gap-1">
         <UserPlus size={18} /> <span className="font-semibold">Data de Cadastro:</span>
-        {new Date(user.added_at).toLocaleDateString("pt-BR")}
+        {user.added_at}
       </div>
     </>
   )
