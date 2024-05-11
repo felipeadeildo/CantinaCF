@@ -11,6 +11,7 @@ export const SIDEBAR_PAGES = [
     path: "/admin/payments",
     category: "Administração",
   },
+  { name: "Recargas", path: "/audits/recharges", category: "Auditorias" },
 ]
 
-export const SIDEBAR_PAGES_CATEGORIES = ["Páginas", "Administração"]
+export const SIDEBAR_PAGES_CATEGORIES = ["Páginas", "Administração", "Auditorias"]
