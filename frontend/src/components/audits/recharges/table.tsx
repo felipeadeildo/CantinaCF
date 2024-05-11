@@ -5,5 +5,5 @@ export const RechargesTable = ({
 }: {
   query: TReachargesQuery
 }) => {
-  return <div className="container mx-auto">Tabela de recharges aqui</div>
+  return <div className="container mx-auto"></div>
 }

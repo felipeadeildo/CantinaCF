@@ -7,7 +7,7 @@ import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tansta
 export const useUsers = (
   query: string,
   onlyBalance?: boolean,
-  onlyBalancePayroll?: boolean
+  onlyBalancePayroll?: boolean,
 ) => {
   const { token } = useAuth()
   return useInfiniteQuery({
