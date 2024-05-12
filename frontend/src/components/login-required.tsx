@@ -1,4 +1,5 @@
 import { useAuth } from "@/contexts/auth"
+import { Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
 
@@ -29,6 +30,11 @@ export const LoginRequired = ({
   if (user && allowed_roles.includes(user.role_id)) {
     return children
   } else {
-    return <div className="text-center text-xl mt-64">Autenticando...</div>
+    return (
+      <div className="flex justify-center items-center gap-2 text-xl mt-64">
+        <Loader2 className="animate-spin" />
+        Autenticando...
+      </div>
+    )
   }
 }
