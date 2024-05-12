@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/table"
 import { maskMoney } from "@/lib/masks"
 import { getAttachUrl } from "@/lib/utils"
-import { FilePlus, FileText, Loader2, Plus } from "lucide-react"
+import { ArrowDownCircle, FilePlus, FileText, Loader2 } from "lucide-react"
 import Link from "next/link"
 
 import {
@@ -127,8 +127,14 @@ export const RechargesTable = ({
         {hasNextPage && (
           <TableCell colSpan={7} className="text-center">
             <Button onClick={() => fetchNextPage()} disabled={!hasNextPage}>
-              {isFetchingNextPage ? <Loader2 className="animate-spin" /> : <Plus />}
-              {isFetchingNextPage ? "Carregando..." : "Carregar mais"}
+              <div className="flex gap-2 items-center justify-center">
+                {isFetchingNextPage ? (
+                  <Loader2 className="animate-spin" />
+                ) : (
+                  <ArrowDownCircle />
+                )}
+                {isFetchingNextPage ? "Carregando..." : "Carregar mais"}
+              </div>
             </Button>
           </TableCell>
         )}

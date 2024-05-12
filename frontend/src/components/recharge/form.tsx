@@ -25,6 +25,7 @@ import {
 
 import { useRechargeMutation } from "@/hooks/recharge"
 import { CreditCard, Loader } from "lucide-react"
+import { ComboboxUsers } from "../combobox/users"
 
 export const RechargeForm = () => {
   const { user } = useAuth()
@@ -155,9 +156,14 @@ export const RechargeForm = () => {
             name="targetUserId"
             render={({ field }) => (
               <FormItem className="space-y-0">
-                <FormLabel>Alvo da Recarga (ID do Usuário)</FormLabel>
+                <FormLabel>Alvo da Recarga</FormLabel>
                 <FormControl>
-                  <Input {...field} disabled={form.formState.isSubmitting} />
+                  <ComboboxUsers
+                    onUserSelected={(user) => field.onChange(user?.id.toString())}
+                    btnClassName="w-full max-w-full"
+                    labelClassName="text-sm"
+                    defaultUser={user}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

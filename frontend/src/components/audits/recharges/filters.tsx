@@ -142,7 +142,7 @@ export const RechargesFilters = ({
         </Popover>
       </div>
 
-      <div className="flex flex-col gap-0.5 justify-center pl-2 col-start-2">
+      <div className="flex flex-col gap-0.5 justify-center pl-2 md:col-start-2 sm:col-start-2">
         <div className="flex items-center space-x-2">
           <Checkbox
             checked={query.onlyIsPayroll}

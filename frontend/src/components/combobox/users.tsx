@@ -17,11 +17,20 @@ import { useCallback, useEffect, useState } from "react"
 type ComboboxUsersProps = {
   onUserSelected: (user?: TUser) => void
   label?: string
+  btnClassName?: string
+  labelClassName?: string
+  defaultUser?: TUser
 }
 
-export const ComboboxUsers = ({ onUserSelected, label }: ComboboxUsersProps) => {
+export const ComboboxUsers = ({
+  onUserSelected,
+  label,
+  btnClassName,
+  labelClassName,
+  defaultUser,
+}: ComboboxUsersProps) => {
   const [open, setOpen] = useState(false)
-  const [selectedUser, setSelectedUser] = useState<TUser | undefined>()
+  const [selectedUser, setSelectedUser] = useState<TUser | undefined>(defaultUser)
   const [query, setQuery] = useState("")
   const [debouncedQuery, setDebouncedQuery] = useState(query)
 
@@ -57,9 +66,9 @@ export const ComboboxUsers = ({ onUserSelected, label }: ComboboxUsersProps) => 
           size="sm"
           role="combobox"
           aria-expanded={open}
-          className="max-w-xs w-full justify-between"
+          className={cn("max-w-xs w-full justify-between", btnClassName)}
         >
-          <span className="text-xs">
+          <span className={cn("text-xs", labelClassName)}>
             {selectedUser ? selectedUser.name : label || "Selecionar Usuário"}
           </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -92,7 +101,9 @@ export const ComboboxUsers = ({ onUserSelected, label }: ComboboxUsersProps) => 
                           : "opacity-0"
                       )}
                     />
-                    <span className="truncate text-sm">{user.name}</span>
+                    <span className={cn("truncate text-sm", labelClassName)}>
+                      {user.name}
+                    </span>
                   </CommandItem>
                 ))}
             </CommandGroup>
