@@ -12,6 +12,11 @@ export const SIDEBAR_PAGES = [
     category: "Administração",
   },
   { name: "Recargas", path: "/audits/recharges", category: "Auditorias" },
+  {
+    name: "Liquidar Folha de Pagamento",
+    path: "/admin/settle-payroll",
+    category: "Administração",
+  },
 ]
 
 export const SIDEBAR_PAGES_CATEGORIES = ["Páginas", "Administração", "Auditorias"]
