@@ -23,9 +23,16 @@ export type TUser = {
 }
 // Assim como ta vindo da API
 
-
 export type TUserUpdatePassword = {
   id: number
   oldPassword?: string
   newPassword: string
+}
+
+export type TRole = {
+  id: number
+  name: string
+  description?: string
+  added_at: string
+  updated_at: string
 }

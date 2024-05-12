@@ -1,18 +1,30 @@
 import { useAuth } from "@/contexts/auth"
 import { SUser, SUserWithoutPassword } from "@/schemas/user"
-import { createUser, fetchUser, fetchUsers, updateUser } from "@/services/users"
+import {
+  createUser,
+  fetchRoles,
+  fetchUser,
+  fetchUsers,
+  updateUser,
+} from "@/services/users"
 import { TUser, TUserUpdatePassword } from "@/types/user"
-import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query"
 
 export const useUsers = (
   query: string,
   onlyBalance?: boolean,
-  onlyBalancePayroll?: boolean,
+  onlyBalancePayroll?: boolean
 ) => {
   const { token } = useAuth()
   return useInfiniteQuery({
     queryKey: ["users", query, onlyBalance, onlyBalancePayroll],
-    queryFn: ({ pageParam }) => fetchUsers(token, query, onlyBalance, onlyBalancePayroll, pageParam),
+    queryFn: ({ pageParam }) =>
+      fetchUsers(token, query, onlyBalance, onlyBalancePayroll, pageParam),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => lastPage.nextPage,
     enabled: !!token,
@@ -50,4 +62,14 @@ export const useUserMutation = () => {
   })
 
   return { createUserMutation, updateUserMutation, updateUserPasswordMutation }
+}
+
+export const useRoles = () => {
+  const { token } = useAuth()
+
+  return useQuery({
+    queryKey: ["roles"],
+    queryFn: () => fetchRoles(token),
+    enabled: !!token,
+  })
 }

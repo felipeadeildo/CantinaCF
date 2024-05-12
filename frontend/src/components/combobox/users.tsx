@@ -15,20 +15,29 @@ import { Check, ChevronsUpDown } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
 
 type ComboboxUsersProps = {
-  onUserSelected: (user: TUser) => void
+  onUserSelected: (user?: TUser) => void
+  label?: string
 }
 
-export const ComboboxUsers = ({ onUserSelected }: ComboboxUsersProps) => {
+export const ComboboxUsers = ({ onUserSelected, label }: ComboboxUsersProps) => {
   const [open, setOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<TUser | undefined>()
   const [query, setQuery] = useState("")
   const [debouncedQuery, setDebouncedQuery] = useState(query)
 
-  const selectUser = useCallback((user: TUser) => {
-    setSelectedUser(user)
-    setOpen(false)
-    onUserSelected(user)
-  }, [setSelectedUser, onUserSelected])
+  const selectUser = useCallback(
+    (user: TUser) => {
+      if (user.id === selectedUser?.id) {
+        setSelectedUser(undefined)
+        onUserSelected(undefined)
+      } else {
+        setSelectedUser(user)
+        setOpen(false)
+        onUserSelected(user)
+      }
+    },
+    [onUserSelected, selectedUser]
+  )
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -48,11 +57,10 @@ export const ComboboxUsers = ({ onUserSelected }: ComboboxUsersProps) => {
           size="sm"
           role="combobox"
           aria-expanded={open}
-          aria-label="Selecione o Usuário"
           className="max-w-xs w-full justify-between"
         >
           <span className="text-xs">
-            {selectedUser ? selectedUser.name : "Selecionar Usuário"}
+            {selectedUser ? selectedUser.name : label || "Selecionar Usuário"}
           </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
@@ -67,9 +75,7 @@ export const ComboboxUsers = ({ onUserSelected }: ComboboxUsersProps) => {
 
           <CommandList>
             {isLoading && <CommandEmpty>Carregando...</CommandEmpty>}
-            {!hasResult && (
-              <CommandEmpty>Nenhum Usuário Encontrado</CommandEmpty>
-            )}
+            {!hasResult && <CommandEmpty>Nenhum Usuário Encontrado</CommandEmpty>}
             <CommandGroup>
               {hasResult &&
                 data.pages[0].users.map((user) => (
@@ -81,7 +87,9 @@ export const ComboboxUsers = ({ onUserSelected }: ComboboxUsersProps) => {
                     <Check
                       className={cn(
                         "mr-2 h-4 w-4",
-                        user.name === selectedUser?.name ? "opacity-100 text-primary" : "opacity-0"
+                        user.name === selectedUser?.name
+                          ? "opacity-100 text-primary"
+                          : "opacity-0"
                       )}
                     />
                     <span className="truncate text-sm">{user.name}</span>

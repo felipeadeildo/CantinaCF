@@ -1,10 +1,10 @@
 import { getErrorMessage } from "@/lib/utils"
 import { SUser, SUserWithoutPassword } from "@/schemas/user"
-import { TUser, TUserUpdatePassword } from "@/types/user"
+import { TRole, TUser, TUserUpdatePassword } from "@/types/user"
 import axios, { AxiosError } from "axios"
 
 type Page = {
-  users: TUser[],
+  users: TUser[]
   nextPage: number | null
 }
 
@@ -81,5 +81,18 @@ export const updateUser = async (
   } catch (e: AxiosError | any) {
     const error = getErrorMessage(e)
     return { message: error }
+  }
+}
+
+export const fetchRoles = async (token: string | null): Promise<TRole[]> => {
+  try {
+    const res = await axios.get("/api/role", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    return res.data
+  } catch (e: AxiosError | any) {
+    throw Error(getErrorMessage(e))
   }
 }
