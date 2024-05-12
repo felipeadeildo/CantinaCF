@@ -10,7 +10,7 @@ const Payments = () => {
   const { payments, isLoading } = useWsPayments()
   return (
     <div>
-      <h1 className="text-xl my-4 text-center">Verificação de Pagmentos</h1>
+      <h1 className="text-xl my-4 text-center">Verificação de Pagamentos</h1>
 
       {isLoading && (
         <div className="flex justify-center items-center mt-32">

@@ -120,7 +120,7 @@ class RechargeResource(Resource):
 
         if payment.status != "to allow":
             return {
-                "message": "Esta recarga não pode ser editada uma vez que ela já foi aprovada/rejeitada (Espere site atualizar a lista de recargas)."
+                "message": "Esta recarga não pode ser editada uma vez que ela já foi aceita/rejeitada (Espere site atualizar a lista de recargas)."
             }, 400
 
         accept = data.get("accept")
@@ -138,7 +138,7 @@ class RechargeResource(Resource):
         db.session.commit()
 
         return {
-            "message": f"Recarga de R$ {payment.value} para {payment.user.name} foi {'ACEITADA' if accept else 'REJEITADA'} com sucesso!"
+            "message": f"Recarga de R$ {payment.value} para {payment.user.name} foi {'ACEITA' if accept else 'REJEITADA'} com sucesso!"
         }, 200
 
     @jwt_required()
