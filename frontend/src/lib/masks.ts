@@ -9,7 +9,7 @@ export const maskMoney = (money: string | number) =>
   }).format(typeof money === "string" ? Number(money.replace(/\D/g, "")) / 100 : money)
 
 export const sanitizeFMoney = (money: string) => {
-  return money.replace("R$", "").replace(".", ".").replace(",", ".").trim()
+  return money.replace("R$", "").replace(".", "").replace(",", ".").trim()
 }
 
 export const maskCPF = (input: string) => {
