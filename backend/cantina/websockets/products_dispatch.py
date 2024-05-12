@@ -3,7 +3,7 @@ from random import randint
 
 from flask import Flask
 from flask_jwt_extended import jwt_required
-from flask_socketio import Namespace # type: ignore
+from flask_socketio import Namespace  # type: ignore
 
 from cantina import socketio
 from cantina.models import ProductSale

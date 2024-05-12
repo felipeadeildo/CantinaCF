@@ -32,4 +32,6 @@ class DispatchResource(Resource):
             product_sale.dispatched_at = datetime.now()
             db.session.commit()
 
-        return {"message": f"{len(product_sales)} produtos despachados com sucesso."}, 200
+        return {
+            "message": f"{len(product_sales)} produtos despachados com sucesso."
+        }, 200

@@ -1,6 +1,5 @@
 import random
 import string
-from getpass import getpass
 
 from werkzeug.security import generate_password_hash
 
