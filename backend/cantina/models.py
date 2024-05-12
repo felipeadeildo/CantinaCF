@@ -1,10 +1,11 @@
 from datetime import datetime
 
-from cantina import db
-from cantina.utils import verify_password
 from flask import url_for
 from sqlalchemy import event
 from werkzeug.security import generate_password_hash
+
+from cantina import db
+from cantina.utils import verify_password
 
 
 class Role(db.Model):
@@ -15,7 +16,14 @@ class Role(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.now)
 
     def as_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+        data = {c.name: getattr(self, c.name) for c in self.__table__.columns}
+        data.update(
+            {
+                "added_at": self.added_at.strftime("%d/%m/%Y %H:%M"),
+                "updated_at": self.updated_at.strftime("%d/%m/%Y %H:%M"),
+            }
+        )
+        return data
 
 
 class User(db.Model):
@@ -189,6 +197,16 @@ class PaymentMethod(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.now)
     is_payroll = db.Column(db.Boolean, default=False)
     is_protected = db.Column(db.Boolean, default=False)
+
+    def as_dict(self):
+        data = {c.name: getattr(self, c.name) for c in self.__table__.columns}
+        data.update(
+            {
+                "added_at": self.added_at.strftime("%d/%m/%Y %H:%M"),
+                "updated_at": self.updated_at.strftime("%d/%m/%Y %H:%M"),
+            }
+        )
+        return data
 
 
 class Payment(db.Model):

@@ -6,6 +6,7 @@ from cantina.utils import allowed_file
 from flask import request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_restful import Resource
+from sqlalchemy.orm import aliased
 from werkzeug.utils import secure_filename
 
 from .. import db
@@ -139,3 +140,52 @@ class RechargeResource(Resource):
         return {
             "message": f"Recarga de R$ {payment.value} para {payment.user.name} foi {'ACEITADA' if accept else 'REJEITADA'} com sucesso!"
         }, 200
+
+    @jwt_required()
+    def get(self):
+        data = request.args
+
+        try:
+            page = int(data.get("page", 1))
+        except ValueError:
+            page = 1
+
+        query = Payment.query
+
+        if user_id := data.get("userId"):
+            query = query.filter_by(user_id=user_id)
+
+        if allowed_by_user_id := data.get("allowedByUserId"):
+            query = query.filter_by(allowed_by=allowed_by_user_id)
+
+        if payroll_receiver_id := data.get("payrollReceiverId"):
+            query = query.filter_by(payroll_receiver_id=payroll_receiver_id)
+
+        if payment_method_ids := data.getlist("paymentMethodIds[]"):
+            query = query.filter(Payment.payment_method_id.in_(payment_method_ids))
+
+        if role_ids := data.getlist("roleIds[]"):
+            user_aliases = aliased(User)
+            query = query.join(user_aliases, Payment.user_id == user_aliases.id).filter(
+                user_aliases.role_id.in_(role_ids)
+            )
+
+        if status := data.get("status"):
+            query = query.filter(Payment.status == status)
+
+        if data.get("onlyIsPayroll", "").lower() == "true":
+            query = query.filter(Payment.payroll_receiver_id.isnot(None))
+
+        if data.get("onlyIsPayPayroll", "").lower() == "true":
+            query = query.filter(Payment.is_paypayroll)
+
+        if unparsed_from := data.get("from"):
+            query = query.filter(Payment.added_at >= unparsed_from)
+
+        if unparsed_to := data.get("to"):
+            query = query.filter(Payment.added_at <= unparsed_to)
+
+        pagination = query.paginate(page=page, per_page=10, error_out=False)
+        data = [user.as_friendly_dict() for user in pagination.items]
+
+        return {"payments": data, "nextPage": page + 1 if pagination.has_next else None}
