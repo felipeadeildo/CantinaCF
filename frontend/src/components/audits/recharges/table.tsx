@@ -13,7 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { maskMoney } from "@/lib/masks"
-import { getAttachUrl } from "@/lib/utils"
+import { cn, getAttachUrl } from "@/lib/utils"
 import { ArrowDownCircle, FilePlus, FileText, Loader2 } from "lucide-react"
 import Link from "next/link"
 
@@ -26,12 +26,14 @@ import {
 
 export const RechargesTable = ({
   query: [query, setQuery],
+  isPayrollHistory = false,
 }: {
   query: TReachargesQuery
+  isPayrollHistory?: boolean
 }) => {
   const { data, hasNextPage, fetchNextPage, isFetchingNextPage } = usePayments(query)
   return (
-    <div className="container mx-auto my-4">
+    <div className={cn("my-4", !isPayrollHistory && "container mx-auto")}>
       <Table className="border-2">
         <TableCaption>Histórico de Pagamentos</TableCaption>
         <TableHeader>
@@ -39,8 +41,12 @@ export const RechargesTable = ({
             <TableHead className="text-center">ID</TableHead>
             <TableHead className="text-center">Usuário</TableHead>
             <TableHead className="text-center">Liberador / Rejeitador</TableHead>
-            <TableHead className="text-center">Forma de Pagamento</TableHead>
-            <TableHead className="text-center">Recebedor do Saldo Devedor</TableHead>
+            {!isPayrollHistory && (
+              <TableHead className="text-center">Forma de Pagamento</TableHead>
+            )}
+            {!isPayrollHistory && (
+              <TableHead className="text-center">Recebedor do Saldo Devedor</TableHead>
+            )}
             <TableHead className="text-center">Valor (R$)</TableHead>
             <TableHead className="text-center">Observação</TableHead>
             <TableHead className="text-center">Data e Hora</TableHead>
@@ -51,23 +57,23 @@ export const RechargesTable = ({
             page.payments.map((payment) => (
               <TableRow key={payment.id} className="text-center">
                 <TableCell className="text-xs">{payment.id}</TableCell>
-                <TableCell>
+                <TableCell className="p-0">
                   <Button variant="link" size="sm" className="h-2 p-0 my-0" asChild>
                     <Link
                       href={`/profile?userId=${payment.user.id}`}
-                      className="text-xs"
+                      className="text-xs text-wrap"
                       target="_blank"
                     >
                       {payment.user.name}
                     </Link>
                   </Button>
                 </TableCell>
-                <TableCell>
+                <TableCell className="p-0">
                   {payment.allowed_by_user ? (
                     <Button variant="link" size="sm" className="h-2 py-0 my-0" asChild>
                       <Link
                         href={`/profile?userId=${payment.allowed_by_user.id}`}
-                        className="text-xs"
+                        className="text-xs text-wrap"
                         target="_blank"
                       >
                         {payment.allowed_by_user.name}
@@ -77,39 +83,58 @@ export const RechargesTable = ({
                     "Não Liberado ainda"
                   )}
                 </TableCell>
-                <TableCell className="text-xs">
-                  {payment.proof_path ? (
-                    <Button variant="link" size="sm" className="h-2 py-0 my-0" asChild>
-                      <Link
-                        href={getAttachUrl(payment.proof_path)}
-                        className="text-xs"
-                        target="_blank"
-                      >
-                        <FileText size={16} className="mr-1" />
-                        {payment.payment_method}
-                      </Link>
-                    </Button>
-                  ) : (
-                    payment.payment_method
+                {!isPayrollHistory && (
+                  <TableCell className="text-xs">
+                    {payment.proof_path ? (
+                      <Button variant="link" size="sm" className="h-2 py-0 my-0" asChild>
+                        <Link
+                          href={getAttachUrl(payment.proof_path)}
+                          className="text-xs"
+                          target="_blank"
+                        >
+                          <FileText size={16} className="mr-1" />
+                          {payment.payment_method}
+                        </Link>
+                      </Button>
+                    ) : (
+                      payment.payment_method
+                    )}
+                  </TableCell>
+                )}
+
+                {!isPayrollHistory && (
+                  <TableCell>
+                    {payment.payroll_receiver ? (
+                      <Button variant="link" size="sm" className="h-2 py-0 my-0" asChild>
+                        <Link
+                          href={`/profile?userId=${payment.payroll_receiver.id}`}
+                          className="text-xs text-wrap"
+                          target="_blank"
+                        >
+                          {payment.payroll_receiver.name}
+                        </Link>
+                      </Button>
+                    ) : (
+                      <span className="text-xs text-red-500">
+                        Não é Folha de Pagamento
+                      </span>
+                    )}
+                  </TableCell>
+                )}
+                <TableCell
+                  className={cn(
+                    "text-xs",
+                    isPayrollHistory &&
+                      payment.payment_method.includes("Folha") &&
+                      "text-red-500 font-semibold",
+                    isPayrollHistory &&
+                      payment.is_paypayroll &&
+                      "text-green-500 font-semibold"
                   )}
+                >
+                  {maskMoney(payment.value)}
                 </TableCell>
-                <TableCell>
-                  {payment.payroll_receiver ? (
-                    <Button variant="link" size="sm" className="h-2 py-0 my-0" asChild>
-                      <Link
-                        href={`/profile?userId=${payment.payroll_receiver.id}`}
-                        className="text-xs"
-                        target="_blank"
-                      >
-                        {payment.payroll_receiver.name}
-                      </Link>
-                    </Button>
-                  ) : (
-                    <span className="text-xs text-red-500">Não é Folha de Pagamento</span>
-                  )}
-                </TableCell>
-                <TableCell className="text-xs">{maskMoney(payment.value)}</TableCell>
-                <TableCell className="w-12 text-xs text-wrap">
+                <TableCell className="w-12 text-xs text-wrap ">
                   {payment.observations || "-"}
                 </TableCell>
 

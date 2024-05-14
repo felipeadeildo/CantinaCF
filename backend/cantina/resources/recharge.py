@@ -1,14 +1,15 @@
 from datetime import datetime
 
-from cantina.models import Affiliation, Payment, PaymentMethod, User
-from cantina.settings import UPLOAD_FOLDER
-from cantina.utils import allowed_file
 from flask import request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_restful import Resource
+from sqlalchemy import and_, or_
 from sqlalchemy.orm import aliased
 from werkzeug.utils import secure_filename
 
+from cantina.models import Affiliation, Payment, PaymentMethod, User
+from cantina.settings import UPLOAD_FOLDER
+from cantina.utils import allowed_file
 from .. import db
 
 
@@ -152,38 +153,60 @@ class RechargeResource(Resource):
 
         query = Payment.query
 
-        if user_id := data.get("userId"):
-            query = query.filter_by(user_id=user_id)
-
-        if allowed_by_user_id := data.get("allowedByUserId"):
-            query = query.filter_by(allowed_by=allowed_by_user_id)
-
-        if payroll_receiver_id := data.get("payrollReceiverId"):
-            query = query.filter_by(payroll_receiver_id=payroll_receiver_id)
-
-        if payment_method_ids := data.getlist("paymentMethodIds[]"):
-            query = query.filter(Payment.payment_method_id.in_(payment_method_ids))
-
-        if role_ids := data.getlist("roleIds[]"):
-            user_aliases = aliased(User)
-            query = query.join(user_aliases, Payment.user_id == user_aliases.id).filter(
-                user_aliases.role_id.in_(role_ids)
+        if data.get("isPayrollHistory", "").lower() == "true":
+            payroll_receiver_id = data.get("payrollReceiverId", "")
+            query = query.filter(
+                or_(
+                    and_(
+                        Payment.payroll_receiver_id == payroll_receiver_id,
+                        Payment.payment_method_id == 5,
+                    ),
+                    and_(Payment.is_paypayroll, Payment.user_id == payroll_receiver_id),
+                )
             )
 
-        if status := data.get("status"):
-            query = query.filter(Payment.status == status)
+            if user_id := data.get("userId"):
+                query = query.filter_by(user_id=user_id)
 
-        if data.get("onlyIsPayroll", "").lower() == "true":
-            query = query.filter(Payment.payroll_receiver_id.isnot(None))
+        else:
+            if user_id := data.get("userId"):
+                query = query.filter_by(user_id=user_id)
 
-        if data.get("onlyIsPayPayroll", "").lower() == "true":
-            query = query.filter(Payment.is_paypayroll)
+            if allowed_by_user_id := data.get("allowedByUserId"):
+                query = query.filter_by(allowed_by=allowed_by_user_id)
+
+            if payroll_receiver_id := data.get("payrollReceiverId"):
+                query = query.filter_by(payroll_receiver_id=payroll_receiver_id)
+
+            if payment_method_ids := data.getlist("paymentMethodIds[]"):
+                query = query.filter(Payment.payment_method_id.in_(payment_method_ids))
+
+            if role_ids := data.getlist("roleIds[]"):
+                user_aliases = aliased(User)
+                query = query.join(
+                    user_aliases, Payment.user_id == user_aliases.id
+                ).filter(user_aliases.role_id.in_(role_ids))
+
+            if status := data.get("status"):
+                query = query.filter(Payment.status == status)
+
+            if data.get("onlyIsPayroll", "").lower() == "true":
+                query = query.filter(Payment.payroll_receiver_id.isnot(None))
+
+            if data.get("onlyIsPayPayroll", "").lower() == "true":
+                query = query.filter(Payment.is_paypayroll)
 
         if unparsed_from := data.get("from"):
-            query = query.filter(Payment.added_at >= unparsed_from)
+            parsed_from = datetime.strptime(
+                unparsed_from, "%Y-%m-%dT%H:%M:%S.%fZ"
+            ).strftime("%Y-%m-%d")
+            query = query.filter(Payment.added_at >= parsed_from)
 
         if unparsed_to := data.get("to"):
-            query = query.filter(Payment.added_at <= unparsed_to)
+            parsed_to = datetime.strptime(
+                unparsed_to, "%Y-%m-%dT%H:%M:%S.%fZ"
+            ).strftime("%Y-%m-%d")
+            query = query.filter(Payment.added_at <= parsed_to)
 
         pagination = query.paginate(page=page, per_page=10, error_out=False)
         data = [user.as_friendly_dict() for user in pagination.items]
