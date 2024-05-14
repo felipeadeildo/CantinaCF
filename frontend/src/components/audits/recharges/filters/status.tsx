@@ -7,12 +7,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { TReachargesQuery } from "@/types/queries"
+import { TRechargesQuery } from "@/types/queries"
 
 export const StatusFilter = ({
   query: [query, setQuery],
 }: {
-  query: TReachargesQuery
+  query: TRechargesQuery
 }) => {
   return (
     <Select onValueChange={(value) => setQuery({ ...query, status: value })}>

@@ -1,5 +1,5 @@
 import { usePayments } from "@/hooks/payments"
-import { TReachargesQuery } from "@/types/queries"
+import { TRechargesQuery } from "@/types/queries"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -28,7 +28,7 @@ export const RechargesTable = ({
   query: [query, setQuery],
   isPayrollHistory = false,
 }: {
-  query: TReachargesQuery
+  query: TRechargesQuery
   isPayrollHistory?: boolean
 }) => {
   const { data, hasNextPage, fetchNextPage, isFetchingNextPage } = usePayments(query)

@@ -1,12 +1,12 @@
 import { MultiSelectPaymentMethods } from "@/components/dropdown-menu/payment-methods"
-import { TReachargesQuery } from "@/types/queries"
+import { TRechargesQuery } from "@/types/queries"
 import { TPaymentMethod } from "@/types/recharge"
 import { useCallback } from "react"
 
 export const PaymentMethodsFilter = ({
   query: [query, setQuery],
 }: {
-  query: TReachargesQuery
+  query: TRechargesQuery
 }) => {
   const togglePaymentMethod = useCallback(
     (paymentMethod: TPaymentMethod) => {

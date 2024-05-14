@@ -2,14 +2,14 @@ import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
-import { TReachargesQuery } from "@/types/queries"
+import { TRechargesQuery, TSalesQuery } from "@/types/queries"
 import { format } from "date-fns"
 import { CalendarIcon } from "lucide-react"
 
 export const IntervalFilter = ({
   query: [query, setQuery],
 }: {
-  query: TReachargesQuery
+  query: TRechargesQuery | TSalesQuery
 }) => {
   return (
     <div className={cn("grid gap-2")}>

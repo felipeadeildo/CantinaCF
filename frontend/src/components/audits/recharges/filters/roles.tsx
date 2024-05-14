@@ -1,13 +1,9 @@
 import { MultiSelectRoles } from "@/components/dropdown-menu/roles"
-import { TReachargesQuery } from "@/types/queries"
+import { TRechargesQuery } from "@/types/queries"
 import { TRole } from "@/types/user"
 import { useCallback } from "react"
 
-export const RolesFilter = ({
-  query: [query, setQuery],
-}: {
-  query: TReachargesQuery
-}) => {
+export const RolesFilter = ({ query: [query, setQuery] }: { query: TRechargesQuery }) => {
   const toggleRole = useCallback(
     (role: TRole) => {
       setQuery({

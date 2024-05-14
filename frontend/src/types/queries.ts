@@ -11,10 +11,19 @@ export type TBRechargesQuery = {
   onlyIsPayPayroll?: boolean
   isPayrollHistory?: boolean
   from?: Date
-  to?: Date,
+  to?: Date
 }
 
-export type TReachargesQuery = [
+export type TRechargesQuery = [
   TBRechargesQuery,
   Dispatch<React.SetStateAction<TBRechargesQuery>>
 ]
+
+export type TBSalesQuery = {
+  soldToUserId?: number
+  productId?: number
+  from?: Date
+  to?: Date
+}
+
+export type TSalesQuery = [TBSalesQuery, Dispatch<React.SetStateAction<TBSalesQuery>>]

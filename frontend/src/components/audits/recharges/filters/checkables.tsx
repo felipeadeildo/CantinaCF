@@ -1,10 +1,10 @@
 import { Checkbox } from "@/components/ui/checkbox"
-import { TReachargesQuery } from "@/types/queries"
+import { TRechargesQuery } from "@/types/queries"
 
 export const CheckablesFilter = ({
   query: [query, setQuery],
 }: {
-  query: TReachargesQuery
+  query: TRechargesQuery
 }) => {
   return (
     <div className="flex flex-col gap-0.5 justify-center pl-2 md:col-start-2 sm:col-start-2">

@@ -28,7 +28,7 @@ const Profile = () => {
   if (isError) {
     return (
       <div className="flex justify-center items-center text-center gap-2 text-xl mt-64">
-        Houve um erro ao carregar o usuário em questão.
+        {error.message}
       </div>
     )
   }
