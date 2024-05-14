@@ -90,6 +90,7 @@ def create_app(settings_map=settings_map):
         ("DispatchResource", "/dispatch"),
         ("PaymentMethodsResource", "/payment_methods"),
         ("RoleResource", "/role"),
+        ("PayrollResource", "/payroll"),
     ]
     from cantina import resources
 
