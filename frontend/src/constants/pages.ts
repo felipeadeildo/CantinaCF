@@ -7,7 +7,7 @@ export const SIDEBAR_PAGES = [
   { name: "Produtos", path: "/admin/products", category: "Administração" },
   { name: "Despachar Produtos", path: "/cantina/dispatch", category: "Administração" },
   {
-    name: "Pagamentos",
+    name: "Liberar Recargas",
     path: "/admin/payments",
     category: "Administração",
   },
