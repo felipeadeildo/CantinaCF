@@ -1,6 +1,6 @@
 "use client"
 
-import { RechargesFilters } from "@/components/audits/recharges/filters"
+import { QueryGenerator } from "@/components/audits/recharges/query-generator"
 import { RechargesTable } from "@/components/audits/recharges/table"
 import { LoginRequired } from "@/components/login-required"
 import { TBRechargesQuery } from "@/types/queries"
@@ -11,7 +11,7 @@ const Recharges = () => {
   return (
     <>
       <h1 className="text-xl my-2 text-center">Histórico de Recargas</h1>
-      <RechargesFilters query={query} />
+      <QueryGenerator query={query} />
       <RechargesTable query={query} />
     </>
   )

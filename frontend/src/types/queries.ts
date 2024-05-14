@@ -9,6 +9,7 @@ export type TBRechargesQuery = {
   status?: string
   onlyIsPayroll?: boolean
   onlyIsPayPayroll?: boolean
+  isPayrollHistory?: boolean
   from?: Date
   to?: Date,
 }
