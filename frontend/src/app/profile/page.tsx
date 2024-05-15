@@ -2,12 +2,10 @@
 
 import { LoginRequired } from "@/components/login-required"
 import { UserCard } from "@/components/profile/user-card"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Button } from "@/components/ui/button"
+import { UserNotFound } from "@/components/profile/user-not-found"
 import { useAuth } from "@/contexts/auth"
 import { useUser } from "@/hooks/users"
 import { Loader } from "lucide-react"
-import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 
 const Profile = () => {
@@ -33,18 +31,7 @@ const Profile = () => {
     )
   }
 
-  return userData ? (
-    <UserCard user={userData} />
-  ) : (
-    <Alert variant="destructive" className="mt-64">
-      <AlertDescription className="flex flex-col items-center gap-2 justify-center">
-        Usuário não encontrado.
-        <Button variant="link" asChild>
-          <Link href={"/admin/users"}>Lista de Usuários</Link>
-        </Button>
-      </AlertDescription>
-    </Alert>
-  )
+  return userData ? <UserCard user={userData} /> : <UserNotFound />
 }
 
 const ProtectedProfile = () => {

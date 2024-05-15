@@ -15,8 +15,8 @@ export const EditUserDialog = ({ user, children }: Props) => {
     <Dialog>
       <DialogTrigger asChild>
         {children || (
-          <Button variant="secondary">
-            <Pen className="mr-1 h-5 w-5" /> Editar
+          <Button variant="secondary" size="sm" className="text-xs">
+            <Pen className="mr-1 size-4" /> Editar
           </Button>
         )}
       </DialogTrigger>

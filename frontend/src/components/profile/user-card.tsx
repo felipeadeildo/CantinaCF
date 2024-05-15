@@ -20,20 +20,21 @@ export const UserCard = ({ user }: Props) => {
   const { user: currentUser } = useAuth()
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="text-center">{user.name}</CardTitle>
+      <CardHeader className="py-1 px-0.5">
+        <CardTitle className="flex justify-center gap-1 items-center text-lg">
+          <span>{user.name}</span>
+          {currentUser && (isUserAdmin(currentUser) || currentUser.id === user.id) && (
+            <EditUserDialog user={user} />
+          )}
+        </CardTitle>
         <CardDescription className="text-center">
           Matrícula: {user.matricula || "-"} | Username: {user.username} | ID: {user.id}
         </CardDescription>
       </CardHeader>
-      <CardContent className="grid gap-2 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
+
+      <CardContent className="py-1">
         <UserInfos user={user} />
       </CardContent>
-      <CardFooter className="justify-end gap-2">
-        {currentUser && (isUserAdmin(currentUser) || currentUser.id === user.id) && (
-          <EditUserDialog user={user} />
-        )}
-      </CardFooter>
     </Card>
   )
 }

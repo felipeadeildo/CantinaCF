@@ -10,6 +10,7 @@ import {
   School,
   UserPlus,
 } from "lucide-react"
+import { Badge } from "../ui/badge"
 
 type Props = {
   user: TUser
@@ -17,52 +18,52 @@ type Props = {
 
 export const UserInfos = ({ user }: Props) => {
   return (
-    <>
+    <div className="text-sm flex flex-wrap gap-3 items-center justify-center">
       {user.email && (
-        <div className="flex gap-1 items-center">
+        <Badge className="flex gap-1 items-center" variant="outline">
           <Mail size={18} /> <span className="font-semibold">Email:</span>
           <span className="text-xs">{user.email}</span>
-        </div>
+        </Badge>
       )}
 
       {user.cpf && (
-        <div className="flex gap-1">
+        <Badge className="flex gap-1 items-center" variant="outline">
           <Fingerprint size={18} /> <span className="font-semibold">CPF:</span>
           {maskCPF(user.cpf)}
-        </div>
+        </Badge>
       )}
 
-      <div className="flex gap-1">
+      <Badge className="flex gap-1 items-center" variant="outline">
         <DollarSign size={18} /> <span className="font-semibold">Saldo:</span>
         <span className="text-green-500">{toReal(user.balance || 0)}</span>
-      </div>
+      </Badge>
 
       {user.balance_payroll > 0 && (
-        <div className="flex gap-1">
+        <Badge className="flex gap-1 items-center" variant="outline">
           <Banknote />
           <span className="font-semibold">Saldo Devedor:</span>
           <span className="text-red-500">{toReal(user.balance_payroll || 0)}</span>
-        </div>
+        </Badge>
       )}
 
       {user.serie && (
-        <div className="flex gap-1">
+        <Badge className="flex gap-1 items-center" variant="outline">
           <School size={18} /> <span className="font-semibold">Série (Turma):</span>
           {user.serie} ({user.turm?.toUpperCase()})
-        </div>
+        </Badge>
       )}
 
       {user.telephone && (
-        <div className="flex gap-1">
+        <Badge className="flex gap-1 items-center" variant="outline">
           <Phone size={18} /> <span className="font-semibold">Telefone:</span>
           {maskPhone(user.telephone)}
-        </div>
+        </Badge>
       )}
 
-      <div className="flex gap-1">
+      <Badge className="flex gap-1 items-center" variant="outline">
         <UserPlus size={18} /> <span className="font-semibold">Data de Cadastro:</span>
         {user.added_at}
-      </div>
-    </>
+      </Badge>
+    </div>
   )
 }
