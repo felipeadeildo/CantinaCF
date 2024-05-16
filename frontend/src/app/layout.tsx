@@ -5,6 +5,7 @@ import { AuthProvider } from "@/contexts/auth"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 
+import { ChartJsProvider } from "@/contexts/chartjs"
 import { Suspense } from "react"
 import "./globals.css"
 import Providers from "./providers"
@@ -34,13 +35,15 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <AuthProvider>
-              <NavBar />
-              <Suspense fallback={null}>
-                <Toaster />
-              </Suspense>
-              {children}
-            </AuthProvider>
+            <ChartJsProvider>
+              <AuthProvider>
+                <NavBar />
+                <Suspense fallback={null}>
+                  <Toaster />
+                </Suspense>
+                {children}
+              </AuthProvider>
+            </ChartJsProvider>
           </ThemeProvider>
         </Providers>
       </body>
