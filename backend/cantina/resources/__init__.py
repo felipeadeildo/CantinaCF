@@ -6,6 +6,7 @@ from .payroll import PayrollResource
 from .product_sales import ProductSalesResource
 from .recharge import RechargeResource
 from .role import RoleResource
+from .stats import StatsResource
 from .user import UserResource, UsersResource
 
 __all__ = [
@@ -17,6 +18,7 @@ __all__ = [
     "RechargeResource",
     "PayrollResource",
     "LoginResource",
+    "StatsResource",
     "UsersResource",
     "CartResource",
     "RoleResource",
