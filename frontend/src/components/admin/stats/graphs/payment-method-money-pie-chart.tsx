@@ -61,6 +61,10 @@ export const PaymentMethodMoneyPieChart = ({ isLoading, data, colorScale }: Prop
           <Pie options={chartOptions} data={chartData} />
         </div>
       )}
+
+      <h1 className="text-center text-xs mt-1">
+        Total: {maskMoney(data?.reduce((a, b) => a + b.value, 0) || 0)}
+      </h1>
     </div>
   )
 }

@@ -9,7 +9,7 @@ type Props = {
 }
 
 const createChartData = (data: ProductSaleStats) => ({
-  labels: data.map((item) => item.product),
+  labels: data.reverse().map((item) => item.product),
   datasets: [
     {
       label: "Quantidade vendida",

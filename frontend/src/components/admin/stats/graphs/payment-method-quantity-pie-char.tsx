@@ -59,6 +59,10 @@ export const PaymentMethodQuantityPieChart = ({ isLoading, data, colorScale }: P
           <Pie options={chartOptions} data={chartData} />
         </div>
       )}
+
+      <h1 className="text-center text-xs mt-1">
+        Total: {data?.reduce((a, b) => a + b.value, 0)} recargas
+      </h1>
     </div>
   )
 }

@@ -55,16 +55,16 @@ class StatsResource(Resource):
             for total_sales, product in product_sales
         ]
 
-    def __get_payment_method_quantity(
-        self, query_string: MultiDict[str, str], data: dict
-    ):
+    def __get_payment_method_stats(self, query_string: MultiDict[str, str], data: dict):
         counter = func.count(Payment.id).label("total_payments")
+        summer = func.sum(Payment.value).label("total_value")
 
         query = self.__filter_interval(
             query_string,
             db.session.query(
                 PaymentMethod,
                 counter,
+                summer,
             ).join(Payment, Payment.payment_method_id == PaymentMethod.id),
             Payment,
         )
@@ -78,41 +78,22 @@ class StatsResource(Resource):
 
         results = query.all()
 
-        data["paymentMethodQuantity"] = [
-            {
-                "paymentMethod": payment_method.name,
-                "value": total_payments,
-            }
-            for payment_method, total_payments in results
-        ]
+        data["paymentMethodQuantity"] = []
+        data["paymentMethodMoney"] = []
 
-    def __get_payment_method_money(self, query_string: MultiDict[str, str], data: dict):
-        total_value = func.sum(Payment.value).label("total_value")
-
-        query = self.__filter_interval(
-            query_string,
-            db.session.query(PaymentMethod, total_value).join(
-                Payment, Payment.payment_method_id == PaymentMethod.id
-            ),
-            Payment,
-        )
-
-        query = query.filter(not_(PaymentMethod.is_protected)).group_by(
-            PaymentMethod.id
-        )
-
-        if user_id := query_string.get("userId"):
-            query = query.filter(Payment.user_id == user_id)
-
-        results = query.all()
-
-        data["paymentMethodMoney"] = [
-            {
-                "paymentMethod": payment_method.name,
-                "value": float(total_value) if total_value is not None else 0,
-            }
-            for payment_method, total_value in results
-        ]
+        for payment_method, total_payments, total_value in results:
+            data["paymentMethodQuantity"].append(
+                {
+                    "paymentMethod": payment_method.name,
+                    "value": total_payments,
+                }
+            )
+            data["paymentMethodMoney"].append(
+                {
+                    "paymentMethod": payment_method.name,
+                    "value": float(total_value) if total_value is not None else 0,
+                }
+            )
 
     @jwt_required()
     def get(self):
@@ -122,8 +103,7 @@ class StatsResource(Resource):
 
         stats_builders = [
             self.__get_products_most_selling,
-            self.__get_payment_method_quantity,
-            self.__get_payment_method_money,
+            self.__get_payment_method_stats,
         ]
 
         for stats_builder in stats_builders:
