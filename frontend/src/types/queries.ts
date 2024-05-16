@@ -27,3 +27,11 @@ export type TBSalesQuery = {
 }
 
 export type TSalesQuery = [TBSalesQuery, Dispatch<React.SetStateAction<TBSalesQuery>>]
+
+export type TBStatsQuery = {
+  userId?: number
+  to?: Date
+  from?: Date
+}
+
+export type TStatsQuery = [TBStatsQuery, Dispatch<React.SetStateAction<TBStatsQuery>>]
