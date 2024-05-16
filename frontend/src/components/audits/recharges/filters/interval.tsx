@@ -5,12 +5,14 @@ import { cn } from "@/lib/utils"
 import { TRechargesQuery, TSalesQuery } from "@/types/queries"
 import { format } from "date-fns"
 import { CalendarIcon } from "lucide-react"
+import { useMediaQuery } from "usehooks-ts"
 
 export const IntervalFilter = ({
   query: [query, setQuery],
 }: {
   query: TRechargesQuery | TSalesQuery
 }) => {
+  const isMobile = useMediaQuery("(max-width: 768px)")
   return (
     <div className={cn("grid gap-2")}>
       <Popover>
@@ -46,7 +48,7 @@ export const IntervalFilter = ({
             onSelect={(dateRange) =>
               setQuery({ ...query, from: dateRange?.from, to: dateRange?.to })
             }
-            numberOfMonths={2}
+            numberOfMonths={isMobile ? 1 : 2}
           />
         </PopoverContent>
       </Popover>
