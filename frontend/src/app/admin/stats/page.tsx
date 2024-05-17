@@ -31,7 +31,7 @@ const Stats = () => {
 
       <PaymentMethodPies isLoading={isLoading} data={data} />
 
-      <AffiliatedHistory query={[query, setQuery]} />
+      {query.userId && <AffiliatedHistory query={[query, setQuery]} />}
 
       <QueryGeneratorModal query={[query, setQuery]} user={user} setUser={setUser} />
     </div>

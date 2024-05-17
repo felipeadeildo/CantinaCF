@@ -1,3 +1,4 @@
+from .affiliates import AffiliatesResource
 from .auth import LoginResource
 from .cantina import CartResource, ProductsResource, PurchaseResource
 from .dispatch import DispatchResource
@@ -12,6 +13,7 @@ from .user import UserResource, UsersResource
 __all__ = [
     "PaymentMethodsResource",
     "ProductSalesResource",
+    "AffiliatesResource",
     "DispatchResource",
     "ProductsResource",
     "PurchaseResource",

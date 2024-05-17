@@ -24,6 +24,7 @@ export const PaymentRequest = ({ payment }: { payment: TPaymentRequest }) => {
         <CardDescription className="flex flex-wrap gap-2 justify-center">
           <Badge variant="outline">Username: {user.username}</Badge>
           <Badge variant="outline">Saldo: {toReal(user.balance)}</Badge>
+          <Badge variant="outline">Saldo Devedor: {toReal(user.balance_payroll)}</Badge>
           <Badge variant="outline">Data: {payment.added_at}</Badge>
         </CardDescription>
       </CardHeader>
