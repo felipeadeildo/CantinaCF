@@ -19,6 +19,7 @@ export const SIDEBAR_PAGES = [
   { name: "Histórico de Recargas", path: "/audits/recharges", category: "Auditorias" },
   { name: "Histórico de Compras", path: "/audits/sales", category: "Auditorias" },
   { name: "Estatísticas", path: "/admin/stats", category: "Administração" },
+  { name: "Afiliados", path: "/affiliations", category: "Páginas" },
 ]
 
 export const SIDEBAR_PAGES_CATEGORIES = ["Páginas", "Administração", "Auditorias"]
