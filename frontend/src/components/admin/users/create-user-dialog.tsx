@@ -1,3 +1,4 @@
+import { SimpleTooltip } from "@/components/simple-tooltip"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -7,32 +8,19 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
 import { CirclePlus } from "lucide-react"
 import CreateUserForm from "./create-user-form"
 
 const CreateUserDialog = () => {
   return (
     <Dialog>
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <DialogTrigger asChild>
-              <Button className="mt-4 fixed right-5 bottom-5" size="icon">
-                <CirclePlus />
-              </Button>
-            </DialogTrigger>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Criar Novo Usuário</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+      <SimpleTooltip message="Criar novo usuário.">
+        <DialogTrigger asChild>
+          <Button className="mt-4 fixed right-5 bottom-5" size="icon">
+            <CirclePlus />
+          </Button>
+        </DialogTrigger>
+      </SimpleTooltip>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Criar Usuário</DialogTitle>

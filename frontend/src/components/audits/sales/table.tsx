@@ -1,3 +1,4 @@
+import { SimpleTooltip } from "@/components/simple-tooltip"
 import { Button } from "@/components/ui/button"
 import {
   Table,
@@ -8,11 +9,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Tooltip, TooltipTrigger } from "@/components/ui/tooltip"
 import { useProductSales } from "@/hooks/product-sales"
 import { maskMoney } from "@/lib/masks"
 import { TSalesQuery } from "@/types/queries"
-import { TooltipContent, TooltipProvider } from "@radix-ui/react-tooltip"
 import { ArrowDownCircle, FilePlus, Loader2 } from "lucide-react"
 import Link from "next/link"
 
@@ -94,19 +93,12 @@ export const ProductSalesTable = ({
   </TableFooter> */}
       </Table>
 
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button variant="secondary" className="fixed bottom-4 right-4">
-              <FilePlus className="mr-1 h-5 w-5" />
-              Exportar
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Exportar histórico de vendas para o Excel</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+      <SimpleTooltip message="Exportar histórico de vendas para Excel">
+        <Button variant="secondary" className="fixed bottom-4 right-4">
+          <FilePlus className="mr-1 h-5 w-5" />
+          Exportar
+        </Button>
+      </SimpleTooltip>
     </div>
   )
 }

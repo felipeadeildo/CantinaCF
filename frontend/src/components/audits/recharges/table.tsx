@@ -17,12 +17,7 @@ import { cn, getAttachUrl } from "@/lib/utils"
 import { ArrowDownCircle, FilePlus, FileText, Loader2 } from "lucide-react"
 import Link from "next/link"
 
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
+import { SimpleTooltip } from "@/components/simple-tooltip"
 
 export const RechargesTable = ({
   query: [query, setQuery],
@@ -180,19 +175,12 @@ export const RechargesTable = ({
       </TableFooter> */}
       </Table>
 
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button variant="secondary" className="fixed bottom-4 right-4">
-              <FilePlus className="mr-1 h-5 w-5" />
-              Exportar
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Exportar histórico de pagamentos para o Excel</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+      <SimpleTooltip message="Exportar histórico para Excel">
+        <Button variant="secondary" className="fixed bottom-4 right-4">
+          <FilePlus className="mr-1 h-5 w-5" />
+          Exportar
+        </Button>
+      </SimpleTooltip>
     </div>
   )
 }

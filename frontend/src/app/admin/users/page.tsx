@@ -13,18 +13,12 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
-
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 import CreateUserDialog from "@/components/admin/users/create-user-dialog"
 import { LoginRequired } from "@/components/login-required"
 import { EditUserDialog } from "@/components/profile/edit-user-dialog"
+import { SimpleTooltip } from "@/components/simple-tooltip"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { maskMoney } from "@/lib/masks"
@@ -129,35 +123,21 @@ const Users = () => {
                     </div>
                   </TableCell>
                   <TableCell className="flex justify-center gap-1">
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <EditUserDialog user={user}>
-                            <Button variant="outline" size="sm">
-                              <Pencil size={16} />
-                            </Button>
-                          </EditUserDialog>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Editar</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
+                    <SimpleTooltip message="Editar">
+                      <EditUserDialog user={user}>
+                        <Button variant="outline" size="sm">
+                          <Pencil size={16} />
+                        </Button>
+                      </EditUserDialog>
+                    </SimpleTooltip>
 
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button variant="secondary" size="sm">
-                            <Link href={`/profile?userId=${user.id}`}>
-                              <User size={16} />
-                            </Link>
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Perfil</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
+                    <SimpleTooltip message="Perfil">
+                      <Button variant="secondary" size="sm">
+                        <Link href={`/profile?userId=${user.id}`}>
+                          <User size={16} />
+                        </Link>
+                      </Button>
+                    </SimpleTooltip>
                   </TableCell>
                 </TableRow>
               ))
