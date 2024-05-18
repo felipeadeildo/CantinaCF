@@ -19,7 +19,7 @@ export const useWsPayments = () => {
 
   useEffect(() => {
     setIsLoading(true)
-    const socket: Socket = io("http://localhost:5000/payments", {
+    const socket: Socket = io("/payments", {
       transports: ["websocket"],
       query: {
         jwt: token,
