@@ -33,6 +33,12 @@ const chartOptions = {
     },
     y: {
       beginAtZero: true,
+      stepSize: 1,
+      ticks: {
+        callback: (value: any) => {
+          if (Number.isInteger(value)) return value
+        },
+      },
     },
   },
   plugins: {

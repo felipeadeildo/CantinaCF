@@ -5,7 +5,8 @@ export type PaymentMethodStats = {
 
 export type ProductSaleStats = {
   product: string
-  value: number
+  value: number,
+  spent: number
 }[]
 
 export type TStats = {

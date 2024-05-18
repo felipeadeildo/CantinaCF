@@ -18,7 +18,7 @@ const Stats = () => {
   const { data, isLoading, isError, error } = useStats(query)
 
   return (
-    <div className="divide-y-2 space-y-3 divide-primary">
+    <div className="divide-y-2 space-y-3 divide-primary mb-10">
       {user && <UserCard user={user} />}
 
       {isError && (

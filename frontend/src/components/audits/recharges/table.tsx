@@ -31,7 +31,8 @@ export const RechargesTable = ({
   query: TRechargesQuery
   isPayrollHistory?: boolean
 }) => {
-  const { data, hasNextPage, fetchNextPage, isFetchingNextPage } = usePayments(query)
+  const { data, hasNextPage, fetchNextPage, isFetchingNextPage, isLoading } =
+    usePayments(query)
   return (
     <div className={cn("my-4", !isPayrollHistory && "container mx-auto")}>
       <Table className="border-2">
@@ -53,6 +54,14 @@ export const RechargesTable = ({
           </TableRow>
         </TableHeader>
         <TableBody>
+          {isLoading && (
+            <TableRow>
+              <TableCell className="flex gap-2 items-center justify-center">
+                <Loader2 className="animate-spin" />
+                Carregando...
+              </TableCell>
+            </TableRow>
+          )}
           {data?.pages.map((page) =>
             page.payments.map((payment) => (
               <TableRow key={payment.id} className="text-center">

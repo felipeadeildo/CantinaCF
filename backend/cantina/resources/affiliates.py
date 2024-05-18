@@ -1,10 +1,11 @@
 from datetime import datetime
 
-from cantina.models import Payment, User
 from flask import request
 from flask_jwt_extended import jwt_required
 from flask_restful import Resource
 from werkzeug.datastructures import MultiDict
+
+from cantina.models import Payment, User
 
 from .. import db
 
@@ -27,7 +28,7 @@ class AffiliatesResource(Resource):
 
         return query
 
-    # @jwt_required()
+    @jwt_required()
     def get(self):
         query_string = request.args
 
@@ -39,11 +40,9 @@ class AffiliatesResource(Resource):
             db.session.query(User)
             .join(Payment, Payment.user_id == User.id)
             .distinct(Payment.user_id)
-            .where(Payment.payroll_receiver_id == user_id)
+            .filter(Payment.payroll_receiver_id == user_id)
         )
         query = self.__filter_interval(query_string, query, Payment)
-        
-        print(query.statement)
 
         results = query.all()
 

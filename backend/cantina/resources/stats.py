@@ -32,8 +32,9 @@ class StatsResource(Resource):
         self, query_string: MultiDict[str, str], data: dict
     ):
         counter = func.count(ProductSale.id).label("total_sales")
+        summer = func.sum(ProductSale.value).label("total_spent")
         query = self.__filter_interval(
-            query_string, db.session.query(counter, Product), ProductSale
+            query_string, db.session.query(counter, summer, Product), ProductSale
         )
 
         if user_id := query_string.get("userId"):
@@ -51,8 +52,9 @@ class StatsResource(Resource):
             {
                 "product": product.name,
                 "value": total_sales,
+                "spent": float(total_spent),
             }
-            for total_sales, product in product_sales
+            for total_sales, total_spent, product in product_sales
         ]
 
     def __get_payment_method_stats(self, query_string: MultiDict[str, str], data: dict):
