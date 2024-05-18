@@ -128,13 +128,17 @@ class RechargeResource(Resource):
         if not isinstance(accept, bool):
             return {"message": "Aceitar recarga inválido."}, 400
 
-        payment.status = "accepted" if accept else "rejected"
+        if accept:
+            payment.status = "accepted"
+            if payment.payroll_receiver:
+                payment.payroll_receiver.balance_payroll += payment.value
+
+            payment.user.balance += payment.value
+
+        else:
+            payment.status = "rejected"
+
         payment.allowed_by = requester_user_id
-
-        if payment.payroll_receiver:
-            payment.payroll_receiver.balance_payroll += payment.value
-
-        payment.user.balance += payment.value
 
         db.session.commit()
 
