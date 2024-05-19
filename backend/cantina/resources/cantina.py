@@ -1,5 +1,6 @@
 import locale
 from functools import reduce
+
 from cantina.models import Cart, Product, ProductSale, StockHistory, User
 from cantina.utils import verify_password
 from flask import request
@@ -239,12 +240,12 @@ class PurchaseResource(Resource):
             lambda acc, cart: acc + cart.product.value * cart.quantity, cart_list, 0
         )
 
-        if total_price > requester_user.balance:
+        if total_price > target_user.balance:
             return {
                 "message": f"{target_user.username} tem somente R$ {target_user.balance:.2f} de saldo (insuficiente)."
             }, 400
 
-        requester_user.balance -= total_price
+        target_user.balance -= total_price
 
         sales = []
         for cart_item in cart_list:
@@ -267,6 +268,6 @@ class PurchaseResource(Resource):
             "message": (
                 "Tudo Certo, pode ir lá pegar!"
                 if not is_admin_purchase
-                else f"Tudo certo, {requester_user.username}, pode mandar o cliente {target_user.username} pegar o que comprou"
+                else f"Tudo certo, {requester_user.username}, pode mandar o cliente {target_user.username} pegar o que comprou!"
             )
         }, 200
