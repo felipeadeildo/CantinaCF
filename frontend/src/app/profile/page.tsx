@@ -1,14 +1,13 @@
 "use client"
 
+import { Stats } from "@/components/admin/stats/stats"
 import { LoginRequired } from "@/components/login-required"
-import { UserCard } from "@/components/profile/user-card"
 import { UserHistorys } from "@/components/profile/user-historys"
 import { UserNotFound } from "@/components/profile/user-not-found"
 import { useAuth } from "@/contexts/auth"
 import { useUser } from "@/hooks/users"
 import { Loader } from "lucide-react"
 import { useSearchParams } from "next/navigation"
-import { Stats } from "../admin/stats/page"
 
 const Profile = () => {
   const searchParams = useSearchParams()
