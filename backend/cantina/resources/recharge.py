@@ -212,6 +212,8 @@ class RechargeResource(Resource):
             ).strftime("%Y-%m-%d")
             query = query.filter(Payment.added_at <= parsed_to)
 
+        query = query.order_by(Payment.added_at.desc())
+
         pagination = query.paginate(page=page, per_page=10, error_out=False)
         data = [user.as_friendly_dict() for user in pagination.items]
 
