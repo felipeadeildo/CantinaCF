@@ -31,7 +31,7 @@ export const ProductSalesCards = ({
               className={cn(
                 "border-2",
                 sale.status == "dispatched" && "bg-primary/10",
-                sale.status == "to dispatch" && "bg-warning/10"
+                sale.status == "to dispatch" && "bg-yellow-400/30"
               )}
             >
               <CardHeader className="py-1.5">

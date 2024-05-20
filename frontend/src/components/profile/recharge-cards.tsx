@@ -32,7 +32,7 @@ export const RechargesCards = ({
                 "border-2",
                 payment.status == "accepted" && "bg-primary/10",
                 payment.status == "rejected" && "bg-destructive/10",
-                payment.status == "to allow" && "bg-warning/10"
+                payment.status == "to allow" && "bg-yellow-400/30"
               )}
             >
               <CardContent className="grid gap-0.5">
