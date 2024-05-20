@@ -1,4 +1,5 @@
 import { RechargesTable } from "@/components/audits/recharges/table"
+import { RechargesCards } from "@/components/profile/recharge-cards"
 import { Button } from "@/components/ui/button"
 import {
   Command,
@@ -14,6 +15,7 @@ import { cn } from "@/lib/utils"
 import { TBRechargesQuery, TStatsQuery } from "@/types/queries"
 import { Check, ChevronsUpDown } from "lucide-react"
 import { useEffect, useState } from "react"
+import { useMediaQuery } from "usehooks-ts"
 
 type Props = {
   query: TStatsQuery
@@ -23,6 +25,7 @@ export const AffiliatedHistory = ({ query: [query, setQuery] }: Props) => {
   const { data: users = [] } = useAffiliates(query)
   const [open, setOpen] = useState(false)
   const [value, setValue] = useState<number>(0)
+  const isMobile = useMediaQuery("(max-width: 768px)")
 
   const [historyQuery, setHistoryQuery] = useState<TBRechargesQuery>({
     userId: value,
@@ -93,9 +96,11 @@ export const AffiliatedHistory = ({ query: [query, setQuery] }: Props) => {
         </PopoverContent>
       </Popover>
 
-      {historyQuery.userId != 0 && (
+      {historyQuery.userId != 0 && isMobile ? (
+        <RechargesCards query={[historyQuery, setHistoryQuery]} />
+      ) : (
         <div className="w-full max-w-3xl h-[70vh] overflow-y-auto">
-          <RechargesTable query={[historyQuery, setHistoryQuery]} isPayrollHistory />
+          <RechargesTable query={[historyQuery, setHistoryQuery]} />
         </div>
       )}
     </div>

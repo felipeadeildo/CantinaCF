@@ -11,9 +11,14 @@ import { TBStatsQuery } from "@/types/queries"
 import { TUser } from "@/types/user"
 import { useState } from "react"
 
-const Stats = () => {
-  const [query, setQuery] = useState<TBStatsQuery>({})
-  const [user, setUser] = useState<TUser | undefined>()
+type Props = {
+  targetUser?: TUser
+  isProfile?: boolean
+}
+
+export const Stats = ({ targetUser, isProfile = false }: Props) => {
+  const [query, setQuery] = useState<TBStatsQuery>({ userId: targetUser?.id })
+  const [user, setUser] = useState<TUser | undefined>(targetUser)
 
   const { data, isLoading, isError, error } = useStats(query)
 
@@ -33,7 +38,12 @@ const Stats = () => {
 
       {query.userId && <AffiliatedHistory query={[query, setQuery]} />}
 
-      <QueryGeneratorModal query={[query, setQuery]} user={user} setUser={setUser} />
+      <QueryGeneratorModal
+        query={[query, setQuery]}
+        user={user}
+        setUser={setUser}
+        isProfile={isProfile}
+      />
     </div>
   )
 }

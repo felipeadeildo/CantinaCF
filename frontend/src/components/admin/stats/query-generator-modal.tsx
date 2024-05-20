@@ -19,10 +19,12 @@ export const QueryGeneratorModal = ({
   query: [query, setQuery],
   user,
   setUser,
+  isProfile,
 }: {
   query: TStatsQuery
   user?: TUser
   setUser: (user?: TUser) => void
+  isProfile: boolean
 }) => {
   const onUserSelected = useCallback(
     (user?: TUser) => {
@@ -54,7 +56,7 @@ export const QueryGeneratorModal = ({
         </DialogHeader>
 
         <div className="flex flex-col gap-2 items-center justify-center">
-          <ComboboxUsers onUserSelected={onUserSelected} defaultUser={user} />
+          {!isProfile && <ComboboxUsers onUserSelected={onUserSelected} />}
           <IntervalFilter query={[query, setQuery]} />
         </div>
       </DialogContent>
