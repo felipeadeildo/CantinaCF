@@ -55,6 +55,7 @@ export const SideBar = () => {
                     key={page.path}
                     variant="ghost"
                     className="w-full justify-start border-t-2"
+                    asChild
                   >
                     <Link
                       href={page.path}
