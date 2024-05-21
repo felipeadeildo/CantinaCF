@@ -37,7 +37,9 @@ select
         )
     ),
     2
-  ) as saldo_devedor
+  ) as saldo_devedor,
+  user.username,
+  user.balance_payroll
 from
   user
 where
