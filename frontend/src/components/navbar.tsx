@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Moon, Sun } from "lucide-react"
 import { useTheme } from "next-themes"
 import Image from "next/image"
+import Link from "next/link"
 import { useEffect, useState } from "react"
 import { SideBar } from "./sidebar"
 
@@ -30,10 +31,10 @@ const NavBar = () => {
 
   return (
     <nav className="flex justify-between items-center p-2 bg-primary">
-      <div className="flex items-center">
+      <Link href="/" className="flex items-center">
         <Image src="/img/logo.png" alt="Logo" width={27} height={27} />
         <span className="ml-2 text-primary-foreground font-semibold">CantinaCF</span>
-      </div>
+      </Link>
 
       <div className="flex gap-2 items-center justify-center">
         {renderThemeToggle()}

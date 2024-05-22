@@ -34,13 +34,6 @@ export const SIDEBAR_PAGES = [
     allowed_roles: [1, 2, 3, 4],
   },
   {
-    name: "Home",
-    path: "/",
-    category: "Cantina",
-    icon: HomeIcon,
-    allowed_roles: [1, 2, 3, 4],
-  },
-  {
     name: "Usuários",
     path: "/admin/users",
     category: "Administração",
