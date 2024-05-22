@@ -26,13 +26,22 @@ export const useProductDispatch = () => {
     })
     socket.connect()
 
+    const pingInterval = setInterval(() => {
+      socket.emit("ping")
+    }, 10000)
+
     socket.on("products_dispatch", (data) => {
       setProductSales(data.products_sales)
       setIsLoading(false)
     })
 
+    socket.on("disconnect", () => {
+      clearInterval(pingInterval)
+    })
+
     return () => {
       socket.disconnect()
+      clearInterval(pingInterval)
     }
   }, [token])
 

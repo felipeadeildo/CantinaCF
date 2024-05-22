@@ -28,12 +28,21 @@ export const useWsPayments = () => {
 
     socket.connect()
 
+    const pintInterval = setInterval(() => {
+      socket.emit("ping")
+    }, 10000)
+
     socket.on("payments", (data) => {
       setPayments(data.payments)
       setIsLoading(false)
     })
 
+    socket.on("disconnect", () => {
+      clearInterval(pintInterval)
+    })
+
     return () => {
+      clearInterval(pintInterval)
       socket.disconnect()
     }
   }, [token])

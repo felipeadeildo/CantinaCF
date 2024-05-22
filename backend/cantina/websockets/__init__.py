@@ -9,3 +9,6 @@ def init_websockets(app: Flask, socketio: SocketIO):
     socketio.on_namespace(ProductsDispatch("/products_dispatch", app))
 
     socketio.on_namespace(Payments("/payments", app))
+
+
+__all__ = ["init_websockets"]
