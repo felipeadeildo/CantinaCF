@@ -8,6 +8,7 @@ import { Inter } from "next/font/google"
 import { ChartJsProvider } from "@/contexts/chartjs"
 import { Suspense } from "react"
 import "./globals.css"
+import Loading from "./loading"
 import Providers from "./providers"
 
 const inter = Inter({ subsets: ["latin"] })
@@ -75,7 +76,7 @@ Feito com  ❤️ por @felipeadeildo."
                 <Suspense fallback={null}>
                   <Toaster />
                 </Suspense>
-                {children}
+                <Suspense fallback={<Loading />}>{children}</Suspense>
               </AuthProvider>
             </ChartJsProvider>
           </ThemeProvider>
