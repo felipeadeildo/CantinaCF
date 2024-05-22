@@ -39,6 +39,6 @@ class ProductSalesResource(Resource):
         query = query.order_by(ProductSale.added_at.desc())
 
         pagination = query.paginate(page=page, per_page=10, error_out=False)
-        data = [sale.as_friendly_dict() for sale in pagination.items]
+        data = [sale.as_dict() for sale in pagination.items]
 
         return {"sales": data, "nextPage": page + 1 if pagination.has_next else None}

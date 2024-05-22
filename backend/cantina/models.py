@@ -145,9 +145,6 @@ class ProductSale(db.Model):
 
     product = db.relationship("Product", backref="products_sales")
 
-    def as_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
-
     @property
     def sold_by_user(self):
         return User.query.get(self.sold_by) if self.sold_by else None
@@ -164,7 +161,7 @@ class ProductSale(db.Model):
     def formatted_added_at(self):
         return self.added_at.strftime("%d/%m/%Y %H:%M")
 
-    def as_friendly_dict(self):
+    def as_dict(self):
         data = {}
         for c in self.__table__.columns:
             key = c.name
@@ -244,9 +241,6 @@ class Payment(db.Model):
         "User", foreign_keys=[payroll_receiver_id], backref="payroll_receivers"
     )
 
-    def as_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
-
     @property
     def formatted_added_at(self):
         return self.added_at.strftime("%d/%m/%Y %H:%M")
@@ -264,7 +258,7 @@ class Payment(db.Model):
     def allowed_by_user(self):
         return User.query.get(self.allowed_by)
 
-    def as_friendly_dict(self):
+    def as_dict(self):
         data = {}
         for c in self.__table__.columns:
             key = c.name
