@@ -6,6 +6,7 @@ import { useTheme } from "next-themes"
 import Image from "next/image"
 import Link from "next/link"
 import { useEffect, useState } from "react"
+import { Pendings } from "./pendings"
 import { SideBar } from "./sidebar"
 
 const NavBar = () => {
@@ -37,6 +38,8 @@ const NavBar = () => {
       </Link>
 
       <div className="flex gap-2 items-center justify-center">
+        <Pendings />
+
         {renderThemeToggle()}
         <SideBar />
       </div>
