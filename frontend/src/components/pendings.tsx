@@ -13,12 +13,13 @@ export const Pendings = () => {
   const queryClient = useQueryClient()
 
   useEffect(() => {
+    if (!user) return
     const timer = setInterval(() => {
       queryClient.invalidateQueries({ queryKey: ["payments"] })
     }, 10000)
 
     return () => clearInterval(timer)
-  }, [queryClient])
+  }, [queryClient, user])
 
   if (!user) return null
 
