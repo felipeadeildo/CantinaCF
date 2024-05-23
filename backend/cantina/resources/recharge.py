@@ -5,12 +5,15 @@ from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_restful import Resource
 from sqlalchemy import and_, or_
 from sqlalchemy.orm import aliased
+from werkzeug.datastructures import MultiDict
 from werkzeug.utils import secure_filename
 
 from cantina.models import Affiliation, Payment, PaymentMethod, User
 from cantina.settings import UPLOAD_FOLDER
 from cantina.utils import allowed_file
-from .. import db
+
+from .. import cache, db
+from ..utils import generate_query_hash
 
 
 class RechargeResource(Resource):
@@ -23,7 +26,7 @@ class RechargeResource(Resource):
         requester_user_id = get_jwt_identity()
         requester_user = User.query.filter_by(id=requester_user_id).first()
         if not requester_user:
-            return {"message": "Usuário não encontrado."}, 404
+            return {"message": "Usuário não encontrado."}, 404
 
         target_user_id = data.get("targetUserId", -1, type=int)
 
@@ -34,7 +37,7 @@ class RechargeResource(Resource):
 
         target_user = User.query.filter_by(id=target_user_id).first()
         if not target_user:
-            return {"message": "Usuário não encontrado."}, 404
+            return {"message": "Usuário não encontrado."}, 404
 
         payment_method_id = data.get("paymentMethod")
         try:
@@ -146,19 +149,12 @@ class RechargeResource(Resource):
             "message": f"Recarga de R$ {payment.value} para {payment.user.name} foi {'ACEITA' if accept else 'REJEITADA'} com sucesso!"
         }, 200
 
-    @jwt_required()
-    def get(self):
-        data = request.args
-
-        try:
-            page = int(data.get("page", 1))
-        except ValueError:
-            page = 1
-
+    @classmethod
+    def generate_query(cls, params: MultiDict):
         query = Payment.query
 
-        if data.get("isPayrollHistory", "").lower() == "true":
-            payroll_receiver_id = data.get("payrollReceiverId", "")
+        if params.get("isPayrollHistory", "").lower() == "true":
+            payroll_receiver_id = params.get("payrollReceiverId", "")
             query = query.filter(
                 or_(
                     and_(
@@ -169,44 +165,44 @@ class RechargeResource(Resource):
                 )
             )
 
-            if user_id := data.get("userId"):
+            if user_id := params.get("userId"):
                 query = query.filter_by(user_id=user_id)
 
         else:
-            if user_id := data.get("userId"):
+            if user_id := params.get("userId"):
                 query = query.filter_by(user_id=user_id)
 
-            if allowed_by_user_id := data.get("allowedByUserId"):
+            if allowed_by_user_id := params.get("allowedByUserId"):
                 query = query.filter_by(allowed_by=allowed_by_user_id)
 
-            if payroll_receiver_id := data.get("payrollReceiverId"):
+            if payroll_receiver_id := params.get("payrollReceiverId"):
                 query = query.filter_by(payroll_receiver_id=payroll_receiver_id)
 
-            if payment_method_ids := data.getlist("paymentMethodIds[]"):
+            if payment_method_ids := params.getlist("paymentMethodIds[]"):
                 query = query.filter(Payment.payment_method_id.in_(payment_method_ids))
 
-            if role_ids := data.getlist("roleIds[]"):
+            if role_ids := params.getlist("roleIds[]"):
                 user_aliases = aliased(User)
                 query = query.join(
                     user_aliases, Payment.user_id == user_aliases.id
                 ).filter(user_aliases.role_id.in_(role_ids))
 
-            if status := data.get("status"):
+            if status := params.get("status"):
                 query = query.filter(Payment.status == status)
 
-            if data.get("onlyIsPayroll", "").lower() == "true":
+            if params.get("onlyIsPayroll", "").lower() == "true":
                 query = query.filter(Payment.payroll_receiver_id.isnot(None))
 
-            if data.get("onlyIsPayPayroll", "").lower() == "true":
+            if params.get("onlyIsPayPayroll", "").lower() == "true":
                 query = query.filter(Payment.is_paypayroll)
 
-        if unparsed_from := data.get("from"):
+        if unparsed_from := params.get("from"):
             parsed_from = datetime.strptime(
                 unparsed_from, "%Y-%m-%dT%H:%M:%S.%fZ"
             ).strftime("%Y-%m-%d")
             query = query.filter(Payment.added_at >= parsed_from)
 
-        if unparsed_to := data.get("to"):
+        if unparsed_to := params.get("to"):
             parsed_to = datetime.strptime(
                 unparsed_to, "%Y-%m-%dT%H:%M:%S.%fZ"
             ).strftime("%Y-%m-%d")
@@ -214,7 +210,26 @@ class RechargeResource(Resource):
 
         query = query.order_by(Payment.added_at.desc())
 
-        pagination = query.paginate(page=page, per_page=10, error_out=False)
-        data = [user.as_dict() for user in pagination.items]
+        return query
 
-        return {"payments": data, "nextPage": page + 1 if pagination.has_next else None}
+    @jwt_required()
+    def get(self):
+        data = request.args
+
+        try:
+            page = int(data.get("page", 1))
+        except ValueError:
+            page = 1
+
+        query = self.generate_query(data)
+        query_hash = generate_query_hash(data)
+        cache.set(query_hash, {"generator": "RechargeResource", "params": data})
+
+        pagination = query.paginate(page=page, per_page=10, error_out=False)
+        data = [payment.as_dict() for payment in pagination.items]
+
+        return {
+            "payments": data,
+            "nextPage": page + 1 if pagination.has_next else None,
+            "queryId": query_hash,
+        }

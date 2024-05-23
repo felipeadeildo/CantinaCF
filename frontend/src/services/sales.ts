@@ -6,6 +6,7 @@ import axios, { AxiosError } from "axios"
 type SalesPage = {
   nextPage: number | null
   sales: TProductSale[]
+  queryId: string
 }
 
 export const fetchProductSales = async (

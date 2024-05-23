@@ -1,6 +1,6 @@
 import { getErrorMessage } from "@/lib/utils"
 import { TBRechargesQuery } from "@/types/queries"
-import { TPayment, TPaymentMethod, TPaymentRequest } from "@/types/recharge"
+import { TPaymentMethod, TPaymentRequest } from "@/types/recharge"
 import axios, { AxiosError } from "axios"
 
 export const acceptOrDenyPayment = async (
@@ -45,6 +45,7 @@ export const fetchPaymentMethods = async (
 type PaymentsPage = {
   nextPage: number | null
   payments: TPaymentRequest[]
+  queryId: string
 }
 
 export const fetchPayments = async (
@@ -57,7 +58,7 @@ export const fetchPayments = async (
       headers: {
         Authorization: `Bearer ${token}`,
       },
-      params: {...query, page},
+      params: { ...query, page },
     })
     return res.data
   } catch (e: AxiosError | any) {

@@ -18,6 +18,7 @@ import { ArrowDownCircle, FilePlus, FileText, Loader2 } from "lucide-react"
 import Link from "next/link"
 
 import { SimpleTooltip } from "@/components/simple-tooltip"
+import { useAuth } from "@/contexts/auth"
 
 export const RechargesTable = ({
   query: [query, setQuery],
@@ -26,6 +27,7 @@ export const RechargesTable = ({
   query: TRechargesQuery
   isPayrollHistory?: boolean
 }) => {
+  const { token } = useAuth()
   const { data, hasNextPage, fetchNextPage, isFetchingNextPage, isLoading } =
     usePayments(query)
   return (
@@ -176,9 +178,14 @@ export const RechargesTable = ({
       </Table>
 
       <SimpleTooltip message="Exportar histórico para Excel">
-        <Button variant="secondary" className="fixed bottom-4 right-4">
-          <FilePlus className="mr-1 h-5 w-5" />
-          Exportar
+        <Button variant="secondary" className="fixed bottom-4 right-4" asChild>
+          <Link
+            href={`/api/export?id=${data?.pages[0].queryId}&jwt=${token}`}
+            target="_blank"
+          >
+            <FilePlus className="mr-1 h-5 w-5" />
+            Exportar
+          </Link>
         </Button>
       </SimpleTooltip>
     </div>

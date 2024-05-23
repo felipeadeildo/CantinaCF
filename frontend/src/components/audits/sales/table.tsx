@@ -9,6 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { useAuth } from "@/contexts/auth"
 import { useProductSales } from "@/hooks/product-sales"
 import { maskMoney } from "@/lib/masks"
 import { TSalesQuery } from "@/types/queries"
@@ -20,6 +21,7 @@ export const ProductSalesTable = ({
 }: {
   query: TSalesQuery
 }) => {
+  const { token } = useAuth()
   const { data, hasNextPage, fetchNextPage, isFetchingNextPage } = useProductSales(query)
   return (
     <div className="my-4">
@@ -93,10 +95,15 @@ export const ProductSalesTable = ({
   </TableFooter> */}
       </Table>
 
-      <SimpleTooltip message="Exportar histórico de vendas para Excel">
-        <Button variant="secondary" className="fixed bottom-4 right-4">
-          <FilePlus className="mr-1 h-5 w-5" />
-          Exportar
+      <SimpleTooltip message="Exportar histórico para Excel">
+        <Button variant="secondary" className="fixed bottom-4 right-4" asChild>
+          <Link
+            href={`/api/export?id=${data?.pages[0].queryId}&jwt=${token}`}
+            target="_blank"
+          >
+            <FilePlus className="mr-1 h-5 w-5" />
+            Exportar
+          </Link>
         </Button>
       </SimpleTooltip>
     </div>

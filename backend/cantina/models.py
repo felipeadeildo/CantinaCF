@@ -125,7 +125,7 @@ class Product(db.Model):
 class ProductSale(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     product_id = db.Column(
-        db.Integer, db.ForeignKey("product.id"), info={"label": "Produto ID"}
+        db.Integer, db.ForeignKey("product.id"), info={"label": "Produto"}
     )
     value = db.Column(db.DECIMAL(10, 2), nullable=False, info={"label": "Valor (R$)"})
     sold_by = db.Column(
@@ -185,6 +185,44 @@ class ProductSale(db.Model):
             data[key] = value
         return data
 
+    def as_friendly_dict(self):
+        status_map = {
+            "dispatched": "Despachado",
+            "to dispatch": "Para Despachar",
+        }
+        data = {}
+        for c in self.__table__.columns:
+            key = c.name
+            friendly_key = c.info.get("label", key)
+            if key in ("sold_by", "sold_to", "dispatched_by"):
+                value = (
+                    f"{user.name} ({user.id})"
+                    if (user := getattr(self, f"{key}_user"))
+                    else None
+                )
+            elif key in ("product_id",):
+                value = (
+                    f"{product.name} ({product.id})"
+                    if (product := getattr(self, "product"))
+                    else None
+                )
+            elif key in ("added_at", "dispatched_at"):
+                value = (
+                    get_friendly_datetime(getattr(self, key))
+                    if getattr(self, key)
+                    else ""
+                )
+            elif key in ("value",):
+                value = float(getattr(self, key))
+            elif key == "status":
+                value = (
+                    status_map.get(status) if (status := getattr(self, key)) else status
+                )
+            else:
+                value = getattr(self, key)
+            data[friendly_key] = value
+        return data
+
 
 class PaymentMethod(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -223,7 +261,7 @@ class Payment(db.Model):
     )
     proof_path = db.Column(db.Text, info={"label": "Comprovante"})
     added_at = db.Column(
-        db.DateTime, default=datetime.now, info={"label": "Data de cadastro"}
+        db.DateTime, default=datetime.now, info={"label": "Data de Pagamento"}
     )
     payroll_receiver_id = db.Column(
         db.Integer,
@@ -232,7 +270,7 @@ class Payment(db.Model):
         info={"label": "Recebedor da Cobrança"},
     )
     is_paypayroll = db.Column(
-        db.Boolean, default=False, info={"label": "Pagamento de Folha de Pagamento?"}
+        db.Boolean, default=False, info={"label": "Pagamento da Folha de Pagamento?"}
     )
     status = db.Column(db.String(20), info={"label": "Status"})
 
@@ -283,6 +321,47 @@ class Payment(db.Model):
             else:
                 value = getattr(self, key)
             data[key] = value
+        return data
+
+    def as_friendly_dict(self):
+        status_map = {
+            "to allow": "Pendente",
+            "accepted": "Permitido",
+            "rejected": "Rejeitado",
+        }
+        data = {}
+        for c in self.__table__.columns:
+            key = c.name
+            friendly_key = c.info.get("label", key)
+            if key in ("user_id",):
+                value = f"{self.user.name} ({self.user.id})"
+            elif key in ("allowed_by",):
+                value = (
+                    f"{self.allowed_by_user.name} ({self.allowed_by_user.id})"
+                    if self.allowed_by
+                    else None
+                )
+            elif key in ("added_at",):
+                value = get_friendly_datetime(getattr(self, key))
+            elif key in ("payment_method_id",):
+                value = self.payment_method.name
+            elif key in ("value",):
+                value = float(getattr(self, key))
+            elif key in ("payroll_receiver_id",):
+                value = (
+                    f"{self.payroll_receiver.name} ({self.payroll_receiver.id})"
+                    if self.payroll_receiver
+                    else None
+                )
+            elif key in ("status",):
+                value = (
+                    status_map.get(status, status)
+                    if (status := getattr(self, key))
+                    else None
+                )
+            else:
+                value = getattr(self, key)
+            data[friendly_key] = value
         return data
 
 

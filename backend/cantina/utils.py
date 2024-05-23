@@ -1,3 +1,6 @@
+import hashlib
+import json
+
 from werkzeug.security import check_password_hash
 
 from cantina.settings import ALLOWED_EXTENSIONS
@@ -19,3 +22,13 @@ def allowed_file(filename):
         bool: True if the file is allowed, False otherwise.
     """
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+def generate_query_hash(params: dict):
+    """Generate a hash query based on the given parameters.
+
+    Args:
+        params (dict): The parameters to be hashed.
+    """
+    params_string = json.dumps(params, sort_keys=True)
+    return hashlib.sha256(params_string.encode("utf-8")).hexdigest()
