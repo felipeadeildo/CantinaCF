@@ -25,7 +25,7 @@ export const Pendings = () => {
 
   if (!paymentsPages) return null
 
-  if (paymentsPages.pages.length === 0) return null
+  if (paymentsPages.pages[0].payments.length === 0) return null
 
   return (
     <Popover>
