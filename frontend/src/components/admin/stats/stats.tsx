@@ -29,7 +29,11 @@ export const Stats = ({ targetUser, isProfile = false }: Props) => {
         </div>
       )}
 
-      <TopSellingProducts isLoading={isLoading} data={data?.productQuantity} />
+      <TopSellingProducts
+        isLoading={isLoading}
+        data={data?.productQuantity}
+        total={data?.productSoldTotal}
+      />
 
       <PaymentMethodPies isLoading={isLoading} data={data} />
 
