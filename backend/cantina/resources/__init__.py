@@ -6,6 +6,7 @@ from .export_query import ExportCachedQueryResource
 from .payment_methods import PaymentMethodsResource
 from .payroll import PayrollResource
 from .product_sales import ProductSalesResource
+from .product_sales_stats import ProductSalesStatsResource
 from .recharge import RechargeResource
 from .role import RoleResource
 from .stats import StatsResource
@@ -13,6 +14,7 @@ from .user import UserResource, UsersResource
 
 __all__ = [
     "ExportCachedQueryResource",
+    "ProductSalesStatsResource",
     "PaymentMethodsResource",
     "ProductSalesResource",
     "AffiliatesResource",

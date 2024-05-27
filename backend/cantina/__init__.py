@@ -95,6 +95,7 @@ def create_app(settings_map=settings_map):
         ("StatsResource", "/stats"),
         ("AffiliatesResource", "/affiliates"),
         ("ExportCachedQueryResource", "/export"),
+        ("ProductSalesStatsResource", "/product_sales_stats"),
     ]
     from cantina import resources
 
