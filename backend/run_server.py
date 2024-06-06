@@ -42,8 +42,6 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-# cantina.tasks.TaskManager().run()
 
 app = cantina.create_app()
-# app.run(host=args.host, port=args.port, debug=args.debug)
 cantina.socketio.run(app, host=args.host, port=args.port, debug=args.debug)  # type: ignore
