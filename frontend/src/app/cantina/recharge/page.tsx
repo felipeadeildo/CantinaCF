@@ -2,12 +2,10 @@
 
 import { LoginRequired } from "@/components/login-required"
 import { RechargeForm } from "@/components/recharge/form"
-import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
