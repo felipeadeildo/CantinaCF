@@ -4,6 +4,7 @@ import { LoginFormInputs, loginSchema } from "@/schemas/login"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { LoaderCircle, LogIn, ShieldAlert } from "lucide-react"
 import { useForm } from "react-hook-form"
+import { ComboboxUsers } from "../combobox/users"
 import { Alert, AlertDescription } from "../ui/alert"
 import { Button } from "../ui/button"
 import {
@@ -57,9 +58,13 @@ export const BuyForm = () => {
           name="username"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Usuário</FormLabel>
+              <FormLabel>Usuário</FormLabel>
               <FormControl>
-                <Input {...field} disabled={form.formState.isSubmitting || isPending} />
+                <ComboboxUsers
+                  onUserSelected={(user) => field.onChange(user?.username)}
+                  btnClassName="px-3 w-full max-w-lg"
+                  defaultUser={user ? user : undefined}
+                />
               </FormControl>
 
               <FormMessage />
