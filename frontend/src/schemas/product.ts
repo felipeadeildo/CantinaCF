@@ -7,12 +7,6 @@ export const productSchema = z.object({
     (v) => (typeof v === "string" ? parseInt(v) : v),
     z.number({ required_error: "Por favor, insira a quantidade de produtos." }).min(1)
   ),
-  ammountPaid: z.preprocess((v) => {
-    if (typeof v === "string") {
-      return parseFloat(sanitizeFMoney(v))
-    }
-    return v
-  }, z.number({ required_error: "Por favor, insira o valor pago sobre o produto." }).min(0.01)),
   observations: z.string().optional(),
 })
 

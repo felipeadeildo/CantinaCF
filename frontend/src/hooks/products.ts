@@ -157,11 +157,13 @@ export const useProductsMutation = () => {
       productId,
       name,
       value,
+      quantity
     }: {
       productId: number
       name: string
       value: number
-    }) => updateProduct(token, productId, name, value),
+      quantity: number
+    }) => updateProduct(token, productId, name, value, quantity),
     // TODO: On Mutate get the products data and update it
     onSuccess: ({ message }) => {
       queryClient.invalidateQueries({ queryKey: ["products"] })

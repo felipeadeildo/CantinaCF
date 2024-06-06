@@ -89,12 +89,13 @@ export const updateProduct = async (
   token: string | null,
   productId: number,
   name: string,
-  value: number
+  value: number,
+  quantity: number
 ): Promise<{ message: string }> => {
   try {
     const res = await axios.put(
       "/api/products",
-      { id: productId, name, value },
+      { id: productId, name, value, quantity },
       {
         headers: {
           Authorization: `Bearer ${token}`,

@@ -443,40 +443,6 @@ class EditHistory(db.Model):
         return data
 
 
-class StockHistory(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    added_at = db.Column(db.DateTime, default=datetime.now)
-    observations = db.Column(db.Text)
-    product_id = db.Column(db.Integer, db.ForeignKey("product.id"))
-    received_by = db.Column(db.Integer, db.ForeignKey("user.id"))
-    purchase_price = db.Column(db.DECIMAL(10, 2))
-    sale_value = db.Column(db.DECIMAL(10, 2))
-    quantity = db.Column(db.Integer, nullable=False)
-
-    # Relacionamentos com outra tabelassss
-    product = db.relationship("Product", backref="stock_historys")
-    received_by_user = db.relationship("User", backref="stock_historsys")
-
-    @property
-    def formatted_added_at(self):
-        return self.added_at.strftime("%d/%m/%Y às %H:%M")
-
-    def as_friendly_dict(self):
-        data = {}
-        for c in self.__table__.columns:
-            key = c.info.get("label", c.name)
-            if c.name in ("received_by",):
-                value = get_user_name_and_id(getattr(self, c.name))
-            elif c.name in ("product_id",):
-                value = get_product_name_and_id(getattr(self, c.name))
-            elif c.name in ("added_at",):
-                value = get_friendly_datetime(getattr(self, c.name))
-            else:
-                value = getattr(self, c.name)
-            data[key] = value
-        return data
-
-
 class Cart(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
