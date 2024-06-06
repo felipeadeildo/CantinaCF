@@ -11,6 +11,7 @@ import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query"
 import { useEffect, useState } from "react"
 import { io, Socket } from "socket.io-client"
 
+
 export const useWsPayments = () => {
   const [payments, setPayments] = useState<TPaymentRequest[]>([])
   const [isLoading, setIsLoading] = useState<boolean>(true)
@@ -19,7 +20,7 @@ export const useWsPayments = () => {
 
   useEffect(() => {
     setIsLoading(true)
-    const socket: Socket = io("/payments", {
+    const socket: Socket = io("http://localhost:8000/socket.io/payments", {
       transports: ["websocket"],
       query: {
         jwt: token,

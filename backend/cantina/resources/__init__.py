@@ -10,13 +10,18 @@ from .recharge import RechargeResource
 from .role import RoleResource
 from .stats import StatsResource
 from .user import UserResource, UsersResource
+from .payments import PaymentsResource
+from .products_dispatch import ProductsDispatchResource
+
 
 __all__ = [
     "ExportCachedQueryResource",
+    "ProductsDispatchResource",
     "PaymentMethodsResource",
     "ProductSalesResource",
     "AffiliatesResource",
     "DispatchResource",
+    "PaymentsResource",
     "ProductsResource",
     "PurchaseResource",
     "RechargeResource",
