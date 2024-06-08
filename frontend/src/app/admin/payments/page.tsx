@@ -3,11 +3,11 @@
 import { LoginRequired } from "@/components/login-required"
 import { PaymentRequest } from "@/components/payments/payment-request"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { useWsPayments } from "@/hooks/payments"
+import { usePaymentRequests } from "@/hooks/payments"
 import { Loader2 } from "lucide-react"
 
 const Payments = () => {
-  const { payments, isLoading } = useWsPayments()
+  const { data: payments = [], isLoading } = usePaymentRequests()
   return (
     <div>
       <h1 className="text-xl my-4 text-center">Verificação de Pagamentos</h1>
