@@ -79,7 +79,12 @@ export const RechargesTable = ({
                     <Button variant="link" size="sm" className="h-2 py-0 my-0" asChild>
                       <Link
                         href={`/profile?userId=${payment.allowed_by_user.id}`}
-                        className="text-xs text-wrap"
+                        className={cn(
+                          "text-xs text-wrap",
+                          payment.status === "accepted"
+                            ? "text-green-500"
+                            : "text-red-500"
+                        )}
                         target="_blank"
                       >
                         {payment.allowed_by_user.name}

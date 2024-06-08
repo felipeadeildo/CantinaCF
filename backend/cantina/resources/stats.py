@@ -1,11 +1,12 @@
 from datetime import datetime
 
-from cantina.models import Payment, PaymentMethod, Product, ProductSale
 from flask import request
 from flask_jwt_extended import jwt_required
 from flask_restful import Resource
 from sqlalchemy import func, not_
 from werkzeug.datastructures import MultiDict
+
+from cantina.models import Payment, PaymentMethod, Product, ProductSale
 
 from .. import db
 
@@ -37,12 +38,19 @@ class StatsResource(Resource):
             query_string, db.session.query(counter, summer, Product), ProductSale
         )
 
+        query = query.join(Product, ProductSale.product_id == Product.id)
+
         if user_id := query_string.get("userId"):
             query = query.filter(ProductSale.sold_to == user_id)
 
+        total_sales, total_spent, _ = query.first()
+        data["productSoldTotal"] = {
+            "totalSpent": float(total_spent or 0),
+            "totalSales": int(total_sales),
+        }
+
         product_sales = (
-            query.join(Product, ProductSale.product_id == Product.id)
-            .group_by(ProductSale.product_id)
+            query.group_by(ProductSale.product_id)
             .order_by(counter.desc())
             .limit(10)
             .all()

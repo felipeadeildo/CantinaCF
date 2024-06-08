@@ -90,6 +90,7 @@ def create_app(settings_map=settings_map):
         ("ExportCachedQueryResource", "/export"),
         ("PaymentsResource", "/payments"),
         ("ProductsDispatchResource", "/products_dispatch"),
+        ("ProductSalesStatsResource", "/product_sales_stats"),
     ]
     from cantina import resources
 

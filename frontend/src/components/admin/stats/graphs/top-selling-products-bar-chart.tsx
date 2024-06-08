@@ -1,4 +1,5 @@
-import { ProductSaleStats } from "@/types/stats"
+import { maskMoney } from "@/lib/masks"
+import { ProductSaleStats, ProductSoldTotal } from "@/types/stats"
 import { Loader2 } from "lucide-react"
 import { Bar } from "react-chartjs-2"
 import { useMediaQuery } from "usehooks-ts"
@@ -6,6 +7,7 @@ import { useMediaQuery } from "usehooks-ts"
 type Props = {
   isLoading: boolean
   data?: ProductSaleStats
+  total?: ProductSoldTotal
 }
 
 const createChartData = (data: ProductSaleStats) => ({
@@ -53,7 +55,7 @@ const chartOptions = {
   },
 }
 
-export const TopSellingProducts = ({ isLoading, data }: Props) => {
+export const TopSellingProducts = ({ isLoading, data, total }: Props) => {
   const isWindowLarge = useMediaQuery("(min-width: 768px)")
 
   const chartData = data
@@ -71,6 +73,12 @@ export const TopSellingProducts = ({ isLoading, data }: Props) => {
       {!isLoading && (
         <div className="relative w-full h-64">
           <Bar options={chartOptions} data={chartData} />
+
+          <div className="absolute top-5 right-8">
+            <div className="text-xs font-medium">
+              Total de {maskMoney(total?.totalSpent || 0)} em {total?.totalSales} vendas
+            </div>
+          </div>
         </div>
       )}
     </div>
