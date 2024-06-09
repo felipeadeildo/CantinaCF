@@ -76,18 +76,15 @@ class RechargeResource(Resource):
         )
 
         if payment_method.is_payroll:
-            # target user is employee
-            if target_user.role.id in (1, 2, 4):
+            affiliation = Affiliation.query.filter_by(
+                affiliated_id=target_user_id
+            ).first()
+            # if isn't affiliate
+            if not affiliation:
+                # the target user is not affiliate, so the payment is for the user itself
                 new_payment.payroll_receiver_id = target_user_id
-            # target user is affiliated
             else:
-                affiliation = Affiliation.query.filter_by(
-                    affiliated_id=target_user_id
-                ).first()
-                if not affiliation:
-                    return {
-                        "message": "Você não está afiliado à nenhum funcionário."
-                    }, 400
+                # the target user is affiliate, so the payment is for the affiliator
                 new_payment.payroll_receiver_id = affiliation.affiliator_id
 
         if payment_method.need_proof:
