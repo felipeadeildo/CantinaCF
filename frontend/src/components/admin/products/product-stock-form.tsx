@@ -11,21 +11,14 @@ import {
 import { Input } from "@/components/ui/input"
 import { useProductsMutation } from "@/hooks/products"
 import { maskMoney } from "@/lib/masks"
-import { newProductSchema, productSchema, ProductStockInput } from "@/schemas/product"
-import { TProduct } from "@/types/products"
+import { newProductSchema, ProductStockInput } from "@/schemas/product"
 import { zodResolver } from "@hookform/resolvers/zod"
 
 import { useForm } from "react-hook-form"
 
-type Props = {
-  product?: TProduct
-}
-
-export const ProductStockForm = ({ product }: Props) => {
-  const schema = !product ? newProductSchema : productSchema
-
+export const ProductStockForm = () => {
   const form = useForm<ProductStockInput>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(newProductSchema),
   })
 
   const { productStockMutation } = useProductsMutation()
@@ -40,47 +33,41 @@ export const ProductStockForm = ({ product }: Props) => {
         onSubmit={form.handleSubmit(onSubmit)}
         className="gap-2 grid grid-cols-1 sm:grid-cols-2 items-center"
       >
-        {product && <input type="hidden" {...form.register("id")} value={product.id} />}
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nome do Produto</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage className="text-xs text-end" />
+            </FormItem>
+          )}
+        />
 
-        {!product && (
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Nome do Produto</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage className="text-xs text-end" />
-              </FormItem>
-            )}
-          />
-        )}
-
-        {!product && (
-          <FormField
-            control={form.control}
-            name="value"
-            render={({ field: { onChange, ...props } }) => (
-              <FormItem>
-                <FormLabel className="flex justify-between">
-                  Valor do Produto
-                  <FormDescription className="text-xs">por unidade</FormDescription>
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    onChange={(e) => {
-                      onChange(maskMoney(e.target.value))
-                    }}
-                    {...props}
-                  />
-                </FormControl>
-                <FormMessage className="text-xs text-end" />
-              </FormItem>
-            )}
-          />
-        )}
+        <FormField
+          control={form.control}
+          name="value"
+          render={({ field: { onChange, ...props } }) => (
+            <FormItem>
+              <FormLabel className="flex justify-between">
+                Valor do Produto
+                <FormDescription className="text-xs">por unidade</FormDescription>
+              </FormLabel>
+              <FormControl>
+                <Input
+                  onChange={(e) => {
+                    onChange(maskMoney(e.target.value))
+                  }}
+                  {...props}
+                />
+              </FormControl>
+              <FormMessage className="text-xs text-end" />
+            </FormItem>
+          )}
+        />
 
         <FormField
           control={form.control}
@@ -93,25 +80,6 @@ export const ProductStockForm = ({ product }: Props) => {
               </FormLabel>
               <FormControl>
                 <Input {...field} />
-              </FormControl>
-              <FormMessage className="text-xs text-end" />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="ammountPaid"
-          render={({ field: { onChange, ...props } }) => (
-            <FormItem>
-              <FormLabel>Valor Pago</FormLabel>
-              <FormControl>
-                <Input
-                  onChange={(e) => {
-                    onChange(maskMoney(e.target.value))
-                  }}
-                  {...props}
-                />
               </FormControl>
               <FormMessage className="text-xs text-end" />
             </FormItem>

@@ -3,65 +3,45 @@ import { useAuth } from "@/contexts/auth"
 import {
   acceptOrDenyPayment,
   fetchPaymentMethods,
+  fetchPaymentRequests,
   fetchPayments,
 } from "@/services/payment"
 import { TBRechargesQuery } from "@/types/queries"
 import { TPaymentRequest } from "@/types/recharge"
-import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query"
-import { useEffect, useState } from "react"
-import { io, Socket } from "socket.io-client"
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query"
 
-export const useWsPayments = () => {
-  const [payments, setPayments] = useState<TPaymentRequest[]>([])
-  const [isLoading, setIsLoading] = useState<boolean>(true)
-
+export const usePaymentRequests = () => {
   const { token } = useAuth()
 
-  useEffect(() => {
-    setIsLoading(true)
-    const socket: Socket = io("/payments", {
-      transports: ["websocket"],
-      query: {
-        jwt: token,
-      },
-    })
-
-    socket.connect()
-
-    const pintInterval = setInterval(() => {
-      socket.emit("ping")
-    }, 10000)
-
-    socket.on("payments", (data) => {
-      setPayments(data.payments)
-      setIsLoading(false)
-    })
-
-    socket.on("disconnect", () => {
-      clearInterval(pintInterval)
-    })
-
-    return () => {
-      clearInterval(pintInterval)
-      socket.disconnect()
-    }
-  }, [token])
-
-  return { payments, isLoading }
+  return useQuery({
+    queryFn: () => fetchPaymentRequests(token),
+    queryKey: ["payment-requests"],
+    enabled: !!token,
+    refetchInterval: 5000,
+  })
 }
 
 export const usePaymentMutation = () => {
   const { token } = useAuth()
   const { toast } = useToast()
+  const queryClient = useQueryClient()
 
   const acceptOrDenyPaymentMutation = useMutation({
     mutationFn: ({ payment, accept }: { payment: TPaymentRequest; accept: boolean }) =>
       acceptOrDenyPayment(token, payment.id, accept),
-    onSuccess: (data) =>
+    onSuccess: (data) => {
       toast({
         title: "Sucesso",
         description: data.message,
-      }),
+      })
+
+      queryClient.invalidateQueries({ queryKey: ["payment-requests"] })
+    },
     onError: (err) =>
       toast({
         title: "Erro",

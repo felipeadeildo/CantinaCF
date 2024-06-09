@@ -2,12 +2,12 @@
 
 import { UserProductsDispatch } from "@/components/dispatch/user-products-dispatch"
 import { LoginRequired } from "@/components/login-required"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useProductDispatch } from "@/hooks/products-dispatch"
 import { Loader2 } from "lucide-react"
 
 const Cantina = () => {
-  const { productSales, isLoading } = useProductDispatch()
+  const { data: productSales = [], isLoading } = useProductDispatch()
 
   return (
     <>

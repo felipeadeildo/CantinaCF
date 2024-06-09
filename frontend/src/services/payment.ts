@@ -65,3 +65,18 @@ export const fetchPayments = async (
     throw Error(getErrorMessage(e))
   }
 }
+
+export const fetchPaymentRequests = async (
+  token: string | null
+): Promise<TPaymentRequest[]> => {
+  try {
+    const res = await axios.get("/api/payments", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    return res.data.payments
+  } catch (e: AxiosError | any) {
+    throw Error(getErrorMessage(e))
+  }
+}

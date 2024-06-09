@@ -1,7 +1,7 @@
 import locale
 from functools import reduce
 
-from cantina.models import Cart, Product, ProductSale, StockHistory, User
+from cantina.models import Cart, Product, ProductSale, User
 from cantina.utils import verify_password
 from flask import request
 from flask_jwt_extended import get_jwt_identity, jwt_required
@@ -109,9 +109,7 @@ class ProductsResource(Resource):
                 return {"message": "Produto não encontrado."}, 404
 
         product_fields = (
-            ["name", "value", "quantity", "ammountPaid"]
-            if product is None
-            else ["quantity", "ammountPaid"]
+            ["name", "value", "quantity"] if product is None else ["quantity"]
         )
 
         if any(map(lambda field: not data.get(field), product_fields)):
@@ -121,7 +119,6 @@ class ProductsResource(Resource):
 
         data.update(
             {
-                "ammountPaid": float(data["ammountPaid"]),
                 "value": float(data["value"]) if product is None else product.value,
                 "quantity": int(data["quantity"]),
             }
@@ -138,18 +135,6 @@ class ProductsResource(Resource):
             product.quantity += data["quantity"]
 
         db.session.commit()
-
-        stock_history = StockHistory(
-            product_id=product.id,
-            received_by=user_id,
-            purchase_price=data["ammountPaid"],
-            sale_value=data["value"],
-            quantity=data["quantity"],
-        )
-
-        db.session.add(stock_history)
-        db.session.commit()
-
         return {"message": f"Produto {product.name} criado com sucesso."}, 200
 
     @jwt_required()
@@ -170,6 +155,9 @@ class ProductsResource(Resource):
         if not data.get("value"):
             return {"message": "Valor do produto deve ser especificado."}, 400
 
+        if not data.get("quantity"):
+            return {"message": "Quantidade do produto deve ser especificado."}, 400
+
         product_id = data.get("id")
         if product_id is None:
             return {"message": "ID do produto deve ser especificado."}, 400
@@ -188,9 +176,13 @@ class ProductsResource(Resource):
             message = f"{message} Nome do Produto alterado de {product.name} para {data['name']}."
         if float(product.value) != value:
             message = f"{message} Valor alterado de {locale.currency(product.value, grouping=True)} para {locale.currency(value, grouping=True)}."
+        if int(product.quantity) != int(data["quantity"]):
+            message = f"{message} Quantidade alterada de {product.quantity} para {data['quantity']}."
 
         product.value = value
         product.name = data["name"]
+        product.quantity = data["quantity"]
+
         db.session.commit()
 
         return {"message": message.strip() or "Sem alteração! Ok :P"}, 200

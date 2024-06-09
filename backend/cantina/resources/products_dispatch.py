@@ -1,17 +1,13 @@
 from itertools import groupby
 
-from cantina import socketio
 from cantina.models import ProductSale
-from flask import Flask
+from flask_jwt_extended import jwt_required
+from flask_restful import Resource
 
-from .base import WSocket
 
-
-class ProductsDispatch(WSocket):
-    def __init__(self, namespace: str, app: Flask):
-        super().__init__(namespace, app)
-
-    def emitter(self):
+class ProductsDispatchResource(Resource):
+    @jwt_required()
+    def get(self):
         products_sales = ProductSale.query.filter_by(status="to dispatch").all()
         products_sales_grouped_by_user = groupby(
             [p.as_dict() for p in products_sales],
@@ -31,8 +27,4 @@ class ProductsDispatch(WSocket):
                 {"user": user, "products": list(products_grouped.items())}
             )
 
-        socketio.emit(
-            "products_dispatch",
-            {"products_sales": products_sales_grouped_by_user_and_product},
-            namespace=self.namespace,
-        )
+        return {"products_sales": products_sales_grouped_by_user_and_product}

@@ -1,40 +1,37 @@
 import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { useProductsMutation } from "@/hooks/products"
 import { maskMoney, sanitizeFMoney } from "@/lib/masks"
-import { cn } from "@/lib/utils"
 import { TProduct } from "@/types/products"
 import { Loader, Pencil, Save, ShoppingCart, X } from "lucide-react"
 import { useState } from "react"
-import { ProductStockModal } from "./product-stock-modal"
 
 type Props = {
   product: TProduct
 }
 
 export const ProductCard = ({ product }: Props) => {
-  const [isEditing, setIsEditing] = useState({ name: false, value: false })
+  const [isEditing, setIsEditing] = useState({
+    name: false,
+    value: false,
+    quantity: false,
+  })
   const [name, setName] = useState(product.name)
   const [value, setValue] = useState(product.value)
+  const [quantity, setQuantity] = useState(product.quantity)
 
   const { updateProductMutation } = useProductsMutation()
 
-  const toggleEditing = (field: "name" | "value") => {
+  const toggleEditing = (field: "name" | "value" | "quantity") => {
     setIsEditing((prev) => {
       return { ...prev, [field]: !prev[field] }
     })
   }
 
-  const submitChanges = (field: "name" | "value") => {
-    updateProductMutation.mutate({ productId: product.id, name, value })
+  const submitChanges = (field: "name" | "value" | "quantity") => {
+    updateProductMutation.mutate({ productId: product.id, name, value, quantity })
     toggleEditing(field)
   }
 
@@ -103,21 +100,42 @@ export const ProductCard = ({ product }: Props) => {
           />
         )}
         <Separator orientation="vertical" className="h-5 bg-primary" />
-        <div
-          className={cn(
-            "flex items-center gap-1",
-            product.quantity === 0 && "text-red-500"
-          )}
-        >
-          <ShoppingCart size={18} />
-          <X size={18} />
-          {product.quantity}
-        </div>
+        {!isEditing.quantity && (
+          <Button
+            asChild
+            size="sm"
+            variant={product.quantity === 0 ? "destructive" : "secondary"}
+            onClick={() => toggleEditing("quantity")}
+          >
+            <span className="flex items-center gap-1">
+              <ShoppingCart size={18} />
+              <X size={18} />
+              {product.quantity}
+            </span>
+          </Button>
+        )}
+        {isEditing.quantity && (
+          <>
+            <Input
+              defaultValue={quantity}
+              onChange={(e) => setQuantity(parseInt(e.target.value.trim()))}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") submitChanges("quantity")
+              }}
+            />
+            <Button
+              size="sm"
+              onClick={() => submitChanges("quantity")}
+              disabled={!name || updateProductMutation.isPending}
+            >
+              {!updateProductMutation.isPending && <Save size={16} />}
+              {updateProductMutation.isPending && (
+                <Loader size={16} className="animate-spin" />
+              )}
+            </Button>
+          </>
+        )}
       </CardContent>
-
-      <CardFooter className="flex justify-end items-center">
-        <ProductStockModal product={product} />
-      </CardFooter>
     </Card>
   )
 }

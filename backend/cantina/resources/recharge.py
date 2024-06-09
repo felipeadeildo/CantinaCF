@@ -1,5 +1,8 @@
 from datetime import datetime
 
+from cantina.models import Affiliation, Payment, PaymentMethod, User
+from cantina.settings import UPLOAD_FOLDER
+from cantina.utils import allowed_file
 from flask import request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_restful import Resource
@@ -7,10 +10,6 @@ from sqlalchemy import and_, or_
 from sqlalchemy.orm import aliased
 from werkzeug.datastructures import MultiDict
 from werkzeug.utils import secure_filename
-
-from cantina.models import Affiliation, Payment, PaymentMethod, User
-from cantina.settings import UPLOAD_FOLDER
-from cantina.utils import allowed_file
 
 from .. import cache, db
 from ..utils import generate_query_hash
@@ -59,6 +58,14 @@ class RechargeResource(Resource):
                 "message": "Método de pagamento não pode ser usado para recargas."
             }, 400
 
+        payment_exists = Payment.query.filter_by(
+            user_id=target_user_id, status="to allow"
+        ).first()
+        if payment_exists:
+            return {
+                "message": "Já existe um pedido de recarga em aberto. Aguarde aprovação."
+            }, 400
+
         observations = data.get("observations")
         new_payment = Payment(
             payment_method=payment_method,
@@ -69,18 +76,15 @@ class RechargeResource(Resource):
         )
 
         if payment_method.is_payroll:
-            # target user is employee
-            if target_user.role.id in (1, 2, 4):
+            affiliation = Affiliation.query.filter_by(
+                affiliated_id=target_user_id
+            ).first()
+            # if isn't affiliate
+            if not affiliation:
+                # the target user is not affiliate, so the payment is for the user itself
                 new_payment.payroll_receiver_id = target_user_id
-            # target user is affiliated
             else:
-                affiliation = Affiliation.query.filter_by(
-                    affiliated_id=target_user_id
-                ).first()
-                if not affiliation:
-                    return {
-                        "message": "Você não está afiliado à nenhum funcionário."
-                    }, 400
+                # the target user is affiliate, so the payment is for the affiliator
                 new_payment.payroll_receiver_id = affiliation.affiliator_id
 
         if payment_method.need_proof:
