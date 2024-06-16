@@ -155,7 +155,7 @@ class ProductsResource(Resource):
         if not data.get("value"):
             return {"message": "Valor do produto deve ser especificado."}, 400
 
-        if not data.get("quantity"):
+        if data.get("quantity") is None:
             return {"message": "Quantidade do produto deve ser especificado."}, 400
 
         product_id = data.get("id")
