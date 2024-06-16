@@ -17,7 +17,13 @@ Welcome to the Cantina School Website repository! This project provides a compre
 
 ### 1. Deploy Using Docker
 
-Ensure you have Docker installed on your machine. To deploy the application, simply run the following command:
+Ensure you have ganarated a SSL certificate with this command:
+
+```bash
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout cert.key -out cert.crt
+```
+
+After this, ensure you have Docker installed on your machine. To deploy the application, simply run the following command:
 
 ```bash
 docker-compose up -d

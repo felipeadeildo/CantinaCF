@@ -8,3 +8,4 @@ instance/
 # migrations/
 .env
 nginx_data/
+cert*
