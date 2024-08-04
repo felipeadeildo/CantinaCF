@@ -23,7 +23,7 @@ class CartResource(Resource):
         if product_id is None:
             return {"message": "ID do produto deve ser especificado."}, 400
 
-        product = Product.query.filter_by(id=product_id).first()
+        product = Product.query.filter_by(id=product_id, is_deleted=False).first()
         if product is None:
             return {"message": "Produto não encontrado."}, 404
 
@@ -78,7 +78,9 @@ class CartResource(Resource):
 class ProductsResource(Resource):
     @jwt_required()
     def get(self):
-        product_query = Product.query.order_by(Product.name.asc())
+        product_query = Product.query.filter_by(is_deleted=False).order_by(
+            Product.name.asc()
+        )
 
         # TODO: Replace "á" with "a" in the query and things like this from the pt-br
 
@@ -186,6 +188,21 @@ class ProductsResource(Resource):
         db.session.commit()
 
         return {"message": message.strip() or "Sem alteração! Ok :P"}, 200
+
+    @jwt_required()
+    def delete(self):
+        product_id = request.args.get("id")
+        if not product_id:
+            return {"message": "ID do produto deve ser especificado."}, 400
+
+        product = Product.query.filter_by(id=product_id, is_deleted=False).first()
+        if product is None:
+            return {"message": "Produto não encontrado."}, 404
+
+        product.is_deleted = True
+        db.session.commit()
+
+        return {"message": "Produto apagado com sucesso."}, 200
 
 
 class PurchaseResource(Resource):
