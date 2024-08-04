@@ -4,7 +4,18 @@ from cantina import db
 from cantina.utils import verify_password
 from flask import url_for
 from sqlalchemy import event
+from sqlalchemy.ext.declarative import declared_attr
 from werkzeug.security import generate_password_hash
+
+
+class SoftDeleteMixin:
+    @declared_attr
+    def is_deleted(cls):
+        return db.Column(db.Boolean, default=False, nullable=False)
+
+    @classmethod
+    def not_deleted(cls):
+        return not cls.is_deleted
 
 
 class Role(db.Model):
@@ -101,7 +112,7 @@ class User(db.Model):
         return verify_password(password, self.password)
 
 
-class Product(db.Model):
+class Product(db.Model, SoftDeleteMixin):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Text, nullable=False, info={"label": "Nome"})
     value = db.Column(db.DECIMAL(10, 2), nullable=False, info={"label": "Valor (R$)"})
