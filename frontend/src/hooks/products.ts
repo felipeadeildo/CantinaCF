@@ -5,6 +5,7 @@ import { fetchCart } from "@/services/cart"
 import {
   addProductStock,
   addProductToCart,
+  deleteProduct,
   fetchProducts,
   removeProductFromCart,
   updateProduct,
@@ -157,7 +158,7 @@ export const useProductsMutation = () => {
       productId,
       name,
       value,
-      quantity
+      quantity,
     }: {
       productId: number
       name: string
@@ -199,9 +200,28 @@ export const useProductsMutation = () => {
     },
   })
 
+  const deleteProductMutation = useMutation({
+    mutationFn: (productId: number) => deleteProduct(token, productId),
+    onSuccess: ({ message }) => {
+      queryClient.invalidateQueries({ queryKey: ["products"] })
+      toast({
+        title: "Sucesso",
+        description: message,
+      })
+    },
+    onError: (error) => {
+      toast({
+        title: "Erro",
+        description: error.message,
+        variant: "destructive",
+      })
+    },
+  })
+
   return {
     addProductToCartMutation,
     removeProductFromCartMutation,
+    deleteProductMutation,
     updateProductMutation,
     productStockMutation,
   }

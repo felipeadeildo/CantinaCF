@@ -123,3 +123,22 @@ export const addProductStock = async (
     throw Error(getErrorMessage(e))
   }
 }
+
+export const deleteProduct = async (
+  token: string | null,
+  productId: number
+): Promise<{ message: string }> => {
+  try {
+    const res = await axios.delete("/api/products/", {
+      params: {
+        id: productId,
+      },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    return res.data
+  } catch (e) {
+    throw Error(getErrorMessage(e as AxiosError))
+  }
+}

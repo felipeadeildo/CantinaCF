@@ -5,7 +5,7 @@ import { Separator } from "@/components/ui/separator"
 import { useProductsMutation } from "@/hooks/products"
 import { maskMoney, sanitizeFMoney } from "@/lib/masks"
 import { TProduct } from "@/types/products"
-import { Loader, Pencil, Save, ShoppingCart, X } from "lucide-react"
+import { Loader, Pencil, Save, ShoppingCart, Trash, X } from "lucide-react"
 import { useState } from "react"
 
 type Props = {
@@ -22,7 +22,7 @@ export const ProductCard = ({ product }: Props) => {
   const [value, setValue] = useState(product.value)
   const [quantity, setQuantity] = useState(product.quantity)
 
-  const { updateProductMutation } = useProductsMutation()
+  const { updateProductMutation, deleteProductMutation } = useProductsMutation()
 
   const toggleEditing = (field: "name" | "value" | "quantity") => {
     setIsEditing((prev) => {
@@ -42,9 +42,23 @@ export const ProductCard = ({ product }: Props) => {
           {!isEditing.name && (
             <>
               <span>{product.name}</span>
-              <Button size="sm" variant="secondary" onClick={() => toggleEditing("name")}>
-                <Pencil size={16} />
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => toggleEditing("name")}
+                >
+                  <Pencil size={16} />
+                </Button>
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  onClick={() => deleteProductMutation.mutate(product.id)}
+                  disabled={updateProductMutation.isPending}
+                >
+                  <Trash size={16} />
+                </Button>
+              </div>
             </>
           )}
           {isEditing.name && (
