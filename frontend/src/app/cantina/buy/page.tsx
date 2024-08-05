@@ -22,7 +22,7 @@ const Buy = () => {
 
   return (
     <>
-      <div className="container mx-auto">
+      <div className="container mx-auto mb-32">
         <Input
           startIcon={Search}
           className="my-4"
