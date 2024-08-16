@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 
 from cantina import db
@@ -284,11 +285,22 @@ class Payment(db.Model):
     )
     status = db.Column(db.String(20), info={"label": "Status"})
 
+    transaction_data = db.Column(
+        db.Text, nullable=True, info={"label": "Dados da Transação (PIX)"}
+    )
+
     payment_method = db.relationship("PaymentMethod", backref="payments")
     payroll_receiver = db.relationship(
         "User", foreign_keys=[payroll_receiver_id], backref="payroll_receivers"
     )
 
+    @property
+    def transaction_data_json(self):
+        if self.transaction_data:
+            return json.loads(self.transaction_data)
+        return {}
+
+    # Outras propriedades e métodos existentes
     @property
     def formatted_added_at(self):
         return self.added_at.strftime("%d/%m/%Y %H:%M")
@@ -328,6 +340,9 @@ class Payment(db.Model):
                 value = (
                     self.payroll_receiver.as_dict() if self.payroll_receiver else None
                 )
+            elif key in ("transaction_data",):
+                key = "transaction_data_json"
+                value = self.transaction_data_json
             else:
                 value = getattr(self, key)
             data[key] = value
@@ -369,6 +384,8 @@ class Payment(db.Model):
                     if (status := getattr(self, key))
                     else None
                 )
+            elif key in ("transaction_data",):
+                value = self.transaction_data_json
             else:
                 value = getattr(self, key)
             data[friendly_key] = value

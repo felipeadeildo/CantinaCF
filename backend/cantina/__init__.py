@@ -91,6 +91,7 @@ def create_app(settings_map=settings_map):
         ("PaymentsResource", "/payments"),
         ("ProductsDispatchResource", "/products_dispatch"),
         ("ProductSalesStatsResource", "/product_sales_stats"),
+        ("MercadoPagoWebhookResource", "/mercado-pago-webhook"),
     ]
     from cantina import resources
 

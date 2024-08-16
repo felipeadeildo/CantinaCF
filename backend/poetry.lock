@@ -688,6 +688,23 @@ files = [
 traitlets = "*"
 
 [[package]]
+name = "mercadopago"
+version = "2.2.3"
+description = "Mercadopago SDK module for Payments integration"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "mercadopago-2.2.3-py3-none-any.whl", hash = "sha256:157f307b0072bf64feaf4d3319d705e58a5e297d09fd594f9a25c51c3552ba5e"},
+    {file = "mercadopago-2.2.3.tar.gz", hash = "sha256:7e6e51d49e0ba511be72ff282983b30e251543eedf1abacf35441cb5f1b39183"},
+]
+
+[package.dependencies]
+requests = "*"
+
+[package.extras]
+testing = ["unittest"]
+
+[[package]]
 name = "numpy"
 version = "1.26.3"
 description = "Fundamental package for array computing in Python"
@@ -923,6 +940,20 @@ files = [
 
 [package.dependencies]
 six = ">=1.5"
+
+[[package]]
+name = "python-dotenv"
+version = "1.0.1"
+description = "Read key-value pairs from a .env file and set them as environment variables"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "python-dotenv-1.0.1.tar.gz", hash = "sha256:e324ee90a023d808f1959c46bcbc04446a10ced277783dc6ee09987c37ec10ca"},
+    {file = "python_dotenv-1.0.1-py3-none-any.whl", hash = "sha256:f7b63ef50f1b690dddf550d03497b66d609393b40b564ed0d674909a68ebf16a"},
+]
+
+[package.extras]
+cli = ["click (>=5.0)"]
 
 [[package]]
 name = "pytz"
@@ -1186,4 +1217,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "a861607845fead3facf35e96ec9f769ad977f2ef2cdb81154f171c779fb61ad8"
+content-hash = "486d04f040b395f3d1bc5d8b7721698f358a2c3ab1c2d1039c851c77d0b7135d"

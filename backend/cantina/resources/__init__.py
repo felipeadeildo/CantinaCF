@@ -3,6 +3,7 @@ from .auth import LoginResource
 from .cantina import CartResource, ProductsResource, PurchaseResource
 from .dispatch import DispatchResource
 from .export_query import ExportCachedQueryResource
+from .mercado_pago_webhook import MercadoPagoWebhookResource
 from .payment_methods import PaymentMethodsResource
 from .payments import PaymentsResource
 from .payroll import PayrollResource
@@ -15,6 +16,7 @@ from .stats import StatsResource
 from .user import UserResource, UsersResource
 
 __all__ = [
+    "MercadoPagoWebhookResource",
     "ExportCachedQueryResource",
     "ProductsDispatchResource",
     "ProductSalesStatsResource",

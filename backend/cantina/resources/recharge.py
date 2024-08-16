@@ -1,15 +1,16 @@
+import json
 from datetime import datetime
+from typing import Any
 
-from cantina.models import Affiliation, Payment, PaymentMethod, User
-from cantina.settings import UPLOAD_FOLDER
-from cantina.utils import allowed_file
 from flask import request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_restful import Resource
 from sqlalchemy import and_, or_
 from sqlalchemy.orm import aliased
 from werkzeug.datastructures import MultiDict
-from werkzeug.utils import secure_filename
+
+from cantina.models import Affiliation, Payment, PaymentMethod, User
+from cantina.services import generate_pix_payment
 
 from .. import cache, db
 from ..utils import generate_query_hash
@@ -18,7 +19,7 @@ from ..utils import generate_query_hash
 class RechargeResource(Resource):
     @jwt_required()
     def post(self):
-        data = request.form
+        data = request.json
         if not data:
             return {"message": "Nenhum dado enviado."}, 400
 
@@ -27,7 +28,7 @@ class RechargeResource(Resource):
         if not requester_user:
             return {"message": "Usuário não encontrado."}, 404
 
-        target_user_id = data.get("targetUserId", -1, type=int)
+        target_user_id = data.get("targetUserId", -1)
 
         if requester_user.role.id != 1 and target_user_id != requester_user_id:
             return {
@@ -87,24 +88,33 @@ class RechargeResource(Resource):
                 # the target user is affiliate, so the payment is for the affiliator
                 new_payment.payroll_receiver_id = affiliation.affiliator_id
 
-        if payment_method.need_proof:
-            file = request.files.get("proof")
-            if file is None:
-                return {"message": "Comprovante de recarga obrigatório."}, 400
-
-            current_datetime_str = datetime.now().strftime("%Y-%m-%d %H-%M-%S")
-            filename = secure_filename(
-                f"{target_user_id}.{payment_method.name}.{current_datetime_str}.{file.filename}"
-            )
-            if not allowed_file(filename):
-                return {"message": "Comprovante de recarga inválido."}, 400
-            file.save(UPLOAD_FOLDER / filename)
-            new_payment.proof_path = filename
-
         db.session.add(new_payment)
         db.session.commit()
 
-        return {"message": "Recarga registrada com sucesso."}, 201
+        msg: dict = {
+            "message": "Recarga registrada com sucesso.",
+        }
+        if payment_method.id == 1:
+            res = generate_pix_payment(new_payment, target_user)
+            new_payment.transaction_data = json.dumps(res["transaction_data"])
+            db.session.commit()
+            msg.update(bank=res)
+
+        return msg, 201
+
+    @classmethod
+    def update_payment(cls, payment: Any, accept: bool):
+        if accept:
+            payment.status = "accepted"
+            if payment.payroll_receiver:
+                payment.payroll_receiver.balance_payroll += payment.value
+
+            payment.user.balance += payment.value
+
+        else:
+            payment.status = "rejected"
+
+        db.session.commit()
 
     @jwt_required()
     def put(self):
@@ -135,15 +145,7 @@ class RechargeResource(Resource):
         if not isinstance(accept, bool):
             return {"message": "Aceitar recarga inválido."}, 400
 
-        if accept:
-            payment.status = "accepted"
-            if payment.payroll_receiver:
-                payment.payroll_receiver.balance_payroll += payment.value
-
-            payment.user.balance += payment.value
-
-        else:
-            payment.status = "rejected"
+        self.update_payment(payment, accept)
 
         payment.allowed_by = requester_user_id
 
