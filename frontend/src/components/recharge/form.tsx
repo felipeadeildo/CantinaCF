@@ -1,11 +1,11 @@
-import { PAYMENT_METHODS_LABELS } from "@/constants/translations"
-import { useAuth } from "@/contexts/auth"
-import { maskMoney } from "@/lib/masks"
-import { rechargeSchema, TRechargeSchema } from "@/schemas/recharge"
-import { PaymentMethods } from "@/types/recharge"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { Button } from "../ui/button"
+import { PAYMENT_METHODS_LABELS } from '@/constants/translations'
+import { useAuth } from '@/contexts/auth'
+import { maskMoney } from '@/lib/masks'
+import { rechargeSchema, TRechargeSchema } from '@/schemas/recharge'
+import { PaymentMethods } from '@/types/recharge'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useForm } from 'react-hook-form'
+import { Button } from '../ui/button'
 import {
   Form,
   FormControl,
@@ -13,19 +13,19 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "../ui/form"
-import { Input } from "../ui/input"
+} from '../ui/form'
+import { Input } from '../ui/input'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../ui/select"
+} from '../ui/select'
 
-import { useRechargeMutation } from "@/hooks/recharge"
-import { CreditCard, Loader } from "lucide-react"
-import { ComboboxUsers } from "../combobox/users"
+import { useRechargeMutation } from '@/hooks/recharge'
+import { CreditCard, Loader } from 'lucide-react'
+import { ComboboxUsers } from '../combobox/users'
 
 export const RechargeForm = () => {
   const { user } = useAuth()
@@ -35,27 +35,17 @@ export const RechargeForm = () => {
     defaultValues: {
       value: undefined,
       paymentMethod: PaymentMethods.PIX,
-      targetUserId: user?.id.toString() || "",
-      proof: undefined,
+      targetUserId: user?.id.toString() || '',
       observations: undefined,
     },
   })
-  const proofRef = form.register("proof")
 
   const rechargeMutation = useRechargeMutation()
 
-  const onSubmit = async (data: TRechargeSchema) => {
-    const formData = new FormData()
-    if (data.paymentMethod === PaymentMethods.PIX && data["proof"]) {
-      formData.append("proof", data["proof"])
-    }
-    formData.append("rechargeValue", data.value.toString())
-    formData.append("paymentMethod", data.paymentMethod)
-    formData.append("targetUserId", data.targetUserId?.toString() || "")
-    formData.append("observations", data.observations || "")
-
-    await rechargeMutation.mutateAsync(formData)
+  const onSubmit = (data: TRechargeSchema) => {
+    rechargeMutation.mutate(data)
   }
+
   return (
     <Form {...form}>
       <form
@@ -103,7 +93,7 @@ export const RechargeForm = () => {
                 </FormControl>
                 <SelectContent>
                   {Object.entries(PaymentMethods)
-                    .filter(([key, value]) => key !== "SYSTEM")
+                    .filter(([key, value]) => key !== 'SYSTEM')
                     .map(([key, value]) => (
                       <SelectItem key={value} value={value}>
                         {PAYMENT_METHODS_LABELS[key]}
@@ -130,26 +120,6 @@ export const RechargeForm = () => {
           )}
         />
 
-        {form.watch("paymentMethod") === PaymentMethods.PIX && (
-          <FormField
-            control={form.control}
-            name="proof"
-            render={({ field }) => (
-              <FormItem className="space-y-0">
-                <FormLabel>Comprovante</FormLabel>
-                <FormControl>
-                  <Input
-                    type="file"
-                    {...proofRef}
-                    disabled={form.formState.isSubmitting}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
-
         {user?.role_id === 1 ? (
           <FormField
             control={form.control}
@@ -159,7 +129,9 @@ export const RechargeForm = () => {
                 <FormLabel>Alvo da Recarga</FormLabel>
                 <FormControl>
                   <ComboboxUsers
-                    onUserSelected={(user) => field.onChange(user?.id.toString())}
+                    onUserSelected={(user) =>
+                      field.onChange(user?.id.toString())
+                    }
                     btnClassName="w-full max-w-full"
                     labelClassName="text-sm"
                     defaultUser={user}
@@ -170,7 +142,11 @@ export const RechargeForm = () => {
             )}
           />
         ) : (
-          <input type="hidden" {...form.register("targetUserId")} value={user?.id} />
+          <input
+            type="hidden"
+            {...form.register('targetUserId')}
+            value={user?.id}
+          />
         )}
 
         <Button

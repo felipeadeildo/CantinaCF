@@ -1,4 +1,4 @@
-import { TUser } from "./user"
+import { TUser } from './user'
 
 export type TPaymentMethod = {
   id: number
@@ -8,6 +8,12 @@ export type TPaymentMethod = {
   updated_at: string
   is_payroll: boolean
   is_protected: boolean
+}
+
+export type TTRansactionData = {
+  qr_code: string
+  qr_code_base64: string
+  ticket_url: string
 }
 
 export type TPayment = {
@@ -22,20 +28,21 @@ export type TPayment = {
   payroll_receiver_id: number
   is_paypayroll: boolean
   status: string
+  transaction_data_json: TTRansactionData
 }
 
 export const PaymentMethods = {
-  PIX: "1",
-  CREDIT_CARD: "2",
-  DEBIT_CARD: "3",
-  CASH: "4",
-  PAYROLL: "5",
-  SYSTEM: "6",
+  PIX: '1',
+  CREDIT_CARD: '2',
+  DEBIT_CARD: '3',
+  CASH: '4',
+  PAYROLL: '5',
+  SYSTEM: '6',
 } as const
 
 export type TPaymentRequest = Omit<
   TPayment,
-  "allowed_by" | "user_id" | "payment_method_id" | "payroll_receiver_id"
+  'allowed_by' | 'user_id' | 'payment_method_id' | 'payroll_receiver_id'
 > & {
   user: TUser
   allowed_by_user: TUser | null

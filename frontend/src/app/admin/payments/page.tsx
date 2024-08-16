@@ -10,7 +10,7 @@ const Payments = () => {
   const { data: payments = [], isLoading } = usePaymentRequests()
   return (
     <div>
-      <h1 className="text-xl my-4 text-center">Verificação de Pagamentos</h1>
+      <h1 className="text-xl my-4 text-center">Liberar Recargas</h1>
 
       {isLoading && (
         <div className="flex justify-center items-center mt-32">
