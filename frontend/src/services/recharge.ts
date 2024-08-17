@@ -5,7 +5,7 @@ import axios, { AxiosError } from 'axios'
 export const confirmRecharge = async (
   token: string | null,
   formData: TRechargeSchema
-): Promise<string> => {
+): Promise<{ message: string; paymentId?: number }> => {
   const { value, paymentMethod, targetUserId, observations } = formData
   const payload = {
     rechargeValue: value.toString(),
@@ -21,7 +21,7 @@ export const confirmRecharge = async (
       },
     })
 
-    return res.data.message
+    return res.data
   } catch (e) {
     throw Error(getErrorMessage(e as AxiosError))
   }

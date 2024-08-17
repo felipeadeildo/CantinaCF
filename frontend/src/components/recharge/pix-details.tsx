@@ -4,8 +4,8 @@ import { useState } from 'react'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 
-import { Clipboard, Verified } from 'lucide-react'
 import { toReal } from '@/lib/utils'
+import { Clipboard, Verified } from 'lucide-react'
 
 export const PixDetails = ({ payment }: { payment: TPaymentRequest }) => {
   const [buttonIcon, setButtonIcon] = useState<React.ReactNode>(<Clipboard />)

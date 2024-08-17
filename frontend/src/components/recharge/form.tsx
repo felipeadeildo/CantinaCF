@@ -33,7 +33,7 @@ export const RechargeForm = () => {
   const form = useForm<TRechargeSchema>({
     resolver: zodResolver(rechargeSchema),
     defaultValues: {
-      value: undefined,
+      value: 0,
       paymentMethod: PaymentMethods.PIX,
       targetUserId: user?.id.toString() || '',
       observations: undefined,
@@ -66,10 +66,10 @@ export const RechargeForm = () => {
                     e.target.value = maskMoney(e.target.value)
                     field.onChange(e)
                   }}
-                  defaultValue="0,00"
                   disabled={form.formState.isSubmitting}
                 />
               </FormControl>
+
               <FormMessage />
             </FormItem>
           )}

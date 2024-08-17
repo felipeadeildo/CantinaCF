@@ -7,10 +7,14 @@ import { useRouter } from 'next/navigation'
 
 export const useRechargeMutation = () => {
   const { token } = useAuth()
-  const router = useRouter()
   const { toast } = useToast()
+  const router = useRouter()
 
-  return useMutation<string, Error, TRechargeSchema>({
+  return useMutation<
+    { message: string; paymentId?: number },
+    Error,
+    TRechargeSchema
+  >({
     mutationFn: (formData) => confirmRecharge(token, formData),
     mutationKey: ['recharge'],
     onError: (err) => {
@@ -23,9 +27,10 @@ export const useRechargeMutation = () => {
     onSuccess: (data) => {
       toast({
         title: 'Sucesso',
-        description: data,
+        description: data.message,
       })
-      router.push('/')
+
+      router.push(`/cantina/recharge/${data.paymentId}`)
     },
   })
 }

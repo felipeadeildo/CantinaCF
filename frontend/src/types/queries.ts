@@ -12,6 +12,7 @@ export type TBRechargesQuery = {
   isPayrollHistory?: boolean
   from?: Date
   to?: Date
+  paymentId?: number
 }
 
 export type TRechargesQuery = [
