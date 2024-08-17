@@ -1,21 +1,21 @@
-import NavBar from "@/components/navbar"
-import { ThemeProvider } from "@/components/theme-provider"
-import { Toaster } from "@/components/ui/toaster"
-import { AuthProvider } from "@/contexts/auth"
-import type { Metadata } from "next"
-import { Inter } from "next/font/google"
+import NavBar from '@/components/navbar'
+import { ThemeProvider } from '@/components/theme-provider'
+import { Toaster } from '@/components/ui/toaster'
+import { AuthProvider } from '@/contexts/auth'
+import type { Metadata } from 'next'
+import { Inter } from 'next/font/google'
 
-import { ChartJsProvider } from "@/contexts/chartjs"
-import { Suspense } from "react"
-import "./globals.css"
-import Loading from "./loading"
-import Providers from "./providers"
+import { ChartJsProvider } from '@/contexts/chartjs'
+import { Suspense } from 'react'
+import './globals.css'
+import Loading from './loading'
+import Providers from './providers'
 
-const inter = Inter({ subsets: ["latin"] })
+const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: "CantinaCF -  Colégio Fantástico",
-  description: "Site da Cantina do Colégio Fantástico!",
+  title: 'CantinaCF -  Colégio Fantástico',
+  description: 'Site da Cantina do Colégio Fantástico!',
 }
 
 export default function RootLayout({
@@ -24,7 +24,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="pt-br">
+    <html lang="pt-br" suppressHydrationWarning>
       <head>
         <link rel="icon" href="/img/fantastico.ico" />
         {/* <!-- Primary Meta Tags --> */}
@@ -52,7 +52,10 @@ Feito com  ❤️ por @felipeadeildo."
         <meta property="twitter:card" content="summary_large_image" />
         {/* TODO: Adicionar uma variável de ambiente para setar o domínio */}
         {/* <meta property="twitter:url" content="http://localhost:3000" /> */}
-        <meta property="twitter:title" content="CantinaCF - Colégio Fantástico" />
+        <meta
+          property="twitter:title"
+          content="CantinaCF - Colégio Fantástico"
+        />
         <meta
           property="twitter:description"
           content="Site da Cantina do Colégio Fantástico!
