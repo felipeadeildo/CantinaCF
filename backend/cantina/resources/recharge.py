@@ -93,6 +93,7 @@ class RechargeResource(Resource):
 
         msg: dict = {
             "message": "Recarga registrada com sucesso.",
+            "paymentId": new_payment.id
         }
         if payment_method.id == 1:
             res = generate_pix_payment(new_payment, target_user)
@@ -140,6 +141,9 @@ class RechargeResource(Resource):
             return {
                 "message": "Esta recarga não pode ser editada uma vez que ela já foi aceita/rejeitada (Espere site atualizar a lista de recargas)."
             }, 400
+
+        if payment.payment_method_id == 1:
+            return {"message": "Recargas Pix são aceitas automáticamente."}, 400
 
         accept = data.get("accept")
         if not isinstance(accept, bool):
