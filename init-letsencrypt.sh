@@ -41,7 +41,7 @@ echo "### Starting nginx ..."
 docker compose up --force-recreate -d nginx
 echo
 
-echo "### Deleting dummy certificate for $DOMAIN ..."
+echo "### Deleting dummy certificade for $DOMAIN..."
 docker compose run --rm --entrypoint "\
   rm -Rf /etc/letsencrypt/live/$DOMAIN && \
   rm -Rf /etc/letsencrypt/archive/$DOMAIN && \
@@ -49,7 +49,8 @@ rm -Rf /etc/letsencrypt/renewal/$DOMAIN.conf" certbot
 echo
 
 echo "### Requesting Let's Encrypt certificate for $DOMAIN ..."
-#Join $DOMAIN to -d args
+
+# Join $DOMAIN to -d args
 domain_args="-d $DOMAIN"
 
 # Select appropriate email arg

@@ -12,9 +12,10 @@ services:
     volumes:
       - ./certbot/conf:/etc/letsencrypt
       - ./certbot/www:/var/www/certbot
-      - ./nginx_data:/var/log/nginx
+      - ./nginx/logs:/var/log/nginx
+      - ./nginx/data:/etc/nginx/conf.d
     environment:
-      - DOMAIN: ${DOMAIN}
+      DOMAIN: ${DOMAIN}
     depends_on:
       - cantinacf-frontend
     networks:
@@ -41,7 +42,7 @@ services:
     networks:
       - cantinacf
     environment:
-      - TZ: America/Maceio
+      TZ: America/Maceio
 
   cantinacf-frontend:
     build:
