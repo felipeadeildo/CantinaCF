@@ -1,35 +1,47 @@
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { maskMoney } from "@/lib/masks"
-import { cn, getAttachUrl } from "@/lib/utils"
-import { TPaymentRequest } from "@/types/recharge"
-import { FileText } from "lucide-react"
-import Link from "next/link"
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { maskMoney } from '@/lib/masks'
+import { cn, getAttachUrl } from '@/lib/utils'
+import { TPaymentRequest } from '@/types/recharge'
+import { DiamondPercent, FileText } from 'lucide-react'
+import Link from 'next/link'
 
 type Props = {
   payment: TPaymentRequest
   isPending?: boolean
+  showPayButton?: boolean
 }
 
-export const PaymentCard = ({ payment, isPending = false }: Props) => {
+export const PaymentCard = ({
+  payment,
+  isPending = false,
+  showPayButton = false,
+}: Props) => {
   return (
     <Card
       key={payment.id}
       className={cn(
-        "border-2",
-        payment.status == "accepted" && "bg-primary/10",
-        payment.status == "rejected" && "bg-destructive/30",
-        payment.status == "to allow" && "bg-yellow-400/40"
+        'border-2',
+        payment.status == 'accepted' && 'bg-primary/10',
+        payment.status == 'rejected' && 'bg-destructive/30',
+        payment.status == 'to allow' && 'bg-yellow-400/40'
       )}
     >
-      <CardContent className={cn("grid gap-0.5", isPending && "text-xs px-1.5 py-1")}>
+      <CardContent
+        className={cn('grid gap-0.5', isPending && 'text-xs px-1.5 py-1')}
+      >
         {!isPending && (
           <div>
             <strong>
-              {payment.status === "accepted" ? "Aceito por:" : "Rejeitado por:"}
+              {payment.status === 'accepted' ? 'Aceito por:' : 'Rejeitado por:'}
             </strong>
             {payment.allowed_by_user ? (
-              <Button variant="link" size="sm" className="h-2 py-0 px-1 my-0" asChild>
+              <Button
+                variant="link"
+                size="sm"
+                className="h-2 py-0 px-1 my-0"
+                asChild
+              >
                 <Link
                   href={`/profile?userId=${payment.allowed_by_user.id}`}
                   target="_blank"
@@ -38,7 +50,7 @@ export const PaymentCard = ({ payment, isPending = false }: Props) => {
                 </Link>
               </Button>
             ) : (
-              "Não Liberado ainda"
+              'Não Liberado ainda'
             )}
           </div>
         )}
@@ -46,7 +58,12 @@ export const PaymentCard = ({ payment, isPending = false }: Props) => {
         <div>
           <strong>Forma de Pagamento:</strong>
           {payment.proof_path ? (
-            <Button variant="link" size="sm" className="h-2 py-0 px-1 my-0" asChild>
+            <Button
+              variant="link"
+              size="sm"
+              className="h-2 py-0 px-1 my-0"
+              asChild
+            >
               <Link href={getAttachUrl(payment.proof_path)} target="_blank">
                 <FileText size={16} className="mr-1" />
                 {payment.payment_method}
@@ -60,11 +77,16 @@ export const PaymentCard = ({ payment, isPending = false }: Props) => {
         {payment.payroll_receiver && (
           <div>
             <strong>Recebedor do Saldo Devedor:</strong>
-            <Button variant="link" size="sm" className="h-2 py-0 px-0.5 my-0" asChild>
+            <Button
+              variant="link"
+              size="sm"
+              className="h-2 py-0 px-0.5 my-0"
+              asChild
+            >
               <Link
                 href={`/profile?userId=${payment.payroll_receiver.id}`}
                 target="_blank"
-                className={cn(isPending && "text-xs")}
+                className={cn(isPending && 'text-xs')}
               >
                 {payment.payroll_receiver.name}
               </Link>
@@ -82,6 +104,15 @@ export const PaymentCard = ({ payment, isPending = false }: Props) => {
         <div>
           <strong>Data e Hora:</strong> {payment.added_at}
         </div>
+
+        {showPayButton && payment.payment_method === 'PIX' && (
+          <Button size="sm" className="w-full" asChild>
+            <Link href={`/cantina/recharge/${payment.id}`}>
+              <DiamondPercent size={16} className="mr-1" />
+              Pagar
+            </Link>
+          </Button>
+        )}
       </CardContent>
     </Card>
   )
