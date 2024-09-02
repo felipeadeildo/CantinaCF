@@ -15,7 +15,7 @@ services:
       - ./certbot/conf:/etc/letsencrypt
       - ./certbot/www:/var/www/certbot
     environment:
-      - DOMAIN=${DOMAIN}
+      - DOMAIN: ${DOMAIN}
     depends_on:
       - cantinacf-frontend
     networks:
@@ -42,7 +42,7 @@ services:
     networks:
       - cantinacf
     environment:
-      - TZ=America/Maceio
+      - TZ: America/Maceio
 
   cantinacf-frontend:
     build:
