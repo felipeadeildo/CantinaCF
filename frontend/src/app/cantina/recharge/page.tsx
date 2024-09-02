@@ -11,7 +11,6 @@ import {
 } from '@/components/ui/card'
 import { useAuth } from '@/contexts/auth'
 import { usePayments } from '@/hooks/payments'
-import { PaymentMethods } from '@/types/recharge'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
@@ -22,10 +21,9 @@ const Recharge = () => {
   const { data: paymentsPages } = usePayments({
     userId: user?.id,
     status: 'to allow',
-    paymentMethodIds: [Number(PaymentMethods.PIX)],
   })
 
-  const [pixPaymentPending, setPixPaymentPending] = useState(false)
+  const [paymentPending, setPaymentPending] = useState(false)
   const [countdown, setCountdown] = useState(3)
 
   useEffect(() => {
@@ -36,19 +34,19 @@ const Recharge = () => {
       paymentsPages.pages[0].payments &&
       paymentsPages.pages[0].payments.length > 0
     ) {
-      setPixPaymentPending(true)
+      setPaymentPending(true)
     }
   }, [paymentsPages])
 
   useEffect(() => {
-    if (!pixPaymentPending) return
+    if (!paymentPending) return
 
     const interval = setInterval(() => {
       setCountdown((prev) => (prev > 0 ? prev - 1 : 0))
     }, 1000)
 
     return () => clearInterval(interval)
-  }, [pixPaymentPending])
+  }, [paymentPending])
 
   useEffect(() => {
     if (countdown === 0 && paymentsPages?.pages?.[0]?.payments?.[0]?.id) {
@@ -58,10 +56,9 @@ const Recharge = () => {
 
   return (
     <div className="flex justify-center items-center h-[80dvh]">
-      {pixPaymentPending ? (
+      {paymentPending ? (
         <h1 className="text-xl my-2 text-center">
-          Você tem um pagamento PIX em andamento... aguarde {countdown}{' '}
-          segundos...
+          Você tem um pagamento em andamento... aguarde {countdown} segundos...
         </h1>
       ) : (
         <Card className="w-full max-w-md text-secondary-foreground">
