@@ -1,6 +1,8 @@
 services:
   nginx:
     image: nginx:1.25.3-alpine
+    env_file:
+      - .env
     container_name: cantinacf-nginx
     restart: unless-stopped
     hostname: nginx
