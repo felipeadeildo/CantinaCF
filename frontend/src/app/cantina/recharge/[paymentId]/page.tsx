@@ -9,11 +9,7 @@ import { TPaymentRequest } from '@/types/recharge'
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 
-export const PendingRecharge = ({
-  params,
-}: {
-  params: { paymentId: number }
-}) => {
+const PendingRecharge = ({ params }: { params: { paymentId: number } }) => {
   const queryClient = useQueryClient()
 
   const { data: paymentsPages, isLoading } = usePayments({
