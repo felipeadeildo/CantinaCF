@@ -12,6 +12,8 @@ services:
       - ./nginx_data:/var/log/nginx
       - ./certbot/conf:/etc/letsencrypt
       - ./certbot/www:/var/www/certbot
+    environment:
+      - DOMAIN=${DOMAIN}
     depends_on:
       - cantinacf-frontend
     networks:
@@ -34,7 +36,7 @@ services:
     volumes:
       - ./backend:/app
     ports:
-      - "5000:5000"
+      - '5000:5000'
     networks:
       - cantinacf
     environment:
@@ -55,7 +57,7 @@ services:
     volumes:
       - ./frontend:/app
     ports:
-      - "3000:3000"
+      - '3000:3000'
     environment:
       - NEXT_PUBLIC_BACKEND_URL=http://cantinacf-backend:5000
     networks:

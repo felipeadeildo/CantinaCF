@@ -1,18 +1,23 @@
 #!/bin/bash
 
-domains=(cantina.colegiofantastico.com)
+DOMAIN=$1
+EMAIL=$2
+
+if [ -z "$DOMAIN" ] || [ -z "$EMAIL" ]; then
+    echo "Uso: $0 dominio email"
+    exit 1
+fi
+
 rsa_key_size=4096
 data_path="./certbot"
-email="oie.eu.sou.um@gmail.com" # Adding a valid address is strongly recommended
 staging=0 # Set to 1 if you're testing your setup to avoid hitting request limits
 
 if [ -d "$data_path" ]; then
-    read -p "Existing data found for $domains. Continue and replace existing certificate? (y/N) " decision
+    read -p "Existing data found for $DOMAIN. Continue and replace existing certificate? (y/N) " decision
     if [ "$decision" != "Y" ] && [ "$decision" != "y" ]; then
         exit
     fi
 fi
-
 
 if [ ! -e "$data_path/conf/options-ssl-nginx.conf" ] || [ ! -e "$data_path/conf/ssl-dhparams.pem" ]; then
     echo "### Downloading recommended TLS parameters ..."
@@ -22,9 +27,9 @@ if [ ! -e "$data_path/conf/options-ssl-nginx.conf" ] || [ ! -e "$data_path/conf/
     echo
 fi
 
-echo "### Creating dummy certificate for $domains ..."
-path="/etc/letsencrypt/live/$domains"
-mkdir -p "$data_path/conf/live/$domains"
+echo "### Creating dummy certificate for $DOMAIN ..."
+path="/etc/letsencrypt/live/$DOMAIN"
+mkdir -p "$data_path/conf/live/$DOMAIN"
 docker compose run --rm --entrypoint "\
   openssl req -x509 -nodes -newkey rsa:$rsa_key_size -days 1\
     -keyout '$path/privkey.pem' \
@@ -32,31 +37,23 @@ docker compose run --rm --entrypoint "\
 -subj '/CN=localhost'" certbot
 echo
 
-
 echo "### Starting nginx ..."
 docker compose up --force-recreate -d nginx
 echo
 
-echo "### Deleting dummy certificate for $domains ..."
+echo "### Deleting dummy certificate for $DOMAIN ..."
 docker compose run --rm --entrypoint "\
-  rm -Rf /etc/letsencrypt/live/$domains && \
-  rm -Rf /etc/letsencrypt/archive/$domains && \
-rm -Rf /etc/letsencrypt/renewal/$domains.conf" certbot
+  rm -Rf /etc/letsencrypt/live/$DOMAIN && \
+  rm -Rf /etc/letsencrypt/archive/$DOMAIN && \
+rm -Rf /etc/letsencrypt/renewal/$DOMAIN.conf" certbot
 echo
 
-
-echo "### Requesting Let's Encrypt certificate for $domains ..."
-#Join $domains to -d args
-domain_args=""
-for domain in "${domains[@]}"; do
-    domain_args="$domain_args -d $domain"
-done
+echo "### Requesting Let's Encrypt certificate for $DOMAIN ..."
+#Join $DOMAIN to -d args
+domain_args="-d $DOMAIN"
 
 # Select appropriate email arg
-case "$email" in
-    "") email_arg="--register-unsafely-without-email" ;;
-    *) email_arg="--email $email" ;;
-esac
+email_arg="--email $EMAIL"
 
 # Enable staging mode if needed
 if [ $staging != "0" ]; then staging_arg="--staging"; fi
