@@ -11,6 +11,7 @@ sdk = mercadopago.SDK(MERCADO_PAGO_ACCESS_TOKEN)
 
 def generate_pix_payment(payment: Payment, user: User) -> dict:
     options = RequestOptions(custom_headers={"x-idempotency-key": str(uuid4())})
+    expiration_date = (datetime.now() + timedelta(minutes=10)).isoformat() + "-03:00"
 
     payment_data = {
         "transaction_amount": float(payment.value),
@@ -26,11 +27,13 @@ def generate_pix_payment(payment: Payment, user: User) -> dict:
             "user_id": user.id,
         },
         "external_reference": payment.id,
-        "date_of_expiration": (datetime.now() + timedelta(minutes=10)).isoformat()
-        + "-03:00",
+        "date_of_expiration": expiration_date,
     }
 
     result = sdk.payment().create(payment_data, options)
+    result["response"]["point_of_interaction"]["transation_data"]["expiration_date"] = (
+        expiration_date
+    )
 
     return result["response"]["point_of_interaction"]
 
