@@ -6,6 +6,7 @@ import { Input } from '../ui/input'
 
 import { toReal } from '@/lib/utils'
 import { Clipboard, Verified } from 'lucide-react'
+import { CountdownTimer } from './cowntdown-timer'
 
 export const PixDetails = ({ payment }: { payment: TPaymentRequest }) => {
   const [buttonIcon, setButtonIcon] = useState<React.ReactNode>(<Clipboard />)
@@ -34,6 +35,10 @@ export const PixDetails = ({ payment }: { payment: TPaymentRequest }) => {
 
       <h2>{toReal(payment.value)}</h2>
 
+      <CountdownTimer
+        expiryDate={payment.transaction_data_json.expiration_date}
+      />
+
       <div className="flex gap-2 items-center">
         <Input
           value={payment.transaction_data_json.qr_code}
@@ -46,7 +51,7 @@ export const PixDetails = ({ payment }: { payment: TPaymentRequest }) => {
       </div>
 
       <p className="text-sm text-end">
-        Escaneie o código QR ou copie a código pix para realizar o pagamento!
+        Escaneie o código QR ou copie o código pix para realizar o pagamento!
       </p>
     </div>
   )
