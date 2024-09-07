@@ -2,15 +2,14 @@ import json
 from datetime import datetime
 from typing import Any
 
+from cantina.models import Affiliation, Payment, PaymentMethod, User
+from cantina.services import generate_pix_payment
 from flask import request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_restful import Resource
 from sqlalchemy import and_, or_
 from sqlalchemy.orm import aliased
 from werkzeug.datastructures import MultiDict
-
-from cantina.models import Affiliation, Payment, PaymentMethod, User
-from cantina.services import generate_pix_payment
 
 from .. import cache, db
 from ..utils import generate_query_hash
@@ -28,7 +27,7 @@ class RechargeResource(Resource):
         if not requester_user:
             return {"message": "Usuário não encontrado."}, 404
 
-        target_user_id = data.get("targetUserId", -1)
+        target_user_id = int(data.get("targetUserId", -1))
 
         if requester_user.role.id != 1 and target_user_id != requester_user_id:
             return {
@@ -93,7 +92,7 @@ class RechargeResource(Resource):
 
         msg: dict = {
             "message": "Recarga registrada com sucesso.",
-            "paymentId": new_payment.id
+            "paymentId": new_payment.id,
         }
         if payment_method.id == 1:
             res = generate_pix_payment(new_payment, target_user)
