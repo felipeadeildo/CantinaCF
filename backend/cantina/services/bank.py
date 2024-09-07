@@ -31,6 +31,7 @@ def generate_pix_payment(payment: Payment, user: User) -> dict:
     }
 
     result = sdk.payment().create(payment_data, options)
+    print(result)
     result["response"]["point_of_interaction"]["transation_data"]["expiration_date"] = (
         expiration_date
     )
