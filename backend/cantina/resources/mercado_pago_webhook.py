@@ -1,13 +1,12 @@
 import hashlib
 import hmac
 
-from flask import request
-from flask_restful import Resource
-
 from cantina.models import Payment
 from cantina.resources.recharge import RechargeResource
 from cantina.services import get_payment
 from cantina.settings import MERCADO_PAGO_SECRET
+from flask import request
+from flask_restful import Resource
 
 
 class MercadoPagoWebhookResource(Resource):
@@ -56,8 +55,6 @@ class MercadoPagoWebhookResource(Resource):
         payment_id = request.args.get("data.id")
         if not payment_id:
             return {"message": "ID de pagamento inválido."}, 403
-
-        print(request.json)
 
         payment_infos = get_payment(payment_id)
         db_payment_id = payment_infos["external_reference"]
