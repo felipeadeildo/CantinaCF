@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from uuid import uuid4
 
 import mercadopago
@@ -25,6 +26,8 @@ def generate_pix_payment(payment: Payment, user: User) -> dict:
             "user_id": user.id,
         },
         "external_reference": payment.id,
+        "date_of_expiration": (datetime.now() + timedelta(minutes=10)).isoformat()
+        + "-03:00",
     }
 
     result = sdk.payment().create(payment_data, options)
