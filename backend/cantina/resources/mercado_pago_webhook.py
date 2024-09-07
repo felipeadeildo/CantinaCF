@@ -58,8 +58,10 @@ class MercadoPagoWebhookResource(Resource):
 
         payment_infos = get_payment(payment_id)
         db_payment_id = payment_infos["external_reference"]
+        payment = Payment.query.filter_by(id=db_payment_id).first()
 
         if payment_infos["status"] == "approved":
-            payment = Payment.query.filter_by(id=db_payment_id).first()
-            RechargeResource.update_payment(payment, True)
+            RechargeResource.update_payment(payment, accept=True)
+        elif payment_infos["status"] in ("rejected", "cancelled"):
+            RechargeResource.update_payment(payment, accept=False)
         return {"message": "OK"}, 200
