@@ -6,7 +6,7 @@ import { Input } from '../ui/input'
 
 import { toReal } from '@/lib/utils'
 import { Clipboard, Verified } from 'lucide-react'
-import { CountdownTimer } from './cowntdown-timer'
+import { CountdownTimer } from './countdown-timer'
 
 export const PixDetails = ({ payment }: { payment: TPaymentRequest }) => {
   const [buttonIcon, setButtonIcon] = useState<React.ReactNode>(<Clipboard />)
