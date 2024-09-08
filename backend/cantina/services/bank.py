@@ -6,23 +6,30 @@ from cantina.models import Payment, User
 from cantina.settings import MERCADO_PAGO_ACCESS_TOKEN
 from mercadopago.config import RequestOptions
 
+PIX_EXPIRATION_TIME_MINUTES = 10
+
 sdk = mercadopago.SDK(MERCADO_PAGO_ACCESS_TOKEN)
+
+
+def format_expiration_date(minutes: int) -> str:
+    """
+    Retorna uma string formatada com a data de expiração no formato:
+    "yyyy-MM-dd HH:mm:ss.SSSz", adicionando o tempo em minutos à hora atual.
+    """
+    expiration_date = datetime.now(timezone(timedelta(hours=-3))) + timedelta(
+        minutes=minutes
+    )
+    expiration_date_str = expiration_date.strftime("%Y-%m-%dT%H:%M:%S.%f")[
+        :-3
+    ] + expiration_date.strftime("%z")
+    # Ajustar o formato do offset para ter o ':' (de "-0300" para "-03:00")
+    return expiration_date_str[:-2] + ":" + expiration_date_str[-2:]
 
 
 def generate_pix_payment(payment: Payment, user: User) -> dict:
     options = RequestOptions(custom_headers={"x-idempotency-key": str(uuid4())})
 
-    expiration_date = datetime.now(timezone(timedelta(hours=-3))) + timedelta(
-        minutes=10
-    )
-
-    expiration_date_str = expiration_date.strftime("%Y-%m-%dT%H:%M:%S.%f")[
-        :-3
-    ] + expiration_date.strftime("%z")
-
-    # Ajustar o formato do offset para ter o ':' (de "-0300" para "-03:00")
-    expiration_date_str = expiration_date_str[:-2] + ":" + expiration_date_str[-2:]
-
+    expiration_date_str = format_expiration_date(PIX_EXPIRATION_TIME_MINUTES)
     payment_data = {
         "transaction_amount": float(payment.value),
         "payment_method_id": "pix",
