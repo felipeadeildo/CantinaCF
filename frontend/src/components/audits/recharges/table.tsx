@@ -1,7 +1,7 @@
-import { usePayments } from "@/hooks/payments"
-import { TRechargesQuery } from "@/types/queries"
+import { usePayments } from '@/hooks/payments'
+import { TRechargesQuery } from '@/types/queries'
 
-import { Button } from "@/components/ui/button"
+import { Button } from '@/components/ui/button'
 import {
   Table,
   TableBody,
@@ -11,14 +11,15 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { maskMoney } from "@/lib/masks"
-import { cn, getAttachUrl } from "@/lib/utils"
-import { ArrowDownCircle, FilePlus, FileText, Loader2 } from "lucide-react"
-import Link from "next/link"
+} from '@/components/ui/table'
+import { maskMoney } from '@/lib/masks'
+import { cn, getAttachUrl } from '@/lib/utils'
+import { ArrowDownCircle, FilePlus, FileText, Loader2 } from 'lucide-react'
+import Link from 'next/link'
 
-import { SimpleTooltip } from "@/components/simple-tooltip"
-import { useAuth } from "@/contexts/auth"
+import { SimpleTooltip } from '@/components/simple-tooltip'
+import { useAuth } from '@/contexts/auth'
+import RevertPaymentDialog from './revert-payment-dialog'
 
 export const RechargesTable = ({
   query: [query, setQuery],
@@ -31,23 +32,28 @@ export const RechargesTable = ({
   const { data, hasNextPage, fetchNextPage, isFetchingNextPage, isLoading } =
     usePayments(query)
   return (
-    <div className={cn("my-4", !isPayrollHistory && "container mx-auto")}>
+    <div className={cn('my-4', !isPayrollHistory && 'container mx-auto')}>
       <Table className="border-2">
         <TableCaption>Histórico de Pagamentos</TableCaption>
         <TableHeader>
           <TableRow>
             <TableHead className="text-center">ID</TableHead>
             <TableHead className="text-center">Usuário</TableHead>
-            <TableHead className="text-center">Liberador / Rejeitador</TableHead>
+            <TableHead className="text-center">
+              Liberador / Rejeitador
+            </TableHead>
             {!isPayrollHistory && (
               <TableHead className="text-center">Forma de Pagamento</TableHead>
             )}
             {!isPayrollHistory && (
-              <TableHead className="text-center">Recebedor do Saldo Devedor</TableHead>
+              <TableHead className="text-center">
+                Recebedor do Saldo Devedor
+              </TableHead>
             )}
             <TableHead className="text-center">Valor (R$)</TableHead>
             <TableHead className="text-center">Observação</TableHead>
             <TableHead className="text-center">Data e Hora</TableHead>
+            <TableHead className="text-center">Ações</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -64,7 +70,12 @@ export const RechargesTable = ({
               <TableRow key={payment.id} className="text-center">
                 <TableCell className="text-xs">{payment.id}</TableCell>
                 <TableCell className="p-0">
-                  <Button variant="link" size="sm" className="h-2 p-0 my-0" asChild>
+                  <Button
+                    variant="link"
+                    size="sm"
+                    className="h-2 p-0 my-0"
+                    asChild
+                  >
                     <Link
                       href={`/profile?userId=${payment.user.id}`}
                       className="text-xs text-wrap"
@@ -76,14 +87,19 @@ export const RechargesTable = ({
                 </TableCell>
                 <TableCell className="p-0">
                   {payment.allowed_by_user ? (
-                    <Button variant="link" size="sm" className="h-2 py-0 my-0" asChild>
+                    <Button
+                      variant="link"
+                      size="sm"
+                      className="h-2 py-0 my-0"
+                      asChild
+                    >
                       <Link
                         href={`/profile?userId=${payment.allowed_by_user.id}`}
                         className={cn(
-                          "text-xs text-wrap",
-                          payment.status === "accepted"
-                            ? "text-green-500"
-                            : "text-red-500"
+                          'text-xs text-wrap',
+                          payment.status === 'accepted'
+                            ? 'text-green-500'
+                            : 'text-red-500'
                         )}
                         target="_blank"
                       >
@@ -91,13 +107,18 @@ export const RechargesTable = ({
                       </Link>
                     </Button>
                   ) : (
-                    "Não Liberado ainda"
+                    'Não Liberado ainda'
                   )}
                 </TableCell>
                 {!isPayrollHistory && (
                   <TableCell className="text-xs">
                     {payment.proof_path ? (
-                      <Button variant="link" size="sm" className="h-2 py-0 my-0" asChild>
+                      <Button
+                        variant="link"
+                        size="sm"
+                        className="h-2 py-0 my-0"
+                        asChild
+                      >
                         <Link
                           href={getAttachUrl(payment.proof_path)}
                           className="text-xs"
@@ -116,7 +137,12 @@ export const RechargesTable = ({
                 {!isPayrollHistory && (
                   <TableCell>
                     {payment.payroll_receiver ? (
-                      <Button variant="link" size="sm" className="h-2 py-0 my-0" asChild>
+                      <Button
+                        variant="link"
+                        size="sm"
+                        className="h-2 py-0 my-0"
+                        asChild
+                      >
                         <Link
                           href={`/profile?userId=${payment.payroll_receiver.id}`}
                           className="text-xs text-wrap"
@@ -134,34 +160,40 @@ export const RechargesTable = ({
                 )}
                 <TableCell
                   className={cn(
-                    "text-xs",
+                    'text-xs',
                     isPayrollHistory &&
-                      payment.payment_method.includes("Folha") &&
-                      "text-red-500 font-semibold",
+                      payment.payment_method.includes('Folha') &&
+                      'text-red-500 font-semibold',
                     isPayrollHistory &&
                       payment.is_paypayroll &&
-                      "text-green-500 font-semibold"
+                      'text-green-500 font-semibold'
                   )}
                 >
                   {maskMoney(payment.value)}
                 </TableCell>
                 <TableCell className="w-12 text-xs text-wrap ">
-                  {payment.observations || "-"}
+                  {payment.observations || '-'}
                 </TableCell>
 
-                <TableCell className="text-xs text-wrap">{payment.added_at}</TableCell>
+                <TableCell className="text-xs text-wrap">
+                  {payment.added_at}
+                </TableCell>
+
+                <TableCell className="text-xs text-wrap">
+                  <RevertPaymentDialog payment={payment} />
+                </TableCell>
               </TableRow>
             ))
           )}
         </TableBody>
         {data?.pages && data?.pages[0].payments.length === 0 && (
-          <TableCell colSpan={7} className="text-center">
+          <TableCell colSpan={8} className="text-center">
             Nenhum Resultado Encontrado
           </TableCell>
         )}
 
         {hasNextPage && (
-          <TableCell colSpan={7} className="text-center">
+          <TableCell colSpan={8} className="text-center">
             <Button onClick={() => fetchNextPage()} disabled={!hasNextPage}>
               <div className="flex gap-2 items-center justify-center">
                 {isFetchingNextPage ? (
@@ -169,7 +201,7 @@ export const RechargesTable = ({
                 ) : (
                   <ArrowDownCircle />
                 )}
-                {isFetchingNextPage ? "Carregando..." : "Carregar mais"}
+                {isFetchingNextPage ? 'Carregando...' : 'Carregar mais'}
               </div>
             </Button>
           </TableCell>

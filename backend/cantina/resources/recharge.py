@@ -7,6 +7,7 @@ from flask import request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_restful import Resource
 from sqlalchemy import and_, or_
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import aliased
 from werkzeug.datastructures import MultiDict
 from werkzeug.utils import secure_filename
@@ -237,3 +238,54 @@ class RechargeResource(Resource):
             "nextPage": page + 1 if pagination.has_next else None,
             "queryId": query_hash,
         }
+
+    @jwt_required()
+    def delete(self):
+        data = request.args
+        if not data:
+            return {"message": "Nenhum dado enviado."}, 400
+
+        requester_user_id = get_jwt_identity()
+        requester_user = User.query.filter_by(id=requester_user_id).first()
+
+        if requester_user.role.id != 1:
+            return {"message": "Você precisa ser admin para fazer isso."}, 403
+
+        payment_id = data.get("id")
+        if payment_id is None:
+            return {"message": "ID de pagamento inválido."}, 400
+
+        payment = Payment.query.filter_by(id=payment_id).first()
+        if not payment:
+            return {"message": "Pagamento não encontrado."}, 404
+
+        if payment.status == "rejected":
+            return {"message": "Este pagamento já foi rejeitado anteriormente."}, 400
+
+        if payment.payment_method.is_payroll or payment.is_paypayroll:
+            return {
+                "message": "Não é possível reverter pagamentos de folha de pagamento."
+            }, 400
+
+        try:
+            # Verificar se o usuário tem saldo suficiente para a reversão
+            if payment.value > payment.user.balance:
+                difference = payment.value - payment.user.balance
+                payment.user.balance = 0
+                payment.user.balance_payroll += difference
+            else:
+                payment.user.balance -= payment.value
+
+            payment.status = "rejected"
+
+            db.session.commit()
+
+            return {
+                "message": f"Pagamento de R$ {payment.value} para {payment.user.name} foi revertido com sucesso."
+            }, 200
+
+        except SQLAlchemyError:
+            db.session.rollback()
+            return {
+                "message": "Erro ao reverter o pagamento. Por favor, tente novamente."
+            }, 500
