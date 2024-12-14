@@ -1,31 +1,4 @@
 services:
-  nginx:
-    image: nginx:1.25.3-alpine
-    container_name: cantinacf-nginx
-    restart: unless-stopped
-    hostname: nginx
-    ports:
-      - 80:80
-      - 443:443
-    volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf
-      - ./nginx_data:/var/log/nginx
-      - ./certbot/conf:/etc/letsencrypt
-      - ./certbot/www:/var/www/certbot
-    depends_on:
-      - cantinacf-frontend
-    networks:
-      - cantinacf
-
-  certbot:
-    image: certbot/certbot:latest
-    container_name: cantinacf-certbot
-    restart: unless-stopped
-    volumes:
-      - ./certbot/conf:/etc/letsencrypt
-      - ./certbot/www:/var/www/certbot
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
-
   cantinacf-backend:
     build:
       context: ./backend
@@ -33,41 +6,20 @@ services:
     hostname: cantinacf-backend
     volumes:
       - ./backend:/app
-    ports:
-      - "5000:5000"
-    networks:
-      - cantinacf
     environment:
-      - TZ=America/Maceio
+      - TZ=${TIMEZONE}
 
   cantinacf-frontend:
     build:
       context: ./frontend
     container_name: cantinacf-frontend
     hostname: cantinacf-frontend
-    command:
-      - sh
-      - -c
-      - |
-        npm install && \
-        npm run build && \
-        npm start
+    command: npm start
     volumes:
       - ./frontend:/app
     ports:
-      - "3000:3000"
+      - "${WEBUI_PORT}:3000"
     environment:
       - NEXT_PUBLIC_BACKEND_URL=http://cantinacf-backend:5000
-    networks:
-      - cantinacf
     depends_on:
       - cantinacf-backend
-
-networks:
-  cantinacf:
-    driver: bridge
-    name: cantinacf-network
-
-volumes:
-  nginx_data:
-    driver: local

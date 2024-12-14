@@ -8,7 +8,7 @@ chmod -R 755 "$DB_DIR"
 
 if [ ! -f "$DB_FILE" ]; then
     echo "Initializing database..."
-    flask --app cantina db initdb
+    flask --app cantina initdb
 else
     echo "Database already initialized."
     flask --app cantina db upgrade
