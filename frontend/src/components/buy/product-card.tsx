@@ -1,97 +1,173 @@
-import { Card, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { useProductsMutation } from "@/hooks/products"
-import { cn, toReal } from "@/lib/utils"
-import { TCart } from "@/types/cart"
-import { TProduct } from "@/types/products"
-import { LoaderCircle, Minus, Plus, ShoppingCart } from "lucide-react"
-import { Badge } from "../ui/badge"
-import { Button } from "../ui/button"
-import { useToast } from "../ui/use-toast"
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
+import { useToast } from '@/components/ui/use-toast'
+import { useProductsMutation } from '@/hooks/products'
+import { cn, toReal } from '@/lib/utils'
+import { TCart } from '@/types/cart'
+import { TProduct } from '@/types/products'
+import { AlertCircle, Minus, Package2, Plus } from 'lucide-react'
 
 type ProductCardProps = {
   product: TProduct
   cart: TCart | null
-  size?: "default" | "sm"
+  variant?: 'default' | 'compact'
 }
 
-export const ProductCard = ({ product, cart, size = "default" }: ProductCardProps) => {
+export const ProductCard = ({
+  product,
+  cart,
+  variant = 'default',
+}: ProductCardProps) => {
   const { addProductToCartMutation, removeProductFromCartMutation } =
     useProductsMutation()
   const { toast } = useToast()
 
-  const handleClick = async (action: "add" | "remove") => {
+  const handleClick = async (action: 'add' | 'remove') => {
     const callback =
-      action === "add" ? addProductToCartMutation : removeProductFromCartMutation
+      action === 'add'
+        ? addProductToCartMutation
+        : removeProductFromCartMutation
 
-    const { message } = await callback.mutateAsync(product.id)
-
-    toast({
-      // title: "Mensagem",
-      description: message,
-      variant: "info",
-    })
+    try {
+      const { message } = await callback.mutateAsync(product.id)
+      toast({ description: message })
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        description: 'Erro ao atualizar carrinho',
+      })
+    }
   }
 
   const cartQuantity = cart ? cart.quantity : 0
+  const isOutOfStock = product.quantity === 0
+  const isLowStock = product.quantity <= 5 && !isOutOfStock
+
+  const buttonSize = variant === 'compact' ? 'icon-sm' : 'icon'
+  const iconSize = variant === 'compact' ? 'h-3.5 w-3.5' : 'h-4 w-4'
 
   return (
-    <Card>
-      <CardHeader className={cn("my-0 py-2", size === "sm" && "py-1")}>
-        <CardTitle
+    <Card
+      className={cn(
+        'group transition-all duration-200',
+        'hover:shadow-md hover:border-primary/20',
+        cartQuantity > 0 && 'border-primary/30 bg-primary/5'
+      )}
+    >
+      <CardHeader
+        className={cn('space-y-0', variant === 'compact' ? 'p-3' : 'pb-3')}
+      >
+        <div className="flex items-start justify-between gap-2">
+          <CardTitle
+            className={cn(
+              'line-clamp-1 font-medium',
+              variant === 'compact' ? 'text-sm' : 'text-base'
+            )}
+          >
+            <span className="flex items-center gap-2">
+              <Package2
+                className={cn('flex-shrink-0 text-muted-foreground', iconSize)}
+              />
+              {product.name}
+            </span>
+          </CardTitle>
+
+          {(isOutOfStock || isLowStock) && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Badge
+                    variant={isOutOfStock ? 'destructive' : 'warning'}
+                    className={cn(
+                      'text-xs',
+                      variant === 'compact' && 'px-1.5 py-0.5'
+                    )}
+                  >
+                    <AlertCircle
+                      className={cn(
+                        'mr-1',
+                        variant === 'compact' ? 'h-3 w-3' : 'h-3.5 w-3.5'
+                      )}
+                    />
+                    {isOutOfStock ? 'Sem estoque' : 'Acabando'}
+                  </Badge>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {isOutOfStock
+                    ? 'Produto indisponível no momento'
+                    : `Apenas ${product.quantity} unidades disponíveis`}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+        </div>
+
+        <p
           className={cn(
-            "text-base flex gap-2 items-center justify-center",
-            cartQuantity > 0 && "text-emerald-300",
-            size === "sm" && "text-sm"
+            'font-mono font-medium',
+            variant === 'compact' ? 'text-sm' : 'text-base',
+            'text-muted-foreground mt-1'
           )}
         >
-          {product.name}
-          {cartQuantity > 0 && (
-            <Badge>
-              <ShoppingCart size={15} className="mr-1.5" /> {cartQuantity}
-            </Badge>
-          )}
-        </CardTitle>
-      </CardHeader>
-
-      <CardFooter className={cn("justify-between px-1.5", size === "sm" && "py-0.5")}>
-        <Badge variant={product.quantity === 0 ? "destructive" : "secondary"}>
-          {product.quantity} restantes
-        </Badge>
-
-        <p className={cn("text-base font-semibold", size === "sm" && "text-sm")}>
           {toReal(product.value)}
         </p>
+      </CardHeader>
 
-        <div className="flex gap-2 items-center justify-center">
+      <CardContent
+        className={cn(
+          'flex items-center justify-between',
+          variant === 'compact' ? 'p-3 pt-0' : 'pb-4'
+        )}
+      >
+        <Badge
+          variant="secondary"
+          className={cn(
+            'transition-colors',
+            cartQuantity > 0 &&
+              'bg-primary/10 hover:bg-primary/20 text-primary',
+            variant === 'compact' && 'px-1.5 py-0.5 text-xs'
+          )}
+        >
+          {cartQuantity} no carrinho
+        </Badge>
+
+        <div className="flex items-center gap-1.5">
           <Button
-            variant="accent"
-            size="icon"
-            disabled={cartQuantity === 0 || removeProductFromCartMutation.isPending}
-            onClick={() => handleClick("remove")}
-          >
-            {removeProductFromCartMutation.isPending ? (
-              <LoaderCircle className="animate-spin" />
-            ) : (
-              <Minus />
+            variant="outline"
+            size={buttonSize}
+            disabled={
+              cartQuantity === 0 || removeProductFromCartMutation.isPending
+            }
+            onClick={() => handleClick('remove')}
+            className={cn(
+              'transition-colors',
+              cartQuantity > 0 && 'border-primary/30 hover:border-primary/50'
             )}
+          >
+            <Minus className={iconSize} />
           </Button>
 
-          <span>{cartQuantity}</span>
-
           <Button
-            variant="accent"
-            size="icon"
-            disabled={product.quantity === 0 || addProductToCartMutation.isPending}
-            onClick={() => handleClick("add")}
-          >
-            {addProductToCartMutation.isPending ? (
-              <LoaderCircle className="animate-spin" />
-            ) : (
-              <Plus />
+            variant="outline"
+            size={buttonSize}
+            disabled={isOutOfStock || addProductToCartMutation.isPending}
+            onClick={() => handleClick('add')}
+            className={cn(
+              'transition-colors',
+              cartQuantity > 0 && 'border-primary/30 hover:border-primary/50'
             )}
+          >
+            <Plus className={iconSize} />
           </Button>
         </div>
-      </CardFooter>
+      </CardContent>
     </Card>
   )
 }
