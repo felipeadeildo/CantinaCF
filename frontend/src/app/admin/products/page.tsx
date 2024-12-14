@@ -1,68 +1,85 @@
-"use client"
+'use client'
 
-import { ProductStockModal } from "@/components/admin/products/product-stock-modal"
-import { ProductsTable } from "@/components/admin/products/products-table"
-import { LoginRequired } from "@/components/login-required"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Input } from "@/components/ui/input"
-import { useProducts } from "@/hooks/products"
-import { Loader2 } from "lucide-react"
-import { useEffect, useState } from "react"
+import { ProductsGrid } from '@/components/admin/products/products-table'
+import { LoginRequired } from '@/components/login-required'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Input } from '@/components/ui/input'
+import { useProducts, useProductsMutation } from '@/hooks/products'
+import { TProduct } from '@/types/products'
+import { useDebounce } from '@uidotdev/usehooks'
+import { Loader2 } from 'lucide-react'
+import { useState } from 'react'
 
 const Products = () => {
-  const [query, setQuery] = useState("")
-  const [debouncedQuery, setDebouncedQuery] = useState(query)
+  const [searchTerm, setSearchTerm] = useState('')
+  const debouncedSearchTerm = useDebounce(searchTerm, 300)
 
-  useEffect(() => {
-    const timer = setTimeout(() => setDebouncedQuery(query), 500)
-    return () => clearTimeout(timer)
-  }, [query])
+  const { isLoading, data, refetch } = useProducts(debouncedSearchTerm)
+  const { updateProductMutation, deleteProductMutation } = useProductsMutation()
 
-  const { isLoading, data } = useProducts(debouncedQuery)
-  const { products, message } = data || {}
+  const handleUpdate = async (id: number, partialData: Partial<TProduct>) => {
+    if (!data?.products) return
+    const product = data.products.find((p) => p.id === id)
+    if (!product) return
+
+    const updateData = {
+      productId: id,
+      name: partialData.name ?? product.name,
+      value: partialData.value ?? product.value,
+      quantity: partialData.quantity ?? product.quantity,
+    }
+
+    await updateProductMutation.mutateAsync(updateData)
+    refetch()
+  }
+
+  const handleDelete = async (id: number) => {
+    await deleteProductMutation.mutateAsync(id)
+    refetch()
+  }
+
   return (
-    <>
-      <h1 className="text-xl font-semibold text-center">Produtos da Cantina</h1>
+    <div className="container mx-auto px-4 py-6">
+      <h1 className="text-2xl font-bold text-center mb-6">
+        Produtos da Cantina
+      </h1>
 
-      <div className="flex justify-center items-center">
-        <div className="w-3/5 my-4">
-          <Input
-            placeholder="Pesquisar produtos..."
-            onChange={(e) => setQuery(e.target.value)}
-            value={query}
-          />
-        </div>
+      <div className="max-w-xl mx-auto mb-6">
+        <Input
+          placeholder="Pesquisar produtos..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full"
+        />
       </div>
 
       {isLoading ? (
-        <div className="mt-32 text-xl flex justify-center items-center">
-          <Loader2 className="animate-spin" />
-          Carregando...
+        <div className="flex justify-center items-center min-h-[200px]">
+          <Loader2 className="animate-spin mr-2" />
+          <span>Carregando...</span>
         </div>
       ) : (
-        <div className="container mx-auto">
-          <ProductsTable products={products || []} />
-        </div>
+        <ProductsGrid
+          products={data?.products || []}
+          onUpdate={handleUpdate}
+          onDelete={handleDelete}
+        />
       )}
 
-      {message && (
-        <Alert variant="destructive">
+      {data?.message && (
+        <Alert variant="destructive" className="mt-4">
           <AlertTitle>Erro</AlertTitle>
-          <AlertDescription>{message}</AlertDescription>
+          <AlertDescription>{data.message}</AlertDescription>
         </Alert>
       )}
-
-      <ProductStockModal />
-    </>
+    </div>
   )
 }
 
-const ProductsProtected = () => {
-  return (
-    <LoginRequired allowed_roles={[1]}>
-      <Products />
-    </LoginRequired>
-  )
-}
+const ProductsProtected = () => (
+  <LoginRequired allowed_roles={[1]}>
+    <Products />
+  </LoginRequired>
+)
 
 export default ProductsProtected
