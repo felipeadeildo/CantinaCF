@@ -2,58 +2,87 @@
 
 <img src="/frontend/public/img/favicon.ico" alt="Logo" width="100" />
 
-Welcome to the Cantina School Website repository! This project provides a comprehensive solution for managing a school canteen at **Colégio Fantástico**, where students can purchase products. With a robust permission system and an affiliate system, it offers a seamless experience for both administrators and users.
+Bem-vindo ao repositório do **Cantina School Website**! Este projeto oferece uma solução completa para gerenciamento da cantina escolar no **Colégio Fantástico**, permitindo que estudantes comprem produtos e que a equipe administrativa gerencie o estoque, pagamentos e usuários de forma eficiente.
 
-## ✨ Features
+## ✨ Funcionalidades
 
-- **School Canteen Management:** 🥪 Students can browse and purchase products.
-- **Permission System:** 🔒 Role-based access control for different user types.
-- **Affiliate System:** 🤝 Encourage users to invite others.
-- **Post-payment System:** 💳 Flexible payment options for users.
-- **Database Models:** 🗃️ Well-structured database models for users, products, payments, affiliations, and more.
-- **Modern Stack:** 🚀 Implemented using Next.js for the frontend and Flask for the backend.
+- **Gerenciamento de Produtos da Cantina:**
+  Estudantes podem visualizar, pesquisar e adquirir produtos. Administradores podem criar, editar e remover itens do estoque.
+- **Carrinho de Compras:**
+  Usuários autenticados adicionam produtos ao carrinho, removem itens e finalizam a compra, descontando automaticamente o saldo disponível.
+- **Sistema de Permissões e Papéis de Usuário:**
+  Diferentes papéis (administrador, financeiro, estudante) definem quem pode criar, editar ou aprovar ações, garantindo segurança e organização.
+- **Afiliados e Folha de Pagamento (Payroll):**
+  Permite configurar relações de afiliados, possibilitando integrar recargas e liquidações de valores via folha de pagamento de forma centralizada.
+- **Recargas e Pagamentos:**
+  O usuário pode recarregar seu saldo usando diversos métodos de pagamento (incluindo folha de pagamento). Solicitações de recarga podem precisar de aprovação de um administrador.
+  _Em breve: Pagamentos via Pix!_
+- **Despacho de Produtos:**
+  Após a compra, a cantina pode marcar produtos como "a despachar" e depois "despachados", facilitando o controle de retirada.
+- **Estatísticas e Exportações:**
+  Possibilidade de extrair estatísticas sobre vendas, métodos de pagamento mais usados, produtos mais populares e histórico de recargas.
+  Exportação de dados em formato Excel para análise e controle interno.
+- **Gestão de Usuários:**
+  Administradores podem criar, editar e remover usuários, atualizar senhas, e aplicar filtros de pesquisa. É possível identificar usuários com saldo disponível, saldo em folha de pagamento, entre outros.
 
-## 🚀 Getting Started
+## 🚀 Guia de Início Rápido
 
-### 1. Deploy Using Docker
+### 1. Crie o Arquivo `.env`
 
-Ensure you have ganarated a SSL certificate with this command:
+Defina um arquivo `.env` com as seguintes variáveis:
 
 ```bash
-openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout cert.key -out cert.crt
+TIMEZONE=America/Maceio
+WEBUI_PORT=8080
 ```
 
-After this, ensure you have Docker installed on your machine. To deploy the application, simply run the following command:
+Se desejar expor externamente sem um proxy reverso, você pode alterar para `WEBUI_PORT=80`.
+
+### 2. Subir a Aplicação com Docker
+
+Certifique-se de ter o Docker instalado. Em seguida, execute:
 
 ```bash
 docker-compose up -d
 ```
 
-This command will create and start three applications:
+Isso iniciará o sistema completo:
 
-1. **Nginx:** 🌀 Acts as a reverse proxy, handling requests on a dedicated network and forwarding them to the appropriate service (Next.js on port 3000 and Flask on port 5000).
-2. **Next.js:** 🌐 The frontend application, exposed on port 3000 within the network.
-3. **Flask:** 🔧 The backend RESTful API, exposed on port 5000 within the network.
+- **Nginx:** Proxy reverso interno, garantindo que apenas a porta definida no `.env` seja exposta.
+- **Next.js (Frontend):** Interface web do usuário.
+- **Flask (Backend):** APIs internas, não expostas diretamente.
 
-The credentials for the created user will be stored in a file named `credentials.txt`.
+As credenciais do usuário inicial serão geradas em `credentials.txt`.
 
-## 🤝 Contributing
+### 3. Deploy em Produção
 
-Feel free to fork the project, create a feature branch, and send a pull request. For more information on contributing, you can check my sponsorship details.
-
-## 📬 Contact
-
-- **GitHub:** [@felipeadeildo](https://github.com/felipeadeildo)
-- **Email:** oie.eu.sou.um@gmail.com
-
-Happy coding! 🎉
+Para produção, recomenda-se um proxy reverso externo ou simplesmente definir `WEBUI_PORT=80` no `.env`.
 
 ---
 
-### Additional Notes
+## 🤝 Contribuição
 
-- To check the status of the Docker containers, you can use `docker ps`.
-- To stop the Docker containers, you can use `docker-compose down`.
+Faça um fork do projeto, crie uma branch de feature e envie um pull request. Sua contribuição é bem-vinda!
+
+## 📬 Contato
+
+- **GitHub:** [@felipeadeildo](https://github.com/felipeadeildo)
+- **Email:** contato@felipeadeildo.com
+
+Feliz desenvolvimento! 🎉
+
+---
+
+### Comandos Úteis
+
+- **Verificar status dos contêineres:**
+  ```bash
+  docker compose ps
+  ```
+- **Parar os contêineres:**
+  ```bash
+  docker-compose down
+  ```
 
 ---
 
