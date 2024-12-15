@@ -15,8 +15,6 @@ services:
     container_name: cantinacf-frontend
     hostname: cantinacf-frontend
     command: npm start
-    volumes:
-      - ./frontend:/app
     ports:
       - "${WEBUI_PORT}:3000"
     environment:
