@@ -5,7 +5,8 @@ services:
     container_name: cantinacf-backend
     hostname: cantinacf-backend
     volumes:
-      - ./backend:/app
+      - ./backend/cantina/static/uploads:/app/cantina/static/uploads
+      - ./backend/cantina/instance:/app/cantina/instance
     environment:
       - TZ=${TIMEZONE}
 
@@ -16,7 +17,7 @@ services:
     hostname: cantinacf-frontend
     command: npm start
     ports:
-      - "${WEBUI_PORT}:3000"
+      - ${WEBUI_PORT}:3000
     environment:
       - NEXT_PUBLIC_BACKEND_URL=http://cantinacf-backend:5000
     depends_on:
