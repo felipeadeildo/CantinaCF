@@ -6,7 +6,7 @@ authors = ["sr-pato <felipe.adeildo@proton.me>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = ">=3.12,<3.13"
 alembic = "1.11.1"
 blinker = "1.6.2"
 cachelib = "0.9.0"
