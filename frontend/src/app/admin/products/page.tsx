@@ -1,6 +1,7 @@
 'use client'
 
 import { ProductsGrid } from '@/components/admin/products/products-table'
+import { CreateProductDialog } from '@/components/admin/products/create-product-dialog'
 import { LoginRequired } from '@/components/login-required'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Input } from '@/components/ui/input'
@@ -40,9 +41,12 @@ const Products = () => {
 
   return (
     <div className="container mx-auto px-4 py-6">
-      <h1 className="text-2xl font-bold text-center mb-6">
-        Produtos da Cantina
-      </h1>
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold mb-4 sm:mb-0">
+          Produtos da Cantina
+        </h1>
+        <CreateProductDialog />
+      </div>
 
       <div className="max-w-xl mx-auto mb-6">
         <Input
