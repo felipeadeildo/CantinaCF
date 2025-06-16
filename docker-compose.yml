@@ -6,7 +6,7 @@ services:
     hostname: cantinacf-backend
     volumes:
       - ./backend/cantina/static/uploads:/app/cantina/static/uploads
-      - ./backend/cantina/instance:/app/cantina/instance
+      - ./backend/instance:/app/instance
     environment:
       - TZ=${TIMEZONE}
 
